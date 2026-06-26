@@ -139,7 +139,7 @@ class _MainSettingsScreenState extends State<SettingsScreen> {
                       value: isDark,
                       activeColor: const Color(0xffa78bfa),
                       onChanged: (val) {
-                        RobotControlCenterApp.of(context).toggleTheme();
+                        BluCursorFleetApp.of(context).toggleTheme();
                       },
                     ),
                   ],

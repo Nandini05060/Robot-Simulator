@@ -117,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Robot Control Center Access',
+                          'bluCursor Fleet Portal Access',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
                             fontWeight: FontWeight.w500,

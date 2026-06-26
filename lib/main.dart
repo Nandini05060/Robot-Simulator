@@ -7,20 +7,20 @@ import 'screens/control_panel_screen.dart';
 import 'screens/real_time_viz_screen.dart';
 
 void main() {
-  runApp(const RobotControlCenterApp());
+  runApp(const BluCursorFleetApp());
 }
 
-class RobotControlCenterApp extends StatefulWidget {
-  const RobotControlCenterApp({Key? key}) : super(key: key);
+class BluCursorFleetApp extends StatefulWidget {
+  const BluCursorFleetApp({Key? key}) : super(key: key);
 
-  static _RobotControlCenterAppState of(BuildContext context) =>
-      context.findAncestorStateOfType<_RobotControlCenterAppState>()!;
+  static _BluCursorFleetAppState of(BuildContext context) =>
+      context.findAncestorStateOfType<_BluCursorFleetAppState>()!;
 
   @override
-  State<RobotControlCenterApp> createState() => _RobotControlCenterAppState();
+  State<BluCursorFleetApp> createState() => _BluCursorFleetAppState();
 }
 
-class _RobotControlCenterAppState extends State<RobotControlCenterApp> {
+class _BluCursorFleetAppState extends State<BluCursorFleetApp> {
   ThemeMode _themeMode = ThemeMode.light;
 
   ThemeMode get themeMode => _themeMode;
@@ -34,7 +34,7 @@ class _RobotControlCenterAppState extends State<RobotControlCenterApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Robot Control Center',
+      title: 'bluCursor Fleet Manager',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
