@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>bluCursor Fleet Portal - Enterprise Command Center</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.300.0/font/lucide.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.has('simulator')) {
+      document.documentElement.classList.add('standalone-app-mode');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Web Dashboard Header -->
+  <header class="dashboard-header">
+    <div class="header-logo">
+      <img src="assets/logo_light.png" alt="bluCursor Logo" style="height: 24px; margin-right: 12px; display: block;">
+      <span class="logo-divider">|</span>
+      <span class="sub-brand">FLEET MANAGEMENT PORTAL</span>
+    </div>
+    <div class="header-actions">
+      <div class="badge status-nominal">
+        <span class="pulse-dot"></span> FLEET COMMAND NOMINAL
+      </div>
+      <button class="btn btn-primary" onclick="restartSplash()"><i class="icon-rotate-ccw"></i> Restart Splash</button>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Layout -->
+  <main class="dashboard-layout">
+    
+    <!-- LEFT PANEL: Interactive Phone Viewport -->
+    <section class="viewport-panel">
+      <div class="panel-header">
+        <h2><i class="icon-smartphone"></i> Interactive Device Simulator</h2>
+        <span class="subtitle">Click controls inside the phone to navigate and operate</span>
+      </div>
+      
+      <div class="phone-container">
+        <div class="phone-bezel">
+          <div class="phone-speaker"></div>
+          <div class="phone-screen" id="appScreen">
+            
+            <!-- Sidebar Drawer Navigation -->
+            <div class="drawer-backdrop" id="app-drawer-backdrop" onclick="toggleSidebarDrawer(false)"></div>
+            <div class="app-drawer" id="app-side-drawer">
+              <div class="drawer-header">
+                <div class="brand">
+                  <div class="logo-bars-app">
+                    <div class="bar-app"></div>
+                    <div class="bar-app" style="height: 12px; margin-top: 3px; background-color: var(--app-accent);"></div>
+                    <div class="bar-app" style="background-color: var(--app-success);"></div>
+                  </div>
+                  <span class="brand-text" style="font-size: 16px; font-weight: 900; letter-spacing: -0.5px; color: var(--app-text); margin-left: 6px;">bluCursor</span>
+                </div>
+                <button class="drawer-close" onclick="toggleSidebarDrawer(false)">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+
+              <!-- Profile Section in Drawer -->
+              <div class="drawer-profile-section">
+                <div class="drawer-profile-avatar" id="drawer-avatar-big">JD</div>
+                <div class="drawer-profile-name" id="drawer-profile-name">John Doe</div>
+                <div class="drawer-profile-role" id="drawer-profile-role">Senior Operator &bull; Active</div>
+                <div class="drawer-profile-badge" id="drawer-profile-badge">CLEARANCE LVL 3</div>
+              </div>
+
+              <div class="drawer-nav">
+                <div class="drawer-section-label">Navigation</div>
+                <div class="drawer-link active" id="drawer-link-dashboard" onclick="navigateFromDrawer('dashboard')">
+                  <i class="icon-home"></i> <span>Home Dashboard</span>
+                </div>
+                <div class="drawer-link" id="drawer-link-delivery" onclick="navigateFromDrawer('delivery')">
+                  <i class="icon-truck"></i> <span>Delivery Logistics</span>
+                </div>
+                <div class="drawer-link" id="drawer-link-patrolling" onclick="navigateFromDrawer('patrolling')">
+                  <i class="icon-shield"></i> <span>Patrol Surveillance</span>
+                </div>
+                <div class="drawer-section-label" style="margin-top: 8px;">Account</div>
+                <div class="drawer-link" id="drawer-link-settings" onclick="navigateFromDrawer('settings')">
+                  <i class="icon-settings"></i> <span>Settings &amp; Profile</span>
+                </div>
+                <div class="drawer-link" id="drawer-link-admin" onclick="navigateFromDrawer('settings')" style="display: none;">
+                  <i class="icon-shield-alert"></i> <span>Admin Panel</span>
+                </div>
+              </div>
+              <div class="drawer-footer">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #1d4ed8); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 12px;" id="drawer-avatar">JD</div>
+                  <div>
+                    <div style="font-size: 12px; font-weight: 700; color: var(--app-text);" id="drawer-username">John Doe</div>
+                    <div style="font-size: 10px; color: var(--app-text-muted);">Senior Operator</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Skeleton Loading Screen -->
+            <div class="skeleton-loader-screen" id="app-skeleton-loader">
+              <div class="app-bar" style="border: none; padding: 0; background: transparent; height: 48px; display: flex; align-items: center; justify-content: space-between;">
+                <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 50%;"></div>
+                <div class="skeleton-box" style="width: 120px; height: 18px; border-radius: 4px; flex-grow: 1; margin: 0 16px;"></div>
+                <div class="skeleton-box" style="width: 32px; height: 32px; border-radius: 8px;"></div>
+              </div>
+              <div class="skeleton-box" style="width: 100%; height: 110px; border-radius: 16px; margin-top: 12px;"></div>
+              <div class="skeleton-box" style="width: 80px; height: 14px; border-radius: 4px; margin-top: 16px;"></div>
+              <div class="skeleton-box" style="width: 100%; height: 56px; border-radius: 12px; margin-top: 8px;"></div>
+              <div class="skeleton-box" style="width: 100%; height: 56px; border-radius: 12px; margin-top: 8px;"></div>
+              <div class="skeleton-box" style="width: 100%; height: 56px; border-radius: 12px; margin-top: 8px;"></div>
+            </div>
+            
+            <!-- Screen 1: Splash Screen -->
+            <!-- Screen 1: Splash Screen -->
+            <div id="screen-splash" class="app-screen active sphere-splash-screen" onclick="onSplashClick()">
+              <!-- Top Header with bluCursor Logo -->
+              <div class="sphere-splash-header-logo">
+                <img src="assets/logo_light.png" alt="bluCursor Logo" class="splash-top-logo">
+              </div>
+
+              <!-- Main Body -->
+              <div class="sphere-splash-body">
+                <!-- Clean Brand Presentation Frame -->
+                <div class="robocore-splash-frame">
+                  <img src="assets/robocore_splash.jpg" alt="bluCursor Fleet Portal" class="robocore-splash-img">
+                </div>
+
+                <!-- Title & Tagline -->
+                <div class="sphere-splash-title">bluCursor</div>
+                <div class="sphere-splash-subtitle">Enterprise Fleet Command</div>
+
+                <!-- Action Prompt -->
+                <div class="sphere-splash-tap-prompt">
+                  <span class="pulse-icon"><i class="icon-zap"></i></span>
+                  <span class="pulse-text">TAP SCREEN TO ENTER PORTAL</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Screen 2: Login Screen -->
+            <div id="screen-login" class="app-screen">
+              <div class="login-bg-decor">
+                <div class="decor-circle circle-1"></div>
+                <div class="decor-circle circle-2"></div>
+              </div>
+              <div class="login-content">
+                <div class="login-header">
+                  <!-- Logo Badge -->
+                  <div class="logo-badge-login" style="justify-content: center; padding: 12px 20px;">
+                    <img src="assets/logo_dark.png" alt="bluCursor Logo" class="logo-img" style="height: 28px;">
+                  </div>
+                  <h3>Secure Operator Login</h3>
+                  <p>bluCursor Fleet Portal Access</p>
+                </div>
+                <div class="glass-card">
+                  <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+                    <div class="form-group-floating">
+                      <input type="email" id="login-email" value="operator@blucursor.com" placeholder=" " required>
+                      <i class="icon-mail prefix-icon"></i>
+                      <label>EMAIL ADDRESS</label>
+                    </div>
+                    <div class="form-group-floating">
+                      <input type="password" id="login-password" value="password123" placeholder=" " required>
+                      <i class="icon-lock prefix-icon"></i>
+                      <label>PASSWORD</label>
+                      <i class="icon-eye toggle-pwd" onclick="togglePasswordVisibility()" style="top: 15px;"></i>
+                    </div>
+                    <div class="form-options" style="margin-bottom: 20px; display: flex; align-items: center;">
+                      <label class="checkbox-container" style="display: flex; align-items: center; font-size: 13px; color: var(--app-text-muted); cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="login-remember" checked style="margin-right: 8px; accent-color: var(--app-primary); width: 16px; height: 16px; cursor: pointer;">
+                        Remember active session
+                      </label>
+                    </div>
+                    <button type="submit" class="btn btn-block btn-primary-app" id="login-submit-btn">
+                      <span>Authenticate Operator</span>
+                    </button>
+                  </form>
+                </div>
+                <div class="login-footer">
+                  <p>Authorized Personnel Only &bull; IP Logger Active</p>
+                  <p style="margin-top: 6px; font-size: 11px; color: var(--app-text-muted);">Admin? Use <span style="color: var(--app-accent); font-weight: 700;">admin@blucursor.com</span> / <span style="color: var(--app-accent); font-weight: 700;">admin2024</span></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Screen 3: Home Dashboard Screen -->
+            <div id="screen-dashboard" class="app-screen">
+              <div class="app-header" style="height: 56px; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid var(--app-border);">
+                <div style="display: flex; align-items: center;">
+                  <button class="header-icon-btn" onclick="toggleSidebarDrawer(true)" style="background: transparent; border: none; color: var(--app-text); margin-right: 12px; cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                    <i class="icon-menu" style="font-size: 20px;"></i>
+                  </button>
+                  <div class="user-avatar" onclick="toggleSidebarDrawer(true)">
+                    <div class="avatar-circle" id="header-avatar" style="width: 32px; height: 32px; background-color: var(--app-primary); color: white; font-size: 12px; font-weight: 700; border-radius: 50%; display: flex; align-items: center; justify-content: center;">JD</div>
+                    <div class="user-info">
+                      <span class="user-name" id="header-username" style="font-size: 13px; font-weight: 700; color: var(--app-text);">John Doe</span>
+                      <span class="user-sub" style="font-size: 9px; color: var(--app-accent); font-weight: 700;">Senior Operator • Active</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="header-right" style="display: flex; align-items: center;">
+                  <button class="header-icon-btn" onclick="showToastNotification('No new system notifications.')" style="background: transparent; border: none; color: var(--app-text); margin-right: 12px; cursor: pointer; position: relative;">
+                    <i class="icon-bell"></i>
+                    <span class="notification-badge" style="position: absolute; top: -2px; right: -2px; width: 6px; height: 6px; background-color: var(--app-danger); border-radius: 50%;"></span>
+                  </button>
+                  <button class="header-icon-btn" onclick="showScreen('settings')" style="background: transparent; border: none; color: var(--app-text); cursor: pointer;">
+                    <i class="icon-settings"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="app-scrollable-content fade-in-element" style="padding: 0;">
+
+                <!-- bluCursor About Section -->
+                <div class="blucursor-about-card" style="margin: 16px 16px 0 16px; padding: 16px; border-radius: 20px; position: relative; overflow: hidden; background: var(--app-surface); border: 1px solid var(--app-border);">
+                  <div style="position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, rgba(0,51,161,0.15) 0%, transparent 70%); pointer-events: none;"></div>
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                    <img src="assets/logo_dark.png" alt="bluCursor" class="logo-img" style="height: 20px; display: block;">
+                    <span style="font-size: 9px; font-weight: 800; color: var(--app-primary); background: rgba(0,51,161,0.08); border: 1px solid rgba(0,51,161,0.15); padding: 2px 8px; border-radius: 10px; letter-spacing: 0.5px;">v2.0 ENTERPRISE</span>
+                  </div>
+                  <div style="font-size: 13px; font-weight: 800; color: var(--app-text); margin-bottom: 6px; line-height: 1.3;">bluCursor Fleet Operations Console</div>
+                  <div style="font-size: 11px; color: var(--app-text-muted); line-height: 1.5; margin-bottom: 12px;">Welcome to the bluCursor Fleet Portal. This interface allows authorized engineers to manage and coordinate smart office robotics, inspect cargo logistics pathways, view data graphs, and trigger real-time manual override steerings for logistics cart units.</div>
+                  <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                    <span style="font-size: 9px; font-weight: 800; color: var(--app-primary); background: rgba(0,51,161,0.05); border: 1px solid rgba(0,51,161,0.1); padding: 3px 8px; border-radius: 10px;"><i class="icon-cpu" style="font-size: 9px;"></i> Enterprise IT</span>
+                    <span style="font-size: 9px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.1); padding: 3px 8px; border-radius: 10px;"><i class="icon-shield-check" style="font-size: 9px;"></i> Secure</span>
+                    <span style="font-size: 9px; font-weight: 800; color: #3b82f6; background: rgba(59,130,246,0.05); border: 1px solid rgba(59,130,246,0.1); padding: 3px 8px; border-radius: 10px;"><i class="icon-zap" style="font-size: 9px;"></i> Telemetry</span>
+                  </div>
+                </div>
+
+                <!-- Hero Section -->
+                <div class="hero-banner">
+                  <div class="hero-content">
+                    <span class="hero-tag">Core Command v1.2</span>
+                    <h1 class="hero-title">Fleet Command Center</h1>
+                    <p class="hero-desc">Monitor logistics paths, steering vectors, and safety overrides in real-time.</p>
+                    <div class="hero-ctas">
+                      <button class="hero-btn hero-btn-primary" onclick="showScreen('delivery')">
+                        <i class="icon-truck" style="font-size: 12px;"></i> Inspect Fleet
+                      </button>
+                      <button class="hero-btn hero-btn-secondary" onclick="bindRobotToMonitoring('RB-001')">
+                        <i class="icon-activity" style="font-size: 12px;"></i> Active Telemetry
+                      </button>
+                    </div>
+                  </div>
+                  <div class="hero-illustration">
+                    <img src="assets/robot_splash.png" alt="Command Robot" class="hero-robot-vector">
+                  </div>
+                </div>
+
+                <!-- Statistics Section -->
+                <div style="padding: 0 16px;">
+                  <h5 class="section-title" style="margin: 0 0 10px 0; font-size: 11px; font-weight: 800; letter-spacing: 0.8px; color: var(--app-text-muted); text-transform: uppercase;">Fleet Statistics</h5>
+                  <div class="stats-grid-premium">
+                    <div class="stat-card-premium" onclick="showScreen('delivery')" style="cursor: pointer;">
+                      <div class="stat-card-header">
+                        <span class="stat-label">Total Fleet</span>
+                        <div class="stat-icon stat-icon-blue"><i class="icon-cpu"></i></div>
+                      </div>
+                      <div class="stat-value-row">
+                        <span class="stat-value" id="stat-val-total">0</span>
+                        <span class="stat-change change-up"><i class="icon-trending-up"></i> Nominal</span>
+                      </div>
+                      <div class="stat-progress-bar-bg">
+                        <div class="stat-progress-fill fill-blue" style="width: 100%;"></div>
+                      </div>
+                    </div>
+                    
+                    <div class="stat-card-premium" onclick="showScreen('delivery')" style="cursor: pointer;">
+                      <div class="stat-card-header">
+                        <span class="stat-label">Active Fleet</span>
+                        <div class="stat-icon stat-icon-green"><i class="icon-play"></i></div>
+                      </div>
+                      <div class="stat-value-row">
+                        <span class="stat-value" id="stat-val-active">0</span>
+                        <span class="stat-change change-up"><i class="icon-wifi"></i> 80% Online</span>
+                      </div>
+                      <div class="stat-progress-bar-bg">
+                        <div class="stat-progress-fill fill-green" style="width: 80%;"></div>
+                      </div>
+                    </div>
+
+                    <div class="stat-card-premium" onclick="showToastNotification('14 logistics and patrol missions completed today.')" style="cursor: pointer;">
+                      <div class="stat-card-header">
+                        <span class="stat-label">Tasks Done</span>
+                        <div class="stat-icon stat-icon-orange"><i class="icon-check-square"></i></div>
+                      </div>
+                      <div class="stat-value-row">
+                        <span class="stat-value" id="stat-val-completed">0</span>
+                        <span class="stat-change change-up">+14 today</span>
+                      </div>
+                      <div class="stat-progress-bar-bg">
+                        <div class="stat-progress-fill fill-orange" style="width: 72%;"></div>
+                      </div>
+                    </div>
+
+                    <div class="stat-card-premium" onclick="showSystemDiagnostics()" style="cursor: pointer;">
+                      <div class="stat-card-header">
+                        <span class="stat-label">System Health</span>
+                        <div class="stat-icon stat-icon-cyan"><i class="icon-activity"></i></div>
+                      </div>
+                      <div class="stat-value-row">
+                        <span class="stat-value" id="stat-val-health">0</span><span class="stat-value" style="font-size: 13px; font-weight: 800; margin-left: 1px;">%</span>
+                        <span class="stat-change change-up">Optimal</span>
+                      </div>
+                      <div class="stat-progress-bar-bg">
+                        <div class="stat-progress-fill fill-cyan" style="width: 98%;"></div>
+                      </div>
+                    </div>
+                    
+                    <div class="stat-card-premium wide" onclick="bindRobotToMonitoring('RB-001')" style="cursor: pointer;">
+                      <div class="stat-label-group">
+                        <div class="stat-icon stat-icon-blue"><i class="icon-navigation"></i></div>
+                        <div class="stat-text">
+                          <span class="stat-label">Current Missions</span>
+                          <span style="font-size: 10px; color: var(--app-text-muted);">Active dispatch routing tasks</span>
+                        </div>
+                      </div>
+                      <span class="stat-value" id="stat-val-missions" style="font-size: 24px; color: var(--app-primary);">0</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Quick Actions Section -->
+                <div style="padding: 0 16px; margin-top: 6px;">
+                  <h5 class="section-title" style="margin: 0 0 10px 0; font-size: 11px; font-weight: 800; letter-spacing: 0.8px; color: var(--app-text-muted); text-transform: uppercase;">Quick Actions</h5>
+                  <div class="quick-actions-grid">
+                    <div class="quick-action-card" onclick="showScreen('delivery')">
+                      <div class="quick-action-icon"><i class="icon-list"></i></div>
+                      <span>View Robots</span>
+                    </div>
+                    <div class="quick-action-card" onclick="bindRobotToMonitoring('RB-001')">
+                      <div class="quick-action-icon"><i class="icon-map-pin"></i></div>
+                      <span>Open Live Map</span>
+                    </div>
+                    <div class="quick-action-card" onclick="triggerMockAssignTask()">
+                      <div class="quick-action-icon"><i class="icon-plus-circle"></i></div>
+                      <span>Assign Task</span>
+                    </div>
+                    <div class="quick-action-card" onclick="triggerMockViewAnalytics()">
+                      <div class="quick-action-icon"><i class="icon-bar-chart-2"></i></div>
+                      <span>View Stats</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Features Section -->
+                <div style="padding: 0 16px; margin-top: 6px;">
+                  <h5 class="section-title" style="margin: 0 0 10px 0; font-size: 11px; font-weight: 800; letter-spacing: 0.8px; color: var(--app-text-muted); text-transform: uppercase;">System Capabilities</h5>
+                  <div class="features-grid-premium">
+                    <div class="feature-card-premium">
+                      <div class="feature-icon" style="background: rgba(59,130,246,0.06); border-color: rgba(59,130,246,0.25);">
+                        <img src="assets/robot_hermes.png" style="width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 0 4px rgba(59,130,246,0.3));" alt="Hermes">
+                      </div>
+                      <span class="feature-title">Real-Time Tracking</span>
+                      <span class="feature-desc">Interactive GPS coordinates updates.</span>
+                    </div>
+                    <div class="feature-card-premium">
+                      <div class="feature-icon" style="background: rgba(59,130,246,0.06); border-color: rgba(59,130,246,0.25);">
+                        <img src="assets/robot_splash.png" style="width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 0 4px rgba(59,130,246,0.3));" alt="Splash">
+                      </div>
+                      <span class="feature-title">Live Office Map</span>
+                      <span class="feature-desc">Observe automated trail maps of bots.</span>
+                    </div>
+                    <div class="feature-card-premium">
+                      <div class="feature-icon" style="background: rgba(139,92,246,0.06); border-color: rgba(139,92,246,0.25);">
+                        <img src="assets/robot_cronus.png" style="width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 0 4px rgba(139,92,246,0.3));" alt="Cronus">
+                      </div>
+                      <span class="feature-title">Multi-Robot Command</span>
+                      <span class="feature-desc">Coordinate active units concurrently.</span>
+                    </div>
+                    <div class="feature-card-premium">
+                      <div class="feature-icon" style="background: rgba(59,130,246,0.06); border-color: rgba(59,130,246,0.25);">
+                        <img src="assets/robot_ares.png" style="width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 0 4px rgba(59,130,246,0.3));" alt="Ares">
+                      </div>
+                      <span class="feature-title">Navigation Control</span>
+                      <span class="feature-desc">Manual overrides steering d-pad.</span>
+                    </div>
+                    <div class="feature-card-premium">
+                      <div class="feature-icon" style="background: rgba(20,184,166,0.06); border-color: rgba(20,184,166,0.25);">
+                        <img src="assets/robot_zeus.png" style="width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 0 4px rgba(20,184,166,0.3));" alt="Zeus">
+                      </div>
+                      <span class="feature-title">Operational Stats</span>
+                      <span class="feature-desc">Inspect battery decay rates & logs.</span>
+                    </div>
+                    <div class="feature-card-premium">
+                      <div class="feature-icon" style="background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.25);">
+                        <img src="assets/robot_pallas.png" style="width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 0 4px rgba(239,68,68,0.3));" alt="Pallas">
+                      </div>
+                      <span class="feature-title">Safety Monitoring</span>
+                      <span class="feature-desc">Instant emergency stop mechanism.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Module Access / Categories -->
+                <div style="padding: 0 16px; margin-top: 6px;">
+                  <h5 class="section-title" style="margin: 0 0 10px 0; font-size: 11px; font-weight: 800; letter-spacing: 0.8px; color: var(--app-text-muted); text-transform: uppercase;">Fleet Modules</h5>
+                  
+                  <!-- Category 1: Delivery Cart -->
+                  <div class="category-card-premium" onclick="showScreen('delivery')" style="padding: 16px; border-radius: 16px; background: var(--app-surface); border: 1px solid var(--app-border); box-shadow: var(--app-shadow); margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
+                    <div style="display: flex; align-items: center;">
+                      <img src="assets/robot_hermes.png" style="width: 44px; height: 44px; border-radius: 12px; object-fit: contain; margin-right: 14px; background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.2); padding: 3px;" alt="Hermes">
+                      <div>
+                        <h6 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--app-text);">Delivery Cart Robots</h6>
+                        <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--app-text-muted);">Manage cargo & office logistics</p>
+                        <span style="display: inline-block; margin-top: 6px; font-size: 11px; font-weight: 700; color: var(--app-primary); background: rgba(37, 99, 235, 0.08); padding: 2px 8px; border-radius: 12px;">3 Assigned Robots</span>
+                      </div>
+                    </div>
+                    <button class="btn-quick-access" style="background: var(--app-primary); border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer;">
+                      <i class="icon-chevron-right"></i>
+                    </button>
+                  </div>
+
+                  <!-- Category 2: Patrolling -->
+                  <div class="category-card-premium" onclick="showScreen('patrolling')" style="padding: 16px; border-radius: 16px; background: var(--app-surface); border: 1px solid var(--app-border); box-shadow: var(--app-shadow); margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
+                    <div style="display: flex; align-items: center;">
+                      <img src="assets/robot_cronus.png" style="width: 44px; height: 44px; border-radius: 12px; object-fit: contain; margin-right: 14px; background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.2); padding: 3px;" alt="Cronus">
+                      <div>
+                        <h6 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--app-text);">Patrolling Robots</h6>
+                        <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--app-text-muted);">Area surveillance & security</p>
+                        <span style="display: inline-block; margin-top: 6px; font-size: 11px; font-weight: 700; color: #8B5CF6; background: rgba(139, 92, 246, 0.08); padding: 2px 8px; border-radius: 12px;">2 Assigned Robots</span>
+                      </div>
+                    </div>
+                    <button class="btn-quick-access" style="background: var(--app-primary); border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer;">
+                      <i class="icon-chevron-right"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="bottom-spacer" style="height: 30px;"></div>
+              </div>
+            </div>
+
+            <!-- System Diagnostics Popup Overlay -->
+            <div class="robot-popup-overlay" id="diagnostics-popup">
+              <div class="robot-popup-card" style="padding: 20px; max-width: 290px;">
+                <button class="popup-close-btn" onclick="toggleDiagnosticsPopup(false)" style="position: absolute; top: 12px; right: 12px; border: none; background: transparent; color: var(--app-text-muted); cursor: pointer; font-size: 16px; width: auto; height: auto; display: flex; align-items: center; justify-content: center;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px; border-bottom: 1px solid var(--app-border); padding-bottom: 10px;">
+                  <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(93, 230, 255, 0.1); display: flex; align-items: center; justify-content: center; color: var(--app-primary); flex-shrink: 0;">
+                    <i class="icon-activity" style="font-size: 18px;"></i>
+                  </div>
+                  <div>
+                    <h4 style="margin: 0; font-size: 13px; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 1px;">System Health</h4>
+                    <span style="font-size: 10px; color: var(--app-success); font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                      <span class="status-monitor-dot green" style="width: 6px; height: 6px; background-color: var(--app-success); border-radius: 50%; display: inline-block;"></span> SYSTEMS OPTIMAL
+                    </span>
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 11px;">
+                  <!-- Lidar -->
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--app-text-muted); font-weight: 500;">LIDAR Rangefinder</span>
+                    <strong style="color: var(--app-success); font-weight: 700;">100% SIGNAL</strong>
+                  </div>
+                  <!-- Network -->
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--app-text-muted); font-weight: 500;">Network Uplink Ping</span>
+                    <strong style="color: var(--app-primary); font-weight: 700;">12ms (EXCELLENT)</strong>
+                  </div>
+                  <!-- Actuators -->
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--app-text-muted); font-weight: 500;">Servo Actuators</span>
+                    <strong style="color: var(--app-success); font-weight: 700;">NOMINAL TEMP</strong>
+                  </div>
+                  <!-- Batteries -->
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: var(--app-text-muted); font-weight: 500;">Fleet Battery Health</span>
+                    <strong style="color: var(--app-text); font-weight: 700;">94.2% CAPACITY</strong>
+                  </div>
+                  <!-- Diagnostics log -->
+                  <div style="margin-top: 6px; padding: 8px; background: #090d16; border-radius: 8px; border: 1px solid var(--app-border); font-family: monospace; font-size: 9px; color: #4ade80; text-align: left; line-height: 1.4;">
+                    &gt; CPU core temp: 42°C<br>
+                    &gt; Lidar frames: 60 FPS<br>
+                    &gt; Safety override: STANDBY<br>
+                    &gt; Calibration status: OK
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Screen 4: Delivery Module Screen -->
+            <div id="screen-delivery" class="app-screen">
+              <!-- Robot Popup Overlay -->
+              <div class="robot-popup-overlay" id="delivery-robot-popup">
+                <div class="robot-popup-card">
+                  <button class="popup-close-btn" id="delivery-popup-close" onclick="closeRobotPopup('delivery')" style="display: flex; align-items: center; justify-content: center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+                  <div class="popup-robot-header">
+                    <img class="popup-robot-img" id="delivery-popup-img" src="assets/robot_ares.png" alt="Robot">
+                    <div class="popup-robot-title">
+                      <h4 id="delivery-popup-name">ARES-100</h4>
+                      <span id="delivery-popup-type">Industrial Forklift</span>
+                    </div>
+                  </div>
+                  <div class="popup-status-row">
+                    <span class="popup-badge online" id="delivery-popup-status">ONLINE</span>
+                    <span class="popup-badge battery" id="delivery-popup-battery"><i class="icon-battery" style="font-size: 10px;"></i> 88%</span>
+                    <span class="popup-badge" style="background: rgba(37,99,235,0.08); color: var(--app-primary); border: 1px solid rgba(37,99,235,0.2);" id="delivery-popup-map">Floor Map A</span>
+                  </div>
+                  <div class="popup-map-preview">
+                    <div class="popup-map-grid"></div>
+                    <div class="popup-robot-dot" id="delivery-popup-dot"></div>
+                    <div style="position: absolute; bottom: 6px; left: 8px; font-size: 8px; color: var(--app-text-muted); font-family: monospace; font-weight: 700;" id="delivery-popup-coords">[12.4, 8.2]</div>
+                  </div>
+                  <button class="popup-open-map-btn" onclick="openRobotMonitoringFromPopup('delivery')">
+                    <i class="icon-map-pin" style="font-size: 14px;"></i> Open Live Map &amp; Control
+                  </button>
+                </div>
+              </div>
+
+              <div class="app-bar" style="display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--app-border); background-color: var(--app-surface); height: 56px;">
+                <div class="btn-back" onclick="goBackToPrevious()" style="display: flex; align-items: center; color: var(--app-primary); cursor: pointer; font-size: 14px; font-weight: 600; margin-right: 12px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </div>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--app-text); flex-grow: 1;">Delivery Logistics</h3>
+                <button class="header-icon-btn" onclick="toggleSidebarDrawer(true)" style="background: transparent; border: none; color: var(--app-text); cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                  <i class="icon-menu" style="font-size: 20px;"></i>
+                </button>
+              </div>
+              <div class="app-scrollable-content fade-in-element">
+                <div style="padding: 16px 12px;">
+                  <h6 class="module-section-title" style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: var(--app-text);">Office Logistics & Delivery</h6>
+                  <p class="module-section-desc" style="margin: 0 0 12px 0; font-size: 12px; color: var(--app-text-muted);">Select a floor layout below to inspect assigned cargo-carts and track dispatch routes.</p>
+                  
+                  <!-- Search and Filters -->
+                  <div class="search-filter-container">
+                    <div class="search-filter-controls">
+                      <div class="search-input" style="flex: 1; position: relative;">
+                        <i class="icon-search" style="position: absolute; left: 10px; top: 12px; color: var(--app-text-muted); font-size: 14px;"></i>
+                        <input type="text" id="delivery-search-input" placeholder="Search floor or robot..." oninput="handleSearchFilter('delivery')" style="width: 100%; padding: 10px 10px 10px 32px; border-radius: 10px; border: 1.5px solid var(--app-border); background-color: var(--app-surface); color: var(--app-text); font-size: 12px; outline: none;">
+                      </div>
+                      <select id="delivery-status-filter" onchange="handleSearchFilter('delivery')" style="padding: 10px 8px; border-radius: 10px; border: 1.5px solid var(--app-border); background-color: var(--app-surface); color: var(--app-text); font-size: 12px; outline: none; cursor: pointer; font-weight: 600;">
+                        <option value="all">All Status</option>
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                        <option value="standby">Standby</option>
+                      </select>
+                    </div>
+                    <div class="view-toggle-container">
+                      <button class="view-toggle-btn active" id="delivery-toggle-cards" onclick="toggleModuleView('delivery', 'cards')">
+                        <i class="icon-grid" style="font-size: 11px;"></i> Cards
+                      </button>
+                      <button class="view-toggle-btn" id="delivery-toggle-table" onclick="toggleModuleView('delivery', 'table')">
+                        <i class="icon-list" style="font-size: 11px;"></i> Table
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Grid/Cards view -->
+                  <div class="list-container" id="delivery-maps-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                  
+                  <!-- Table Data Grid view -->
+                  <div class="modern-table-container" id="delivery-table-container">
+                    <table class="modern-table">
+                      <thead>
+                        <tr>
+                          <th>Robot / Layout</th>
+                          <th>Status</th>
+                          <th>Battery</th>
+                          <th>Activity</th>
+                        </tr>
+                      </thead>
+                      <tbody id="delivery-table-body">
+                        <!-- Populated dynamically -->
+                      </tbody>
+                    </table>
+                  </div>
+
+                </div>
+                <div class="bottom-spacer" style="height: 80px;"></div>
+              </div>
+              
+              <!-- App Navigation Bar -->
+              <div class="app-nav-bar">
+                <div class="nav-item" onclick="showScreen('dashboard')">
+                  <i class="icon-home"></i>
+                  <span>Home</span>
+                </div>
+                <div class="nav-item active" onclick="showScreen('delivery')">
+                  <i class="icon-truck"></i>
+                  <span>Delivery</span>
+                </div>
+                <div class="nav-item" onclick="showScreen('patrolling')">
+                  <i class="icon-shield"></i>
+                  <span>Patrolling</span>
+                </div>
+                <div class="nav-item" onclick="showScreen('settings')">
+                  <i class="icon-settings"></i>
+                  <span>Settings</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Screen 5: Patrolling Module Screen -->
+            <div id="screen-patrolling" class="app-screen">
+
+              <!-- Robot Popup Overlay -->
+              <div class="robot-popup-overlay" id="patrol-robot-popup">
+                <div class="robot-popup-card">
+                  <button class="popup-close-btn" onclick="closeRobotPopup('patrol')" style="display: flex; align-items: center; justify-content: center;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </button>
+                  <div class="popup-robot-header">
+                    <img class="popup-robot-img" id="patrol-popup-img" src="assets/robot_hermes.png" alt="Robot">
+                    <div class="popup-robot-title">
+                      <h4 id="patrol-popup-name">ZEUS-Surveyor</h4>
+                      <span id="patrol-popup-type">LIDAR Scanner</span>
+                    </div>
+                  </div>
+                  <div class="popup-status-row">
+                    <span class="popup-badge online" id="patrol-popup-status">ONLINE</span>
+                    <span class="popup-badge battery" id="patrol-popup-battery"><i class="icon-battery" style="font-size: 10px;"></i> 62%</span>
+                    <span class="popup-badge" style="background: rgba(139,92,246,0.08); color: #8B5CF6; border: 1px solid rgba(139,92,246,0.2);" id="patrol-popup-zone">Patrol Zone A</span>
+                  </div>
+                  <div class="popup-map-preview">
+                    <div class="popup-map-grid"></div>
+                    <div class="popup-robot-dot" id="patrol-popup-dot"></div>
+                    <div style="position: absolute; bottom: 6px; left: 8px; font-size: 8px; color: var(--app-text-muted); font-family: monospace; font-weight: 700;" id="patrol-popup-coords">[18.9, 12.0]</div>
+                  </div>
+                  <button class="popup-open-map-btn" onclick="openRobotMonitoringFromPopup('patrol')">
+                    <i class="icon-map-pin" style="font-size: 14px;"></i> Open Live Map &amp; Control
+                  </button>
+                </div>
+              </div>
+
+              <div class="app-bar" style="display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--app-border); height: 56px;">
+                <div class="btn-back" onclick="goBackToPrevious()" style="display: flex; align-items: center; color: var(--app-primary); cursor: pointer; font-size: 14px; font-weight: 600; margin-right: 12px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </div>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--app-text); flex-grow: 1;">Patrol Surveillance</h3>
+                <button class="header-icon-btn" onclick="toggleSidebarDrawer(true)" style="background: transparent; border: none; color: var(--app-text); cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                  <i class="icon-menu" style="font-size: 20px;"></i>
+                </button>
+              </div>
+              <div class="app-scrollable-content fade-in-element">
+                <div style="padding: 16px 12px;">
+                  <h6 class="module-section-title" style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: var(--app-text);">Office Surveillance & Security</h6>
+                  <p class="module-section-desc" style="margin: 0 0 12px 0; font-size: 12px; color: var(--app-text-muted);">Select a patrol zone below to open live robot monitoring and telemetry logs.</p>
+                  
+                  <!-- Search and Filters -->
+                  <div class="search-filter-container">
+                    <div class="search-filter-controls">
+                      <div class="search-input" style="flex: 1; position: relative;">
+                        <i class="icon-search" style="position: absolute; left: 10px; top: 12px; color: var(--app-text-muted); font-size: 14px;"></i>
+                        <input type="text" id="patrol-search-input" placeholder="Search zone or guard..." oninput="handleSearchFilter('patrol')" style="width: 100%; padding: 10px 10px 10px 32px; border-radius: 10px; border: 1.5px solid var(--app-border); background-color: var(--app-surface); color: var(--app-text); font-size: 12px; outline: none;">
+                      </div>
+                      <select id="patrol-status-filter" onchange="handleSearchFilter('patrol')" style="padding: 10px 8px; border-radius: 10px; border: 1.5px solid var(--app-border); background-color: var(--app-surface); color: var(--app-text); font-size: 12px; outline: none; cursor: pointer; font-weight: 600;">
+                        <option value="all">All Status</option>
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                        <option value="standby">Standby</option>
+                      </select>
+                    </div>
+                    <div class="view-toggle-container">
+                      <button class="view-toggle-btn active" id="patrol-toggle-cards" onclick="toggleModuleView('patrol', 'cards')">
+                        <i class="icon-grid" style="font-size: 11px;"></i> Cards
+                      </button>
+                      <button class="view-toggle-btn" id="patrol-toggle-table" onclick="toggleModuleView('patrol', 'table')">
+                        <i class="icon-list" style="font-size: 11px;"></i> Table
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Grid/Cards view -->
+                  <div class="list-container" id="patrol-zones-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
+                  
+                  <!-- Table Data Grid view -->
+                  <div class="modern-table-container" id="patrol-table-container">
+                    <table class="modern-table">
+                      <thead>
+                        <tr>
+                          <th>Robot / Zone</th>
+                          <th>Status</th>
+                          <th>Battery</th>
+                          <th>Activity</th>
+                        </tr>
+                      </thead>
+                      <tbody id="patrol-table-body">
+                        <!-- Populated dynamically -->
+                      </tbody>
+                    </table>
+                  </div>
+
+                </div>
+                <div class="bottom-spacer" style="height: 30px;"></div>
+              </div>
+            </div>
+
+            <!-- Screen 6: Robot Monitoring Screen (real_time_viz) -->
+            <div id="screen-real_time_viz" class="app-screen">
+              <div class="app-bar" style="display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--app-border); background-color: var(--app-surface); height: 56px;">
+                <div class="btn-back" onclick="goBackToPrevious()" style="display: flex; align-items: center; color: var(--app-primary); cursor: pointer; font-size: 14px; font-weight: 600; margin-right: 12px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </div>
+                <h3 id="viz-title" style="margin: 0; font-size: 15px; font-weight: 800; color: var(--app-text); flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Monitoring: ARES-100</h3>
+                <div class="badge-status-monitor" id="viz-status-badge" style="font-size: 11px; font-weight: 700; color: var(--app-success); background: rgba(34, 197, 94, 0.08); padding: 4px 8px; border-radius: 12px; display: flex; align-items: center;">
+                  <span class="status-monitor-dot green" style="width: 6px; height: 6px; background-color: var(--app-success); border-radius: 50%; display: inline-block; margin-right: 6px;"></span> ONLINE
+                </div>
+                <button class="header-icon-btn" onclick="toggleSidebarDrawer(true)" style="background: transparent; border: none; color: var(--app-text); cursor: pointer; padding: 4px; display: flex; align-items: center; margin-left: 8px;">
+                  <i class="icon-menu" style="font-size: 20px;"></i>
+                </button>
+              </div>
+              
+              <!-- Map Viewport -->
+              <div class="viz-map-viewport" style="position: relative; height: 320px; flex-shrink: 0; margin: 12px 16px; border-radius: 12px; overflow: hidden;">
+                <!-- Grid background lines to make it look technical -->
+                <div class="map-grid-overlay"></div>
+                
+                <!-- Cybernetic overlays -->
+                <div class="map-scanner-line"></div>
+                <div class="viewport-bracket top-left"></div>
+                <div class="viewport-bracket top-right"></div>
+                <div class="viewport-bracket bottom-left"></div>
+                <div class="viewport-bracket bottom-right"></div>
+                
+                <svg class="trail-svg" id="viz-trail-svg" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;">
+                  <polyline points="" stroke="var(--app-primary)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div class="map-robot pulsing" id="viz-moving-robot" style="position: absolute; left: 15%; top: 20%; transform: translate(-50%, -50%) rotate(0deg); transition: left 0.15s linear, top 0.15s linear, transform 0.15s ease; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; z-index: 10;">
+                  <div class="robot-pulse" style="position: absolute; width: 36px; height: 36px; border-radius: 50%; pointer-events: none;"></div>
+                  <i class="icon-navigation" style="transform: rotate(-45deg);"></i>
+                </div>
+
+                <!-- Floating Zoom Controls -->
+                <div class="floating-zoom-controls">
+                  <button class="zoom-btn" onclick="adjustMapZoom(1)">+</button>
+                  <button class="zoom-btn" onclick="adjustMapZoom(-1)">-</button>
+                </div>
+              </div>
+
+              <!-- Scrollable Telemetry & Controls -->
+              <div class="app-scrollable-content" style="flex: 1; overflow-y: auto; padding: 0 0 20px 0;">
+
+                <!-- HUD Overlay -->
+                <div class="viz-top-overlay" style="padding: 0 16px; margin-bottom: 12px; position: relative; top: 0; left: 0; right: 0;">
+                  <div class="overlay-card" style="padding: 12px; border-radius: 12px; background: var(--app-surface); border: 1px solid var(--app-border); display: flex; align-items: center; justify-content: space-between; box-shadow: var(--app-shadow);">
+                    <div style="display: flex; align-items: center; flex-grow: 1; overflow: hidden; margin-right: 8px;">
+                      <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(37, 99, 235, 0.08); display: flex; align-items: center; justify-content: center; color: var(--app-primary); margin-right: 12px; flex-shrink: 0;">
+                        <i class="icon-locate-fixed"></i>
+                      </div>
+                      <div style="overflow: hidden;">
+                        <h6 id="hud-tracking-title" style="margin: 0; font-size: 13px; font-weight: 700; color: var(--app-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Active Tracking: ARES-100</h6>
+                        <p id="hud-tracking-desc" style="margin: 2px 0 0 0; font-size: 11px; color: var(--app-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">GPS Latency: < 12ms | Coordinates: [12.40, 8.20]</p>
+                      </div>
+                    </div>
+                    <!-- Resume Auto Nav Button -->
+                    <div id="resume-autonav-container" style="display: none; flex-shrink: 0;">
+                      <button class="btn btn-primary-app btn-sm" onclick="resumeAutoNav()" style="padding: 6px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <i class="icon-play" style="font-size: 12px;"></i> Resume Auto
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bottom HUD and D-Pad Controls -->
+                <div class="viz-bottom-panel" style="padding: 16px 20px; display: flex; flex-direction: column; position: relative; border-radius: 20px 20px 0 0; margin-top: 4px; border-top: 1.5px solid var(--app-border);">
+                  
+                  <!-- MANUAL STEERING OVERRIDE (Moved UPWARD!) -->
+                  <span class="panel-title-lbl" style="font-size: 11px; font-weight: 800; letter-spacing: 0.8px; color: var(--app-text-muted); margin-bottom: 8px; text-transform: uppercase; display: block;">MANUAL STEERING OVERRIDE</span>
+                  <div class="premium-controller-wrap" style="margin-top: 8px; margin-bottom: 16px;">
+                    <div class="controller-outer">
+                      <div class="controller-base"></div>
+                      <button class="dpad-btn dpad-up"
+                        onmousedown="startDpadHold('Move Forward', 0, -1)" onmouseup="stopDpadHold()" onmouseleave="stopDpadHold()"
+                        ontouchstart="startDpadHold('Move Forward', 0, -1)" ontouchend="stopDpadHold()">
+                        <i class="icon-arrow-up"></i>
+                      </button>
+                      <button class="dpad-btn dpad-left"
+                        onmousedown="startDpadHold('Move Left', -1, 0)" onmouseup="stopDpadHold()" onmouseleave="stopDpadHold()"
+                        ontouchstart="startDpadHold('Move Left', -1, 0)" ontouchend="stopDpadHold()">
+                        <i class="icon-arrow-left"></i>
+                      </button>
+                      <button class="dpad-btn dpad-right"
+                        onmousedown="startDpadHold('Move Right', 1, 0)" onmouseup="stopDpadHold()" onmouseleave="stopDpadHold()"
+                        ontouchstart="startDpadHold('Move Right', 1, 0)" ontouchend="stopDpadHold()">
+                        <i class="icon-arrow-right"></i>
+                      </button>
+                      <button class="dpad-btn dpad-down"
+                        onmousedown="startDpadHold('Move Backward', 0, 1)" onmouseup="stopDpadHold()" onmouseleave="stopDpadHold()"
+                        ontouchstart="startDpadHold('Move Backward', 0, 1)" ontouchend="stopDpadHold()">
+                        <i class="icon-arrow-down"></i>
+                      </button>
+                      <button class="dpad-center" onclick="emergencyStopRobot()">
+                        <i class="icon-octagon" style="font-size: 14px;"></i>
+                      </button>
+                    </div>
+                    <!-- Speed Slider -->
+                    <div class="controller-speed-row">
+                      <span class="speed-label">Speed</span>
+                      <input type="range" class="speed-slider" id="robot-speed-slider" min="1" max="10" value="5" oninput="updateRobotSpeed(this.value)">
+                      <span class="speed-val-lbl" id="speed-val-display">0.8m/s</span>
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="controller-actions">
+                      <button class="ctrl-action-btn" onclick="rotateRobot()">
+                        <i class="icon-rotate-cw" style="font-size: 13px;"></i> Rotate 180&deg;
+                      </button>
+                      <button class="ctrl-action-btn" onclick="resumeAutoNav()">
+                        <i class="icon-play" style="font-size: 13px;"></i> Auto Nav
+                      </button>
+                      <button class="ctrl-action-btn danger" onclick="emergencyStopRobot()">
+                        <i class="icon-octagon" style="font-size: 13px;"></i> E-STOP
+                      </button>
+                    </div>
+                  </div>
+
+                  <hr class="panel-divider" style="margin: 4px 0 10px 0; border: none; border-top: 1px solid var(--app-border);">
+
+                  <!-- Metrics -->
+                  <div class="monitoring-metrics-row" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+                    <div class="metric-cell-premium">
+                      <div class="dial-container">
+                        <svg width="50" height="50" viewBox="0 0 36 36" class="dial-svg">
+                          <circle cx="18" cy="18" r="15.9155" class="dial-track" />
+                          <path id="battery-ring" class="dial-fill-battery" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="88, 100" />
+                        </svg>
+                        <span id="monitor-battery" class="dial-val-centered">88%</span>
+                      </div>
+                      <span class="cell-label">Battery</span>
+                    </div>
+                    <div class="metric-cell-premium">
+                      <div class="dial-container">
+                        <svg width="50" height="50" viewBox="0 0 36 36" class="dial-svg">
+                          <circle cx="18" cy="18" r="15.9155" class="dial-track" />
+                          <path id="velocity-ring" class="dial-fill-velocity" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="40, 100" />
+                        </svg>
+                        <span id="monitor-speed" class="dial-val-centered-small">0.8m/s</span>
+                      </div>
+                      <span class="cell-label">Velocity</span>
+                    </div>
+                    <div class="metric-cell-premium">
+                      <div class="dial-container">
+                        <svg width="50" height="50" viewBox="0 0 36 36" style="transform: rotate(0deg); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);" id="heading-compass-svg">
+                          <circle cx="18" cy="18" r="15.9155" class="dial-track" />
+                          <line x1="18" y1="5" x2="18" y2="31" stroke="rgba(139, 92, 246, 0.15)" stroke-width="1" />
+                          <line x1="5" y1="18" x2="31" y2="18" stroke="rgba(139, 92, 246, 0.15)" stroke-width="1" />
+                          <polygon points="18,6 21.5,18 14.5,18" fill="#8B5CF6" />
+                          <polygon points="18,30 21.5,18 14.5,18" fill="rgba(139, 92, 246, 0.3)" />
+                        </svg>
+                        <span id="monitor-direction-short" class="dial-val-centered">NE</span>
+                      </div>
+                      <span class="cell-label">Heading</span>
+                      <span class="cell-val-sub" id="monitor-direction">North-East</span>
+                    </div>
+                  </div>
+                  
+                  <hr class="panel-divider" style="margin: 4px 0 10px 0; border: none; border-top: 1px solid var(--app-border);">
+
+                  <!-- Telemetry Sensor Grid -->
+                  <span class="panel-title-lbl" style="font-size: 11px; font-weight: 800; letter-spacing: 0.8px; color: var(--app-text-muted); margin-bottom: 8px; text-transform: uppercase; display: block;">TELEMETRY SENSOR GRID</span>
+                  <div class="sensor-status-grid" style="margin-bottom: 12px;">
+                    <div class="sensor-status-card">
+                      <span class="sensor-status-indicator" id="sensor-ind-lidar"></span>
+                      <div class="sensor-info-text">
+                        <span class="name">LiDAR</span>
+                        <span class="val" id="sensor-val-lidar">Active (360°)</span>
+                      </div>
+                    </div>
+                    <div class="sensor-status-card">
+                      <span class="sensor-status-indicator" id="sensor-ind-sonar"></span>
+                      <div class="sensor-info-text">
+                        <span class="name">Sonar</span>
+                        <span class="val" id="sensor-val-sonar">0.4m Range</span>
+                      </div>
+                    </div>
+                    <div class="sensor-status-card">
+                      <span class="sensor-status-indicator" id="sensor-ind-imu"></span>
+                      <div class="sensor-info-text">
+                        <span class="name">IMU</span>
+                        <span class="val" id="sensor-val-imu">Stabilized</span>
+                      </div>
+                    </div>
+                    <div class="sensor-status-card">
+                      <span class="sensor-status-indicator" id="sensor-ind-avoid"></span>
+                      <div class="sensor-info-text">
+                        <span class="name">Obstacle</span>
+                        <span class="val" id="sensor-val-avoid">Clear</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <hr class="panel-divider" style="margin: 4px 0 10px 0; border: none; border-top: 1px solid var(--app-border);">
+
+                  <!-- Route Vector Details Card (Moved DOWNWARD!) -->
+                  <div class="viz-mission-card" id="mapMissionPanel" style="padding: 12px; border-radius: 12px; background: var(--app-surface); border: 1px solid var(--app-border); margin-bottom: 16px; box-shadow: var(--app-shadow); position: relative;">
+                    <div class="mission-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                      <span class="mission-title" style="font-size: 10px; font-weight: 800; letter-spacing: 0.8px; color: var(--app-text-muted); text-transform: uppercase;">Route Vector Details</span>
+                      <span class="mission-status-dot" id="mission-status-lbl" style="font-size: 9px; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 3px;"><span class="blinking-dot"></span> ACTIVE</span>
+                    </div>
+                    <div class="mission-detail-row" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; border-top: 1px solid var(--app-border); padding-top: 6px;">
+                      <div class="mission-stat" style="display: flex; flex-direction: column;">
+                        <span class="lbl" style="font-size: 9px; color: var(--app-text-muted); text-transform: uppercase;">Command</span>
+                        <span class="val" id="mission-task-name" style="font-size: 12px; font-weight: 700; color: var(--app-text);">Patrolling</span>
+                      </div>
+                      <div class="mission-stat" style="display: flex; flex-direction: column;">
+                        <span class="lbl" style="font-size: 9px; color: var(--app-text-muted); text-transform: uppercase;">ETA</span>
+                        <span class="val" id="mission-eta" style="font-size: 12px; font-weight: 700; color: var(--app-text);">1m 12s</span>
+                      </div>
+                      <div class="mission-stat" style="display: flex; flex-direction: column;">
+                        <span class="lbl" style="font-size: 9px; color: var(--app-text-muted); text-transform: uppercase;">Distance</span>
+                        <span class="val" id="mission-dist" style="font-size: 12px; font-weight: 700; color: var(--app-text);">12.4m</span>
+                      </div>
+                    </div>
+                    <div class="mission-progress-bar-bg" style="width: 100%; height: 4px; background: var(--app-surface-2); border-radius: 2px; overflow: hidden;">
+                      <div class="mission-progress-fill" id="mission-progress-fill-bar" style="height: 100%; width: 55%; background: var(--app-primary); box-shadow: 0 0 8px var(--app-primary);"></div>
+                    </div>
+                  </div>
+
+                  <hr class="panel-divider" style="margin: 4px 0 10px 0; border: none; border-top: 1px solid var(--app-border);">
+                  
+                  <!-- Dynamic Activity Timeline -->
+                  <div class="activity-timeline-card" style="padding: 12px; border-radius: 12px; background: var(--app-surface); border: 1px solid var(--app-border); margin-bottom: 12px; box-shadow: var(--app-shadow);">
+                    <div class="timeline-title-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                      <span style="font-size: 10px; font-weight: 800; letter-spacing: 0.8px; color: var(--app-text-muted); text-transform: uppercase;">Telemetry Activity Feed</span>
+                      <span class="blinking-dot" style="width: 8px; height: 8px; background-color: var(--app-success); border-radius: 50%; display: inline-block;"></span>
+                    </div>
+                    <div class="console-box" id="monitor-console" style="display: flex; flex-direction: column; gap: 10px; max-height: 120px; overflow-y: auto; font-family: monospace; font-size: 11px; padding: 4px;">
+                      <p class="console-line">[SYS] Telemetry link established.</p>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- Screen 7: Settings Screen -->
+            <div id="screen-settings" class="app-screen">
+              <div class="app-bar" style="display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--app-border); height: 56px;">
+                <div class="btn-back" onclick="goBackToPrevious()" style="display: flex; align-items: center; color: var(--app-primary); cursor: pointer; font-size: 14px; font-weight: 600; margin-right: 12px;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </div>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--app-text); flex-grow: 1;">Settings &amp; Profile</h3>
+                <button class="header-icon-btn" onclick="toggleSidebarDrawer(true)" style="background: transparent; border: none; color: var(--app-text); cursor: pointer; padding: 4px; display: flex; align-items: center;">
+                  <i class="icon-menu" style="font-size: 20px;"></i>
+                </button>
+              </div>
+              <div class="app-scrollable-content">
+                <div style="padding: 16px;">
+                  <!-- Switch role toggle for testing -->
+                  <div class="app-card role-switcher-card" style="padding: 12px; border-radius: 12px; background: var(--app-surface); border: 1px solid var(--app-border); display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div class="role-switch-label" style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--app-primary);">
+                      <i class="icon-shield-alert"></i>
+                      <span>Simulate Admin Mode</span>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" id="admin-mode-toggle" onchange="toggleAdminSimMode(this)">
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+
+                  <!-- Switch theme toggle for testing -->
+                  <div class="app-card role-switcher-card" style="padding: 12px; border-radius: 12px; background: var(--app-surface); border: 1px solid var(--app-border); display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div class="role-switch-label" style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #8B5CF6;">
+                      <i class="icon-moon"></i>
+                      <span>Simulate Dark Theme</span>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" id="theme-mode-toggle" onchange="toggleThemeSimMode(this)">
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+
+                  <!-- Profile Card -->
+                  <div class="app-card profile-card" style="padding: 16px; border-radius: 16px; background: var(--app-surface); border: 1px solid var(--app-border); display: flex; align-items: center; gap: 16px; margin-bottom: 12px; box-shadow: var(--app-shadow);">
+                    <div class="profile-avatar-large" id="profile-avatar" style="width: 60px; height: 60px; border-radius: 50%; background-color: var(--app-primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800;">JD</div>
+                    <div class="profile-details">
+                      <h4 id="profile-name" style="margin: 0; font-size: 16px; font-weight: 800; color: var(--app-text);">John Doe</h4>
+                      <p id="profile-role" style="margin: 2px 0 4px 0; font-size: 12px; color: var(--app-text-muted);">Role: Senior Operator</p>
+                      <span class="clearance-badge" id="profile-clearance" style="font-size: 10px; font-weight: 700; color: var(--app-primary); background: rgba(37, 99, 235, 0.08); padding: 2px 6px; border-radius: 4px;">Clearance Level 3</span>
+                    </div>
+                  </div>
+
+                  <!-- Profile details -->
+                  <div class="app-card detail-card" style="padding: 14px; border-radius: 12px; background: var(--app-surface); border: 1px solid var(--app-border); margin-bottom: 12px;">
+                    <div class="detail-row" style="display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px solid var(--app-border);">
+                      <span style="color: var(--app-text-muted);">Employee ID</span>
+                      <strong id="profile-emp-id" style="color: var(--app-text);">EMP-9942</strong>
+                    </div>
+                    <div class="detail-row" style="display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0; border-bottom: 1px solid var(--app-border);">
+                      <span style="color: var(--app-text-muted);">Email</span>
+                      <strong id="profile-email" style="color: var(--app-text);">operator@blucursor.com</strong>
+                    </div>
+                    <div class="detail-row" style="display: flex; justify-content: space-between; font-size: 12px; padding: 6px 0;">
+                      <span style="color: var(--app-text-muted);">Department</span>
+                      <strong id="profile-dept" style="color: var(--app-text);">Fleet Operations</strong>
+                    </div>
+                  </div>
+
+                  <!-- Admin Details Card (hidden by default) -->
+                  <div class="app-card" id="admin-details-card" style="display: none; padding: 14px; border-radius: 12px; margin-bottom: 12px; background: linear-gradient(145deg, #0f1240, #080f2e); border: 1px solid rgba(139,92,246,0.3);">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                      <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3); display: flex; align-items: center; justify-content: center; color: #a78bfa; font-size: 14px;"><i class="icon-shield-alert"></i></div>
+                      <span style="font-size: 11px; font-weight: 800; color: #a78bfa; letter-spacing: 1px; text-transform: uppercase;">Admin Profile</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid rgba(139,92,246,0.15);">
+                      <span style="color: #6b84a8;">Admin Name</span>
+                      <strong style="color: #e8f0ff;">Dr. Aryan Mehta</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid rgba(139,92,246,0.15);">
+                      <span style="color: #6b84a8;">Admin ID</span>
+                      <strong style="color: #e8f0ff;">ADM-0001</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid rgba(139,92,246,0.15);">
+                      <span style="color: #6b84a8;">Email</span>
+                      <strong style="color: #e8f0ff;">admin@blucursor.com</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; border-bottom: 1px solid rgba(139,92,246,0.15);">
+                      <span style="color: #6b84a8;">Phone</span>
+                      <strong style="color: #e8f0ff;">+91 98765 43210</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0;">
+                      <span style="color: #6b84a8;">Clearance</span>
+                      <span style="font-size: 10px; font-weight: 800; color: #a78bfa; background: rgba(139,92,246,0.15); padding: 2px 8px; border-radius: 12px;">LEVEL 5 &bull; FULL ACCESS</span>
+                    </div>
+                  </div>
+
+                  <!-- Support & Emergency Contacts -->
+                  <div class="app-card detail-card" style="padding: 14px; border-radius: 12px; background: var(--app-surface); border: 1px solid var(--app-border); margin-bottom: 12px;">
+                    <h6 class="card-section-title" style="margin: 0 0 10px 0; font-size: 12px; font-weight: 800; color: var(--app-text); letter-spacing: 0.5px; text-transform: uppercase;">Support &amp; Admin Contact</h6>
+                    <div class="contact-block" style="font-size: 12px; line-height: 1.4;">
+                      <span class="block-title" style="font-weight: 700; color: var(--app-text);">Admin Operations Desk</span>
+                      <p class="block-content" style="margin: 2px 0 0 0; color: var(--app-text-muted);">Phone: +91 98765 43210<br>Email: admin@blucursor.com</p>
+                    </div>
+                    <hr class="block-divider" style="margin: 10px 0; border: none; border-top: 1px solid var(--app-border);">
+                    <div class="contact-block" style="font-size: 12px; line-height: 1.4;">
+                      <span class="block-title" style="font-weight: 700; color: var(--app-text);">System Technical Support</span>
+                      <p class="block-content" style="margin: 2px 0 0 0; color: var(--app-text-muted);">Phone: +91 80000 12345<br>Email: support@blucursor.com</p>
+                    </div>
+                  </div>
+
+                  <!-- Administrative Privileges -->
+                  <div class="app-card admin-privileges-card" style="padding: 14px; border-radius: 12px; background: var(--app-surface); border: 1px solid var(--app-border); margin-bottom: 20px;">
+                    <div class="card-title-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                      <h6 style="margin: 0; font-size: 12px; font-weight: 800; color: var(--app-text); text-transform: uppercase;">Administrative Controls</h6>
+                      <span class="priv-badge" id="priv-badge-status" style="font-size: 9px; font-weight: 700; color: var(--app-danger); background: rgba(239, 68, 68, 0.08); padding: 2px 6px; border-radius: 4px;">LOCK</span>
+                    </div>
+                    
+                    <!-- Locked banner -->
+                    <div class="locked-banner" id="admin-locked-banner" style="display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--app-text-muted); background: var(--app-bg); padding: 8px; border-radius: 8px;">
+                      <i class="icon-lock" style="font-size: 14px; color: var(--app-danger);"></i>
+                      <span>Admin credentials required for user activation and system configurations.</span>
+                    </div>
+
+                    <!-- Admin options (hidden by default) -->
+                    <div class="admin-actions-list" id="admin-actions-list" style="display: none;">
+                      <button class="btn btn-green btn-block mb-8" onclick="adminAction('Activate Operator Account')" style="width: 100%; padding: 10px; border-radius: 8px; background-color: var(--app-success); border: none; color: white; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px;"><i class="icon-check-circle" style="font-size: 14px;"></i> Activate Operator Account</button>
+                      <button class="btn btn-red btn-block mb-8" onclick="adminAction('Deactivate Operator Account')" style="width: 100%; padding: 10px; border-radius: 8px; background-color: var(--app-danger); border: none; color: white; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px;"><i class="icon-ban" style="font-size: 14px;"></i> Deactivate Operator Account</button>
+                      <button class="btn btn-primary-app btn-block" onclick="adminAction('Manage Platform Users')" style="width: 100%; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"><i class="icon-users" style="font-size: 14px;"></i> Manage Platform Users</button>
+                    </div>
+                  </div>
+
+                  <!-- Operator Controls (Normal Users Only) -->
+                  <div id="operator-actions-list">
+                    <button class="btn btn-block" id="btn-edit-profile" onclick="showToastNotification('Profile settings are locked by Enterprise IDP (SSO).')" style="width: 100%; padding: 12px; border-radius: 8px; background: transparent; border: 1.5px solid var(--app-primary); color: var(--app-primary); font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
+                      <i class="icon-edit" style="font-size: 16px;"></i> Edit Profile
+                    </button>
+                  </div>
+
+                  <!-- Log Out Button -->
+                  <button class="btn btn-red btn-block" onclick="handleLogout()" style="width: 100%; padding: 12px; border-radius: 8px; background-color: rgba(239, 68, 68, 0.08); border: 1px dashed var(--app-danger); color: var(--app-danger); font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="icon-log-out" style="font-size: 16px;"></i> Terminate Session
+                  </button>
+                </div>
+                <div class="bottom-spacer" style="height: 80px;"></div>
+              </div>
+
+              <!-- App Navigation Bar -->
+              <div class="app-nav-bar">
+                <div class="nav-item" onclick="showScreen('dashboard')">
+                  <i class="icon-home"></i>
+                  <span>Home</span>
+                </div>
+                <div class="nav-item" onclick="showScreen('delivery')">
+                  <i class="icon-truck"></i>
+                  <span>Delivery</span>
+                </div>
+                <div class="nav-item" onclick="showScreen('patrolling')">
+                  <i class="icon-shield"></i>
+                  <span>Patrolling</span>
+                </div>
+                <div class="nav-item active" onclick="showScreen('settings')">
+                  <i class="icon-settings"></i>
+                  <span>Settings</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: Information & Code Explorer -->
+    <section class="code-panel">
+      <!-- Main Right Panel Tabs -->
+      <div class="right-panel-main-tabs" style="display: flex; background: var(--dash-panel-bg); border-bottom: 1.5px solid var(--dash-border); padding: 0 16px; height: 50px; align-items: center; gap: 8px;">
+        <button class="panel-main-tab active" id="tab-panel-about" onclick="switchRightPanelTab('about')" style="background: transparent; border: none; padding: 12px 16px; color: var(--dash-text-main); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; border-bottom: 2.5px solid var(--app-primary); transition: all 0.2s ease;">
+          <i class="icon-building-2" style="font-size: 14px; margin-right: 6px; vertical-align: middle;"></i> About bluCursor
+        </button>
+        <button class="panel-main-tab" id="tab-panel-code" onclick="switchRightPanelTab('code')" style="background: transparent; border: none; padding: 12px 16px; color: var(--dash-text-sub); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s ease; border-bottom: 2.5px solid transparent;">
+          <i class="icon-code-2" style="font-size: 14px; margin-right: 6px; vertical-align: middle;"></i> Flutter Code Explorer
+        </button>
+      </div>
+
+      <!-- About Panel View -->
+      <div id="panel-content-about" class="right-panel-view active" style="padding: 24px; overflow-y: auto; color: var(--dash-text-sub); flex: 1;">
+        <div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+          
+          <!-- Company Hero Card -->
+          <div style="background: linear-gradient(135deg, #141d38 0%, #0033a1 100%); border-radius: 16px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 1px solid var(--dash-border); position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -50px; right: -50px; width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%); pointer-events: none;"></div>
+            <div style="display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 2;">
+              <img src="assets/logo_light.png" alt="bluCursor Logo" style="height: 32px; align-self: flex-start;">
+              <h1 style="color: #ffffff; font-size: 26px; font-weight: 800; margin: 8px 0 0 0; font-family: 'Outfit', sans-serif; letter-spacing: -0.5px;">Custom Software Development Service Provider</h1>
+              <p style="color: rgba(255,255,255,0.85); font-size: 14.5px; line-height: 1.6; margin: 0; font-weight: 400; max-width: 650px;">
+                bluCursor Infotech is a premier government-certified IT company. We deliver state-of-the-art software solutions, custom enterprise applications, and cloud transformations to help international businesses scale and innovate.
+              </p>
+              <div style="display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;">
+                <span style="background: rgba(255,255,255,0.12); color: #ffffff; padding: 4px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 700;"><i class="icon-map-pin" style="margin-right: 4px; vertical-align: middle;"></i> Indore, India (HQ)</span>
+                <span style="background: rgba(255,255,255,0.12); color: #ffffff; padding: 4px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 700;"><i class="icon-calendar" style="margin-right: 4px; vertical-align: middle;"></i> Est. 2013</span>
+                <span style="background: rgba(255,255,255,0.12); color: #ffffff; padding: 4px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 700;"><i class="icon-users" style="margin-right: 4px; vertical-align: middle;"></i> Global Client Markets</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Services Grid -->
+          <div>
+            <h3 style="color: var(--dash-text-main); font-size: 18px; font-weight: 800; font-family: 'Outfit', sans-serif; margin: 0 0 16px 0; letter-spacing: 0.5px;">CORE ENGINEERING SERVICES</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+              
+              <div style="background-color: var(--dash-panel-bg); border: 1px solid var(--dash-border); padding: 18px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="color: var(--app-primary); font-size: 20px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(59,130,246,0.06); border-radius: 8px;"><i class="icon-laptop-2"></i></div>
+                <h4 style="color: var(--dash-text-main); font-size: 14px; font-weight: 700; margin: 4px 0 0 0;">Custom Software</h4>
+                <p style="font-size: 12px; line-height: 1.5; margin: 0; color: var(--dash-text-sub);">Tailor-made portals, enterprise resource planning (ERP) suites, and business process automation platforms.</p>
+              </div>
+
+              <div style="background-color: var(--dash-panel-bg); border: 1px solid var(--dash-border); padding: 18px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="color: var(--app-primary); font-size: 20px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(59,130,246,0.06); border-radius: 8px;"><i class="icon-smartphone"></i></div>
+                <h4 style="color: var(--dash-text-main); font-size: 14px; font-weight: 700; margin: 4px 0 0 0;">Web & Mobile Apps</h4>
+                <p style="font-size: 12px; line-height: 1.5; margin: 0; color: var(--dash-text-sub);">Expert frontend architectures in React JS and native/hybrid mobile application design utilizing Flutter.</p>
+              </div>
+
+              <div style="background-color: var(--dash-panel-bg); border: 1px solid var(--dash-border); padding: 18px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="color: var(--app-primary); font-size: 20px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(59,130,246,0.06); border-radius: 8px;"><i class="icon-award"></i></div>
+                <h4 style="color: var(--dash-text-main); font-size: 14px; font-weight: 700; margin: 4px 0 0 0;">Salesforce Partnership</h4>
+                <p style="font-size: 12px; line-height: 1.5; margin: 0; color: var(--dash-text-sub);">Implementation, customization, custom Apex scripting, and Lightning Web Component (LWC) integrations.</p>
+              </div>
+
+              <div style="background-color: var(--dash-panel-bg); border: 1px solid var(--dash-border); padding: 18px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="color: var(--app-primary); font-size: 20px; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(59,130,246,0.06); border-radius: 8px;"><i class="icon-cloud"></i></div>
+                <h4 style="color: var(--dash-text-main); font-size: 14px; font-weight: 700; margin: 4px 0 0 0;">Cloud & SecOps</h4>
+                <p style="font-size: 12px; line-height: 1.5; margin: 0; color: var(--dash-text-sub);">Secure cloud consulting, AWS/Azure cluster orchestration, and automated microservices architectures.</p>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Application Documentation Card -->
+          <div style="background-color: var(--dash-panel-bg); border: 1px solid var(--dash-border); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px; border-bottom: 1.5px solid var(--dash-border); padding-bottom: 12px;">
+              <div style="color: #ffffff; font-size: 18px; width: 32px; height: 32px; background-color: var(--app-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;"><i class="icon-info" style="font-size: 16px;"></i></div>
+              <h3 style="color: var(--dash-text-main); font-size: 16px; font-weight: 800; font-family: 'Outfit', sans-serif; margin: 0; letter-spacing: 0.5px;">FLEET MANAGER SIMULATOR GUIDE</h3>
+            </div>
+            
+            <p style="font-size: 13px; line-height: 1.6; margin: 0; color: var(--dash-text-sub);">
+              This portal serves as an interactive showcase of bluCursor's capabilities in **frontend system simulator modeling** and **enterprise user experience design**. Use the interactive phone to simulate operating autonomous logistics hardware in real-time:
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 12.5px; line-height: 1.6;">
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <strong style="color: var(--dash-text-main);"><i class="icon-smartphone" style="margin-right: 6px; color: var(--app-primary); vertical-align: middle;"></i> 1. Boot & Authentication</strong>
+                <span style="color: var(--dash-text-sub);">Tap the splash screen inside the phone view, then log in using simulated credentials. Use <strong>operator@blucursor.com</strong> / <strong>password123</strong>, or use <strong>admin@blucursor.com</strong> / <strong>admin2024</strong> to unlock administrative controls.</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <strong style="color: var(--dash-text-main);"><i class="icon-navigation" style="margin-right: 6px; color: var(--app-primary); vertical-align: middle;"></i> 2. Operations Modules</strong>
+                <span style="color: var(--dash-text-sub);">Navigate through the <strong>Delivery Logistics</strong> or <strong>Patrol Surveillance</strong> cards. Select floor maps A-E or patrol zones to inspect unit statuses, battery metrics, and paths.</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <strong style="color: var(--dash-text-main);"><i class="icon-gamepad-2" style="margin-right: 6px; color: var(--app-primary); vertical-align: middle;"></i> 3. Telemetry & Remote Overrides</strong>
+                <span style="color: var(--dash-text-sub);">Tapping "Open Live Map & Control" launches real-time telemetry. Hold down the D-pad steering buttons (Up, Down, Left, Right) to manually drive the robot, adjust speeds, or hit the red <strong>E-STOP</strong> override.</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                <strong style="color: var(--dash-text-main);"><i class="icon-settings" style="margin-right: 6px; color: var(--app-primary); vertical-align: middle;"></i> 4. Configurations & Dark Mode</strong>
+                <span style="color: var(--dash-text-sub);">Open Settings to swap between simulated Light Theme and Dark Theme. You can also toggle Admin mode to simulate supervisor user profiles dynamically.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Footer -->
+          <div style="text-align: center; font-size: 11.5px; color: var(--dash-text-sub); border-top: 1px solid var(--dash-border); padding-top: 16px; margin-top: 8px;">
+            For official services, visit <a href="https://blucursor.com" target="_blank" style="color: var(--app-primary); text-decoration: none; font-weight: 700;">blucursor.com <i class="icon-external-link" style="font-size: 10px; vertical-align: middle;"></i></a>. Developed by bluCursor Infotech Pvt Ltd.
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Code Explorer View (hidden by default) -->
+      <div id="panel-content-code" class="right-panel-view" style="display: none; flex: 1; flex-direction: column; overflow: hidden; padding: 20px;">
+        <div class="panel-header" style="margin-bottom: 12px;">
+          <h2><i class="icon-folder-code"></i> Flutter Material 3 Code Explorer</h2>
+          <span class="subtitle">Select a file to inspect clean implementation details</span>
+        </div>
+        
+        <!-- Code Tab Navigation -->
+        <div class="code-tabs">
+          <button class="code-tab active" data-file="pubspec" onclick="switchCodeFile('pubspec')">pubspec.yaml</button>
+          <button class="code-tab" data-file="main" onclick="switchCodeFile('main')">main.dart</button>
+          <button class="code-tab" data-file="theme" onclick="switchCodeFile('theme')">app_theme.dart</button>
+          <button class="code-tab" data-file="robot_model" onclick="switchCodeFile('robot_model')">robot.dart (Model)</button>
+          <button class="code-tab" data-file="splash" onclick="switchCodeFile('splash')">splash_screen.dart</button>
+          <button class="code-tab" data-file="login" onclick="switchCodeFile('login')">login_screen.dart</button>
+          <button class="code-tab" data-file="shell" onclick="switchCodeFile('shell')">main_navigation_shell.dart</button>
+          <button class="code-tab" data-file="dashboard" onclick="switchCodeFile('dashboard')">dashboard_screen.dart</button>
+          <button class="code-tab" data-file="delivery" onclick="switchCodeFile('delivery')">delivery_cart_screen.dart</button>
+          <button class="code-tab" data-file="patrolling" onclick="switchCodeFile('patrolling')">patrolling_screen.dart</button>
+          <button class="code-tab" data-file="viz" onclick="switchCodeFile('viz')">real_time_viz_screen.dart</button>
+          <button class="code-tab" data-file="settings" onclick="switchCodeFile('settings')">settings_screen.dart</button>
+        </div>
+
+        <!-- Code Container -->
+        <div class="code-viewer-container" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+          <div class="code-viewer-header" style="flex-shrink: 0;">
+            <span class="file-path-display" id="filePathDisplay">pubspec.yaml</span>
+            <button class="btn btn-sm" onclick="copyActiveCode()"><i class="icon-copy"></i> Copy Code</button>
+          </div>
+          <pre class="code-display-pre" style="flex: 1; overflow: auto; margin: 0;"><code id="codeDisplayCode" class="language-dart">Loading code...</code></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- About Dialog Overlay -->
+  <div class="dialog-overlay" id="aboutDialog">
+    <div class="dialog-box">
+      <h3>bluCursor Fleet Portal</h3>
+      <p class="dialog-version">Version 1.0.0+1</p>
+      <p class="dialog-text">This mock console simulates bluCursor's mobile application and real-time operations console. Developed by bluCursor Infotech, it integrates telemetry monitors, diagnostics logs, and manual D-Pad overrides under a clean corporate design standard.</p>
+      <p class="dialog-copyright">© 2026 bluCursor Infotech Pvt Ltd. All rights reserved.</p>
+      <button class="btn btn-primary" onclick="closeAboutInfo()">Close</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
