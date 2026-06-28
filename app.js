@@ -1903,9 +1903,10 @@ function sendRemoteCmd(cmdName, dx, dy) {
     const matchR = activeRobot.id.match(/\d+$/);
     const intId = matchR ? parseInt(matchR[0]) : 1;
     
+    if (dy > 0) return; // Disable backward movement
+
     let command = "forward";
     if (dx === 0 && dy < 0) command = "forward";
-    else if (dx === 0 && dy > 0) command = "backward";
     else if (dx < 0 && dy === 0) command = "rotate_left";
     else if (dx > 0 && dy === 0) command = "rotate_right";
 
@@ -1923,6 +1924,8 @@ function sendRemoteCmd(cmdName, dx, dy) {
     document.getElementById('hud-tracking-title').innerText = `Manual Override: ${activeRobot.name}`;
     return;
   }
+
+  if (dy > 0) return; // Disable backward movement
 
   const timestamp = new Date().toTimeString().split(' ')[0];
   

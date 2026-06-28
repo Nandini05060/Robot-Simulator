@@ -92,8 +92,7 @@ def move_robot(robot_id: str, command: str):
         new_x += dx * robot.speed
         new_y += dy * robot.speed
     elif command == "backward":
-        new_x -= dx * robot.speed
-        new_y -= dy * robot.speed
+        return {"success": False, "message": "Backward movement is disabled"}
 
     if new_x < 0 or new_x >= MAP_WIDTH:
         return {"success": False, "message": "Boundary reached"}

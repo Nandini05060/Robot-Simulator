@@ -212,11 +212,11 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
 
   void _triggerManualMove(double dx, double dy, String dirName) {
     if (_status == 'E-STOPPED' || !_robot!.isOnline) return;
+    if (dy > 0) return; // Disable backward movement
 
     if (ApiService().isConnected) {
       String command = "forward";
       if (dx == 0 && dy < 0) command = "forward";
-      else if (dx == 0 && dy > 0) command = "backward";
       else if (dx < 0 && dy == 0) command = "rotate_left";
       else if (dx > 0 && dy == 0) command = "rotate_right";
 
