@@ -13,9 +13,8 @@ class ApiService extends ChangeNotifier {
   IOWebSocketChannel? _wsChannel;
   bool _isConnected = false;
 
-  static const String _serverIp = "192.168.0.107";
-  String get baseUrl => "http://$_serverIp:8000";
-  String get wsUrl => "ws://$_serverIp:8000";
+  String get baseUrl => "https://robot-simulator.onrender.com";
+  String get wsUrl => "wss://robot-simulator.onrender.com";
 
   bool get isAuthenticated => _token != null;
   String? get token => _token;

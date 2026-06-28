@@ -918,7 +918,7 @@ function connectBackendWS(token) {
   if (webSocket) {
     try { webSocket.close(); } catch(e) {}
   }
-  const wsUrl = `ws://${window.location.hostname || 'localhost'}:8000/ws?token=${token}`;
+  const wsUrl = `wss://robot-simulator.onrender.com/ws?token=${token}`;
   console.log("Connecting to WebSocket:", wsUrl);
   webSocket = new WebSocket(wsUrl);
 
@@ -1028,8 +1028,7 @@ function handleLoginSubmit(e) {
   btn.disabled = true;
 
   // Real HTTP POST login call to backend
-  const host = window.location.hostname || 'localhost';
-  fetch(`http://${host}:8000/login`, {
+  fetch(`https://robot-simulator.onrender.com/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
