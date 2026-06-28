@@ -5,7 +5,7 @@ import '../services/api_service.dart';
 
 class _MainSettingsScreenState extends State<SettingsScreen> {
   // Let's implement an interactive role switch so the user can test both states!
-  bool _isAdminMode = false;
+  bool get _isAdminMode => ApiService().isAdminMode;
 
   void _showLogoutDialog() {
     showDialog(
@@ -55,8 +55,11 @@ class _MainSettingsScreenState extends State<SettingsScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: isDark ? const Color(0xff090d16) : const Color(0xfff8fafc),
+    return AnimatedBuilder(
+      animation: ApiService(),
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: isDark ? const Color(0xff090d16) : const Color(0xfff8fafc),
       appBar: AppBar(
         title: const Text('System Settings'),
         automaticallyImplyLeading: false,
@@ -94,9 +97,7 @@ class _MainSettingsScreenState extends State<SettingsScreen> {
                       value: _isAdminMode,
                       activeColor: const Color(0xff2563eb),
                       onChanged: (val) {
-                        setState(() {
-                          _isAdminMode = val;
-                        });
+                        ApiService().setAdminMode(val);
                       },
                     ),
                   ],
@@ -427,7 +428,9 @@ class _MainSettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
-  }
+  },
+);
+}
 
   Widget _buildProfileDetailRow(String label, String value) {
     return Row(

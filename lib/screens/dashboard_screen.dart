@@ -146,26 +146,70 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final apiService = ApiService();
 
-    return Scaffold(
-      backgroundColor: const Color(0xff090d16),
-      appBar: AppBar(
-        backgroundColor: const Color(0xff090d16),
-        elevation: 0,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
-        ),
-        title: Image.asset(
-          'assets/logo_light.png',
-          height: 20,
-          fit: BoxFit.contain,
-        ),
-        centerTitle: true,
+    return AnimatedBuilder(
+      animation: apiService,
+      builder: (context, child) {
+        final isAdmin = apiService.isAdminMode;
+        return Scaffold(
+          backgroundColor: const Color(0xff090d16),
+          appBar: AppBar(
+            backgroundColor: const Color(0xff090d16),
+            elevation: 0,
+            leading: Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
+            ),
+            titleSpacing: 0,
+            title: InkWell(
+              onTap: () {
+                Scaffold.of(context).openDrawer();
+              },
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: isAdmin ? const Color(0xff8b5cf6) : const Color(0xff2563eb),
+                    child: Text(
+                      isAdmin ? 'AM' : 'JD',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        isAdmin ? 'Dr. Aryan Mehta' : 'John Doe',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        isAdmin ? 'Security Admin • Active' : 'Senior Operator • Active',
+                        style: const TextStyle(
+                          color: Color(0xff14b8a6), // Teal accent color matching HTML portal
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none, color: Colors.white),
@@ -192,10 +236,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              DrawerHeader(
-                decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Color(0xff1e293b))),
-                ),
+              // Brand logo row
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Row(
                   children: [
                     Image.asset('assets/logo_light.png', height: 24),
@@ -212,6 +255,71 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
               ),
+              const Divider(color: Color(0xff1e293b), height: 1),
+              
+              // Profile Section in Drawer
+              Container(
+                padding: const EdgeInsets.all(20),
+                color: const Color(0xff0d131f), // Slightly different background for depth
+                child: Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundColor: isAdmin ? const Color(0xff8b5cf6) : const Color(0xff2563eb),
+                      child: Text(
+                        isAdmin ? 'AM' : 'JD',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      isAdmin ? 'Dr. Aryan Mehta' : 'John Doe',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isAdmin ? 'Security Admin • Active' : 'Senior Operator • Active',
+                      style: const TextStyle(
+                        color: Color(0xff94a3b8),
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isAdmin 
+                            ? const Color(0xff8b5cf6).withOpacity(0.15) 
+                            : const Color(0xff2563eb).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isAdmin 
+                              ? const Color(0xff8b5cf6).withOpacity(0.3) 
+                              : const Color(0xff2563eb).withOpacity(0.3),
+                        ),
+                      ),
+                      child: Text(
+                        isAdmin ? 'CLEARANCE LVL 5' : 'CLEARANCE LVL 3',
+                        style: TextStyle(
+                          color: isAdmin ? const Color(0xffa78bfa) : const Color(0xff60a5fa),
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(color: Color(0xff1e293b), height: 1),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -595,7 +703,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
     );
-  }
+  },
+);
+}
 
   Widget _buildBadgeTag(String label, IconData icon, Color color) {
     return Container(

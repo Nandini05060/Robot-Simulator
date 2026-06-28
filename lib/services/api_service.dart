@@ -13,6 +13,16 @@ class ApiService extends ChangeNotifier {
   IOWebSocketChannel? _wsChannel;
   bool _isConnected = false;
 
+  bool _isAdminMode = false;
+  bool get isAdminMode => _isAdminMode;
+
+  void setAdminMode(bool val) {
+    if (_isAdminMode != val) {
+      _isAdminMode = val;
+      notifyListeners();
+    }
+  }
+
   String get baseUrl => "https://robot-simulator.onrender.com";
   String get wsUrl => "wss://robot-simulator.onrender.com";
 
@@ -26,11 +36,13 @@ class ApiService extends ChangeNotifier {
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'username': username, 'password': password}),
-      ).timeout(const Duration(seconds: 35));
+      ).timeout(const Duration(seconds: 60));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _token = data['access_token'];
+        _isAdminMode = username.trim().toLowerCase() == 'admin@blucursor.com';
+        notifyListeners();
         await fetchRobots();
         _connectWebSocket();
         return true;

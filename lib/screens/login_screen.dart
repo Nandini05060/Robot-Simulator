@@ -282,13 +282,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                   child: _isLoading
-                                      ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 2,
-                                          ),
+                                      ? Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: const [
+                                            SizedBox(
+                                              height: 18,
+                                              width: 18,
+                                              child: CircularProgressIndicator(
+                                                color: Colors.white,
+                                                strokeWidth: 2,
+                                              ),
+                                            ),
+                                            SizedBox(width: 12),
+                                            Text(
+                                              'Connecting to Render server...',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
                                         )
                                       : const Text(
                                           'Authenticate Operator',
@@ -313,6 +326,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: isDark ? const Color(0xff475569) : const Color(0xff94a3b8),
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Admin? Use admin@blucursor.com / admin2024',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: const Color(0xff14b8a6), // Teal accent color matching HTML portal
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
