@@ -326,11 +326,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        _buildBadgeTag('Enterprise IT', Icons.cpu_outlined, const Color(0xff3b82f6)),
+                        _buildBadgeTag('Enterprise IT', Icons.memory, const Color(0xff3b82f6)),
                         const SizedBox(width: 6),
-                        _buildBadgeTag('Secure', Icons.verified_user_outlined, const Color(0xff10b981)),
+                        _buildBadgeTag('Secure', Icons.gpp_good, const Color(0xff10b981)),
                         const SizedBox(width: 6),
-                        _buildBadgeTag('Telemetry', Icons.flash_on_outlined, const Color(0xfff59e0b)),
+                        _buildBadgeTag('Telemetry', Icons.flash_on, const Color(0xfff59e0b)),
                       ],
                     )
                   ],
