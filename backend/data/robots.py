@@ -1,77 +1,84 @@
 from models.robot import Robot
 
 robots = [
-
     Robot(
-        id=1,
-        name="Robot A",
-        model_type="Delivery",
-
-        x=5,
-        y=5,
-        angle=0,
-
-        direction="North",
-
-        battery=100,
-        speed=1,
-
+        id="R-01",
+        name="ARES-100",
+        model_type="Industrial Forklift",
+        x=12.4,
+        y=8.2,
+        angle=45,
+        direction="North-East",
+        battery=88,
+        speed=0.8,
         status="Idle",
         mode="Manual",
-
         is_online=True,
-
-        current_task="None",
-
-        map_name="Warehouse"
+        current_task="Active now",
+        map_name="Floor Map A"
     ),
-
     Robot(
-        id=2,
-        name="Robot B",
-        model_type="Patrol",
-
-        x=10,
-        y=10,
-        angle=90,
-
-        direction="East",
-
-        battery=100,
-        speed=1,
-
-        status="Idle",
-        mode="Manual",
-
-        is_online=True,
-
-        current_task="None",
-
-        map_name="Warehouse"
-    ),
-
-    Robot(
-        id=3,
-        name="Robot C",
-        model_type="Inspection",
-
-        x=15,
-        y=15,
+        id="R-02",
+        name="HERMES-Lite",
+        model_type="Delivery Unit",
+        x=5.8,
+        y=14.3,
         angle=180,
-
         direction="South",
-
-        battery=100,
-        speed=1,
-
+        battery=94,
+        speed=0.8,
         status="Idle",
         mode="Manual",
-
+        is_online=True,
+        current_task="Idle",
+        map_name="Floor Map B"
+    ),
+    Robot(
+        id="R-03",
+        name="CRONUS-Heavy",
+        model_type="Heavy Pallet Mover",
+        x=20.1,
+        y=4.7,
+        angle=270,
+        direction="West",
+        battery=12,
+        speed=0.0,
+        status="Offline",
+        mode="Manual",
         is_online=False,
-
-        current_task="Offline",
-
-        map_name="Warehouse"
+        current_task="4 hours ago",
+        map_name="Floor Map C"
+    ),
+    Robot(
+        id="R-04",
+        name="ZEUS-Surveyor",
+        model_type="LIDAR Scanner",
+        x=18.9,
+        y=12.0,
+        angle=90,
+        direction="East",
+        battery=62,
+        speed=0.8,
+        status="Idle",
+        mode="Manual",
+        is_online=True,
+        current_task="Scanning area",
+        map_name="Floor Map D"
+    ),
+    Robot(
+        id="R-05",
+        name="PALLAS-Sorter",
+        model_type="Small Sorting Bot",
+        x=8.1,
+        y=9.6,
+        angle=125,
+        direction="South-East",
+        battery=45,
+        speed=0.8,
+        status="Idle",
+        mode="Manual",
+        is_online=True,
+        current_task="Moving cargo",
+        map_name="Floor Map E"
     )
-
 ]

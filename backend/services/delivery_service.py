@@ -1,7 +1,7 @@
 from services.robot_service import get_robot
 
 
-def start_delivery(robot_id: int, destination: dict):
+def start_delivery(robot_id: str, destination: dict):
 
     robot = get_robot(robot_id)
 
@@ -22,7 +22,7 @@ def start_delivery(robot_id: int, destination: dict):
     }
 
 
-def stop_delivery(robot_id: int):
+def stop_delivery(robot_id: str):
 
     robot = get_robot(robot_id)
 

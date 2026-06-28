@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'services/fleet_state_provider.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
@@ -9,12 +7,7 @@ import 'screens/control_panel_screen.dart';
 import 'screens/real_time_viz_screen.dart';
 
 void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => FleetStateProvider(),
-      child: const BluCursorFleetApp(),
-    ),
-  );
+  runApp(const BluCursorFleetApp());
 }
 
 class BluCursorFleetApp extends StatefulWidget {

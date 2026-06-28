@@ -11,7 +11,7 @@ def robots():
 
 
 @router.get("/{robot_id}")
-def robot(robot_id: int):
+def robot(robot_id: str):
     data = get_robot(robot_id)
 
     if data is None:

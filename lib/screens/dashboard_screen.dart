@@ -1,6 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../services/fleet_state_provider.dart';
+import 'package:http/http.dart' as http;
 import 'main_navigation_shell.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -11,18 +11,37 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  int _totalRobots = 5;
+  int _onlineRobots = 4;
+  double _averageBattery = 100.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboardData();
+  }
+
+  Future<void> _loadDashboardData() async {
+    try {
+      final response = await http.get(Uri.parse('http://127.0.0.1:8000/dashboard'))
+          .timeout(const Duration(seconds: 4));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _totalRobots = data['total_robots'] ?? 5;
+          _onlineRobots = data['online_robots'] ?? 4;
+          _averageBattery = (data['average_battery'] ?? 100.0).toDouble();
+        });
+      }
+    } catch (e) {
+      print("Error loading dashboard metrics: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
-    final provider = Provider.of<FleetStateProvider>(context);
-    final robots = provider.robots;
-    
-    final totalCount = robots.length;
-    final onlineCount = robots.where((r) => r.isOnline).length;
-    final deliveryCount = robots.where((r) => r.modelType.toLowerCase().contains('delivery')).length;
-    final patrolCount = robots.where((r) => r.modelType.toLowerCase().contains('patrol')).length;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xff090d16) : const Color(0xfff8fafc),
@@ -69,7 +88,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   radius: 24,
                   backgroundColor: Color(0xff2563eb),
                   child: Text(
-                    'AD',
+                    'JD',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -81,16 +100,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Welcome, Administrator',
-                      style: TextStyle(
+                    Text(
+                      'Welcome, John Doe',
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
                     ),
-                    Text(
-                      'Clearance Level 5 • ${provider.isLoggedIn ? "Active API Session" : "Standby"}',
-                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    const Text(
+                      'Senior Operator • Active Session',
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ],
                 ),
@@ -155,14 +174,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               mainAxisSpacing: 12,
               childAspectRatio: 1.7,
               children: [
-                _buildAnalyticsCard('Total Robots', '$totalCount', Icons.precision_manufacturing, const Color(0xff2563eb)),
-                _buildAnalyticsCard('Active Robots', '$onlineCount', Icons.play_circle_outline, const Color(0xff10b981)),
-                _buildAnalyticsCard('Delivery Carts', '$deliveryCount', Icons.local_shipping_outlined, const Color(0xff3b82f6)),
-                _buildAnalyticsCard('Patrolling Units', '$patrolCount', Icons.security, const Color(0xff8b5cf6)),
+                _buildAnalyticsCard('Total Robots', '$_totalRobots', Icons.precision_manufacturing, const Color(0xff2563eb)),
+                _buildAnalyticsCard('Active Robots', '$_onlineRobots', Icons.play_circle_outline, const Color(0xff10b981)),
+                _buildAnalyticsCard('Delivery Carts', '3', Icons.local_shipping_outlined, const Color(0xff3b82f6)),
+                _buildAnalyticsCard('Average Battery', '${_averageBattery.toStringAsFixed(1)}%', Icons.battery_charging_full, const Color(0xff8b5cf6)),
               ],
             ),
             const SizedBox(height: 12),
-            _buildLargeAnalyticsCard('Robots Currently Online', '$onlineCount / $totalCount', Icons.wifi, const Color(0xff10b981)),
+            _buildLargeAnalyticsCard('Robots Currently Online', '$_onlineRobots / $_totalRobots', Icons.wifi, const Color(0xff10b981)),
             const SizedBox(height: 24),
 
             // 4. Main Category Selection

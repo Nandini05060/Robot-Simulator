@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../services/fleet_state_provider.dart';
 import '../models/robot.dart';
 
 class DeliveryCartScreen extends StatelessWidget {
@@ -11,32 +9,26 @@ class DeliveryCartScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final provider = Provider.of<FleetStateProvider>(context);
-    final List<Robot> robotsSource = provider.robots.isEmpty ? sampleRobots : provider.robots;
-    
-    // Filter delivery robots dynamically
-    final List<Robot> deliveryRobots = robotsSource
-        .where((r) => r.modelType.toLowerCase().contains('delivery') || 
-                      r.modelType.toLowerCase().contains('forklift') || 
-                      r.modelType.toLowerCase().contains('sort') ||
-                      r.name.toLowerCase().contains('ares') ||
-                      r.name.toLowerCase().contains('hermes') ||
-                      r.name.toLowerCase().contains('pallas'))
-        .toList();
+    // Delivery-specific robots from the sample database
+    final List<Robot> deliveryRobots = [
+      sampleRobots[0], // ARES-100
+      sampleRobots[1], // HERMES-Lite
+      sampleRobots[4], // PALLAS-Sorter
+    ];
 
     // Map configuration matching the Delivery Cart module specs
     final List<Map<String, dynamic>> maps = [
       {
         'name': 'Floor Map A',
-        'robot': deliveryRobots.isNotEmpty ? deliveryRobots[0] : null,
+        'robot': deliveryRobots[0],
       },
       {
         'name': 'Floor Map B',
-        'robot': deliveryRobots.length > 1 ? deliveryRobots[1] : null,
+        'robot': deliveryRobots[1],
       },
       {
         'name': 'Floor Map C',
-        'robot': deliveryRobots.length > 2 ? deliveryRobots[2] : null,
+        'robot': deliveryRobots[2],
       },
       {
         'name': 'Floor Map D',

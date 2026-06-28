@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
+import '../services/api_service.dart';
 
 
 class _MainSettingsScreenState extends State<SettingsScreen> {
@@ -20,6 +21,7 @@ class _MainSettingsScreenState extends State<SettingsScreen> {
             ),
             ElevatedButton(
               onPressed: () {
+                ApiService().logout();
                 Navigator.pop(context);
                 Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
               },

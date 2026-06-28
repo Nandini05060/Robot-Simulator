@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class Robot(BaseModel):
-    id: int
+    id: str
     name: str
     model_type: str
 

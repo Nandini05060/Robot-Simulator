@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../services/fleet_state_provider.dart';
 import '../models/robot.dart';
 
 class RobotSelectionScreen extends StatefulWidget {
@@ -11,6 +9,7 @@ class RobotSelectionScreen extends StatefulWidget {
 }
 
 class _RobotSelectionScreenState extends State<RobotSelectionScreen> {
+  final List<Robot> _robots = sampleRobots;
   String _searchQuery = '';
 
   @override
@@ -18,10 +17,7 @@ class _RobotSelectionScreenState extends State<RobotSelectionScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final provider = Provider.of<FleetStateProvider>(context);
-    final List<Robot> robots = provider.robots.isEmpty ? sampleRobots : provider.robots;
-
-    final filtered = robots.where((r) {
+    final filtered = _robots.where((r) {
       return r.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           r.modelType.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
@@ -56,7 +52,7 @@ class _RobotSelectionScreenState extends State<RobotSelectionScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'ACTIVE UNITS: ${robots.where((r) => r.isOnline).length}/${robots.length}',
+                      'ACTIVE UNITS: ${_robots.where((r) => r.isOnline).length}/${_robots.length}',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
