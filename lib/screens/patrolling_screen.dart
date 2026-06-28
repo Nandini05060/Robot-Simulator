@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/fleet_state_provider.dart';
 import '../models/robot.dart';
 
 class PatrollingScreen extends StatelessWidget {
@@ -9,25 +11,31 @@ class PatrollingScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // Patrolling-specific robots from the sample database
-    final List<Robot> patrolRobots = [
-      sampleRobots[3], // ZEUS-Surveyor
-      sampleRobots[2], // CRONUS-Heavy
-    ];
+    final provider = Provider.of<FleetStateProvider>(context);
+    final List<Robot> robotsSource = provider.robots.isEmpty ? sampleRobots : provider.robots;
+    
+    // Filter patrol & inspection robots dynamically
+    final List<Robot> patrolRobots = robotsSource
+        .where((r) => r.modelType.toLowerCase().contains('patrol') || 
+                      r.modelType.toLowerCase().contains('survey') || 
+                      r.modelType.toLowerCase().contains('inspect') ||
+                      r.name.toLowerCase().contains('zeus') ||
+                      r.name.toLowerCase().contains('cronus'))
+        .toList();
 
     // Patrol zone configurations matching patrolling module specs
     final List<Map<String, dynamic>> zones = [
       {
         'name': 'Patrol Zone A',
-        'robot': patrolRobots[0],
+        'robot': patrolRobots.isNotEmpty ? patrolRobots[0] : null,
       },
       {
         'name': 'Patrol Zone B',
-        'robot': patrolRobots[1],
+        'robot': patrolRobots.length > 1 ? patrolRobots[1] : null,
       },
       {
         'name': 'Patrol Zone C',
-        'robot': null, // No robot assigned
+        'robot': patrolRobots.length > 2 ? patrolRobots[2] : null,
       },
       {
         'name': 'Patrol Zone D',

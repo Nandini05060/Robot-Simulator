@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/fleet_state_provider.dart';
 import 'main_navigation_shell.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -13,6 +15,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    
+    final provider = Provider.of<FleetStateProvider>(context);
+    final robots = provider.robots;
+    
+    final totalCount = robots.length;
+    final onlineCount = robots.where((r) => r.isOnline).length;
+    final deliveryCount = robots.where((r) => r.modelType.toLowerCase().contains('delivery')).length;
+    final patrolCount = robots.where((r) => r.modelType.toLowerCase().contains('patrol')).length;
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xff090d16) : const Color(0xfff8fafc),
@@ -59,7 +69,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   radius: 24,
                   backgroundColor: Color(0xff2563eb),
                   child: Text(
-                    'JD',
+                    'AD',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -71,16 +81,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Welcome, John Doe',
-                      style: theme.textTheme.titleMedium?.copyWith(
+                    const Text(
+                      'Welcome, Administrator',
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
                     ),
-                    const Text(
-                      'Senior Operator • Active Session',
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    Text(
+                      'Clearance Level 5 • ${provider.isLoggedIn ? "Active API Session" : "Standby"}',
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                   ],
                 ),
@@ -145,14 +155,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
               mainAxisSpacing: 12,
               childAspectRatio: 1.7,
               children: [
-                _buildAnalyticsCard('Total Robots', '5', Icons.precision_manufacturing, const Color(0xff2563eb)),
-                _buildAnalyticsCard('Active Robots', '4', Icons.play_circle_outline, const Color(0xff10b981)),
-                _buildAnalyticsCard('Delivery Carts', '3', Icons.local_shipping_outlined, const Color(0xff3b82f6)),
-                _buildAnalyticsCard('Patrolling Units', '2', Icons.security, const Color(0xff8b5cf6)),
+                _buildAnalyticsCard('Total Robots', '$totalCount', Icons.precision_manufacturing, const Color(0xff2563eb)),
+                _buildAnalyticsCard('Active Robots', '$onlineCount', Icons.play_circle_outline, const Color(0xff10b981)),
+                _buildAnalyticsCard('Delivery Carts', '$deliveryCount', Icons.local_shipping_outlined, const Color(0xff3b82f6)),
+                _buildAnalyticsCard('Patrolling Units', '$patrolCount', Icons.security, const Color(0xff8b5cf6)),
               ],
             ),
             const SizedBox(height: 12),
-            _buildLargeAnalyticsCard('Robots Currently Online', '4 / 5', Icons.wifi, const Color(0xff10b981)),
+            _buildLargeAnalyticsCard('Robots Currently Online', '$onlineCount / $totalCount', Icons.wifi, const Color(0xff10b981)),
             const SizedBox(height: 24),
 
             // 4. Main Category Selection

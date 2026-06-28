@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dart:math' as math;
 import '../models/robot.dart';
+import '../services/fleet_state_provider.dart';
 
 class ControlPanelScreen extends StatefulWidget {
   const ControlPanelScreen({Key? key}) : super(key: key);
@@ -30,66 +32,73 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
     });
   }
 
-  void _updateRobotState() {
-    final index = sampleRobots.indexWhere((r) => r.id == _robot.id);
-    if (index != -1) {
-      sampleRobots[index] = sampleRobots[index].copyWith(
-        position: '${_posX.toStringAsFixed(2)}, ${_posY.toStringAsFixed(2)}',
-        angle: (_angle % 360 + 360) % 360,
-        batteryLevel: _battery,
-      );
-    }
-  }
-
   void _moveForward() {
     if (!_canControl) return;
-    final rad = _angle * math.pi / 180;
-    setState(() {
-      _posX = (_posX + 0.5 * math.cos(rad)).clamp(0.0, 25.0);
-      _posY = (_posY + 0.5 * math.sin(rad)).clamp(0.0, 20.0);
-      _battery = math.max(0, _battery - 1);
-    });
-    _updateRobotState();
-    _addLog('CMD SENT: FORWARD [X: ${_posX.toStringAsFixed(2)}, Y: ${_posY.toStringAsFixed(2)}]');
+    final provider = Provider.of<FleetStateProvider>(context, listen: false);
+    if (provider.isLoggedIn) {
+      provider.moveRobot(_robot.id, 'forward');
+    } else {
+      final rad = _angle * math.pi / 180;
+      setState(() {
+        _posX = (_posX + 0.5 * math.cos(rad)).clamp(0.0, 25.0);
+        _posY = (_posY + 0.5 * math.sin(rad)).clamp(0.0, 20.0);
+        _battery = math.max(0, _battery - 1);
+      });
+      _addLog('MOCK CMD: FORWARD [X: ${_posX.toStringAsFixed(2)}, Y: ${_posY.toStringAsFixed(2)}]');
+    }
   }
 
   void _turnLeft() {
     if (!_canControl) return;
-    setState(() {
-      _angle = _angle - 15;
-    });
-    _updateRobotState();
-    _addLog('CMD SENT: ROTATE LEFT [Angle: ${(_angle.toInt() % 360 + 360) % 360}°]');
+    final provider = Provider.of<FleetStateProvider>(context, listen: false);
+    if (provider.isLoggedIn) {
+      provider.moveRobot(_robot.id, 'rotate_left');
+    } else {
+      setState(() {
+        _angle = _angle - 15;
+      });
+      _addLog('MOCK CMD: ROTATE LEFT [Angle: ${(_angle.toInt() % 360 + 360) % 360}°]');
+    }
   }
 
   void _turnRight() {
     if (!_canControl) return;
-    setState(() {
-      _angle = _angle + 15;
-    });
-    _updateRobotState();
-    _addLog('CMD SENT: ROTATE RIGHT [Angle: ${(_angle.toInt() % 360 + 360) % 360}°]');
+    final provider = Provider.of<FleetStateProvider>(context, listen: false);
+    if (provider.isLoggedIn) {
+      provider.moveRobot(_robot.id, 'rotate_right');
+    } else {
+      setState(() {
+        _angle = _angle + 15;
+      });
+      _addLog('MOCK CMD: ROTATE RIGHT [Angle: ${(_angle.toInt() % 360 + 360) % 360}°]');
+    }
   }
 
   void _rotate180() {
     if (!_canControl) return;
-    _addLog('CMD SENT: ROTATE 180° SPIN INITIATED');
-    setState(() {
-      _angle = _angle + 180;
-      _battery = math.max(0, _battery - 3);
-    });
-    _updateRobotState();
-    Future.delayed(const Duration(milliseconds: 1000), () {
-      _addLog('TELEMETRY: SPIN COMPLETE [Angle: ${(_angle.toInt() % 360 + 360) % 360}°]');
-    });
+    final provider = Provider.of<FleetStateProvider>(context, listen: false);
+    if (provider.isLoggedIn) {
+      provider.moveRobot(_robot.id, 'rotate_right');
+      provider.moveRobot(_robot.id, 'rotate_right');
+    } else {
+      _addLog('MOCK CMD: ROTATE 180° SPIN INITIATED');
+      setState(() {
+        _angle = _angle + 180;
+        _battery = math.max(0, _battery - 3);
+      });
+    }
   }
 
   void _emergencyStop() {
-    if (!_robot.isOnline) return;
     setState(() {
       _isEStopped = true;
     });
-    _updateRobotState();
+    
+    final provider = Provider.of<FleetStateProvider>(context, listen: false);
+    if (provider.isLoggedIn) {
+      provider.stopDelivery(_robot.id);
+    }
+    
     _addLog('CRITICAL: EMERGENCY STOP TRIGGERED!');
     _addLog('CRITICAL: MOTORS DISABLED. SYSTEM STANDBY.');
     ScaffoldMessenger.of(context).showSnackBar(
@@ -102,11 +111,9 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
   }
 
   void _resetEmergencyStop() {
-    if (!_robot.isOnline) return;
     setState(() {
       _isEStopped = false;
     });
-    _updateRobotState();
     _addLog('SYSTEM: Safety loops reset. System Online.');
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -122,6 +129,8 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final provider = Provider.of<FleetStateProvider>(context);
+
     if (!_initialized) {
       final argRobot = ModalRoute.of(context)?.settings.arguments as Robot?;
       _robot = argRobot ?? sampleRobots[0];
@@ -133,6 +142,17 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
       _logs.add('[SYSTEM] Operator attached to unit ${_robot.id}.');
       _logs.add('[SYSTEM] Telemetry link online.');
       _initialized = true;
+    }
+
+    // Sync robot state from provider in real-time
+    if (provider.isLoggedIn) {
+      final liveRobot = provider.robots.firstWhere((r) => r.id == _robot.id, orElse: () => _robot);
+      _robot = liveRobot;
+      final coords = _robot.position.split(', ');
+      _posX = double.tryParse(coords[0]) ?? 10.0;
+      _posY = double.tryParse(coords[1]) ?? 10.0;
+      _angle = _robot.angle;
+      _battery = _robot.batteryLevel;
     }
 
     return Scaffold(
@@ -462,9 +482,9 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
                         ),
                         child: ListView.builder(
                           controller: _scrollController,
-                          itemCount: _logs.length,
+                          itemCount: (provider.isLoggedIn ? provider.activityLogs : _logs).length,
                           itemBuilder: (context, idx) {
-                            final log = _logs[idx];
+                            final log = (provider.isLoggedIn ? provider.activityLogs : _logs)[idx];
                             final isError = log.contains('CRITICAL') || log.contains('STOP');
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 2.0),

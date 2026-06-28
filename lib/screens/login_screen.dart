@@ -1,5 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/fleet_state_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -10,24 +12,41 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController(text: 'operator@blucursor.com');
-  final _passwordController = TextEditingController(text: 'password123');
+  final _emailController = TextEditingController(text: 'admin');
+  final _passwordController = TextEditingController(text: 'admin123');
   bool _rememberMe = true;
   bool _showPassword = false;
   bool _isLoading = false;
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
-      // Simulate API call
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        setState(() {
-          _isLoading = false;
-        });
-        Navigator.pushReplacementNamed(context, '/dashboard');
+      
+      final provider = Provider.of<FleetStateProvider>(context, listen: false);
+      final success = await provider.login(
+        _emailController.text,
+        _passwordController.text,
+      );
+      
+      if (!mounted) return;
+      
+      setState(() {
+        _isLoading = false;
       });
+      
+      if (success) {
+        Navigator.pushReplacementNamed(context, '/dashboard');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid username or password'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -151,9 +170,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                // Email field
-                                Text(
-                                  'EMAIL ADDRESS',
+                                 Text(
+                                  'OPERATOR USERNAME',
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
@@ -164,18 +182,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const SizedBox(height: 8),
                                 TextFormField(
                                   controller: _emailController,
-                                  keyboardType: TextInputType.emailAddress,
+                                  keyboardType: TextInputType.text,
                                   decoration: InputDecoration(
-                                    prefixIcon: const Icon(Icons.email_outlined, color: Color(0xff2563eb)),
-                                    hintText: 'operator@blucursor.com',
+                                    prefixIcon: const Icon(Icons.person_outline, color: Color(0xff2563eb)),
+                                    hintText: 'admin',
                                     fillColor: isDark ? const Color(0xff090d16).withOpacity(0.3) : Colors.white.withOpacity(0.5),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      return 'Please enter email address';
-                                    }
-                                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                                      return 'Please enter a valid email';
+                                      return 'Please enter username';
                                     }
                                     return null;
                                   },

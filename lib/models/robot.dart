@@ -21,6 +21,58 @@ class Robot {
     required this.imagePath,
   });
 
+  factory Robot.fromJson(Map<String, dynamic> json) {
+    final rawId = json['id'] ?? json['robot_id'] ?? '';
+    final id = rawId.toString();
+    final name = json['name'] ?? json['robot_name'] ?? 'Robot $id';
+    
+    final isOnline = json['online'] ?? json['is_online'] ?? (json['status']?.toString().toLowerCase() != 'offline');
+    String status = json['status']?.toString() ?? (isOnline ? 'Online' : 'Offline');
+    
+    final battery = json['battery'] ?? json['batteryLevel'] ?? 100;
+    
+    String posStr = '0.0, 0.0';
+    if (json['position'] is Map) {
+      final posMap = json['position'] as Map;
+      posStr = '${posMap['x'] ?? 0.0}, ${posMap['y'] ?? 0.0}';
+    } else if (json['position'] != null) {
+      posStr = json['position'].toString();
+    } else if (json['x'] != null && json['y'] != null) {
+      posStr = '${json['x']}, ${json['y']}';
+    }
+    
+    final angleVal = json['angle'] ?? 0.0;
+    final double angle = (angleVal is num) ? angleVal.toDouble() : 0.0;
+    
+    final currentTask = json['current_task'] ?? json['lastActivity'] ?? 'None';
+    final modelType = json['model_type'] ?? json['modelType'] ?? 'General';
+    
+    String imgPath = 'assets/robot_ares.png';
+    final lowerName = name.toString().toLowerCase();
+    final lowerType = modelType.toString().toLowerCase();
+    if (lowerType.contains('delivery') || lowerName.contains('hermes')) {
+      imgPath = 'assets/robot_hermes.png';
+    } else if (lowerType.contains('patrol') || lowerName.contains('zeus')) {
+      imgPath = 'assets/robot_hermes.png'; 
+    } else if (lowerType.contains('inspect') || lowerName.contains('cronus')) {
+      imgPath = 'assets/robot_cronus.png';
+    } else if (lowerName.contains('ares')) {
+      imgPath = 'assets/robot_ares.png';
+    }
+    
+    return Robot(
+      id: id,
+      name: name,
+      status: status,
+      batteryLevel: battery is num ? battery.toInt() : 100,
+      position: posStr,
+      angle: angle,
+      lastActivity: currentTask != 'None' ? currentTask : (isOnline ? 'Active' : 'Offline'),
+      modelType: modelType,
+      imagePath: imgPath,
+    );
+  }
+
   bool get isOnline => status.toLowerCase() == 'online';
 
   Robot copyWith({

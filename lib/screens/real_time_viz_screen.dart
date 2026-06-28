@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/fleet_state_provider.dart';
 import '../models/robot.dart';
 
 class RealTimeVizScreen extends StatefulWidget {
@@ -82,8 +84,9 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
         _activityLog.add('[WARN] Unit is offline. Remote controls locked.');
       }
 
-      // Start simulation loop if online
-      if (_robot!.isOnline) {
+      // Start simulation loop if online and NOT connected to backend
+      final provider = Provider.of<FleetStateProvider>(context, listen: false);
+      if (_robot!.isOnline && !provider.isLoggedIn) {
         _startSimulation();
       }
 
@@ -93,7 +96,7 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
 
   void _startSimulation() {
     _simulationTimer = Timer.periodic(const Duration(milliseconds: 1500), (timer) {
-      if (!mounted || _isManualOverride || _status == 'E-STOPPED') return;
+      if (!mounted || _isManualOverride || _status == 'E-STOPPED' || Provider.of<FleetStateProvider>(context, listen: false).isLoggedIn) return;
 
       setState(() {
         _currentPathIndex = (_currentPathIndex + 1) % _navigationPath.length;
@@ -177,44 +180,69 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
   void _triggerManualMove(double dx, double dy, String dirName) {
     if (_status == 'E-STOPPED' || !_robot!.isOnline) return;
 
-    setState(() {
-      _isManualOverride = true;
-      _currentX = (_currentX + dx).clamp(2.0, 23.0);
-      _currentY = (_currentY + dy).clamp(2.0, 18.0);
-      
-      final double newAngle = math.atan2(dy, dx) * 180 / math.pi;
-      // Calculate shortest path to new angle to prevent wrapping animations
-      double diff = (newAngle - _angle) % 360;
-      if (diff > 180) diff -= 360;
-      _angle = _angle + diff;
-      
-      _updateDirection(_angle);
-      _speed = 0.8;
-      _trail.add(Offset(_currentX, _currentY));
-      if (_trail.length > 8) {
-        _trail.removeAt(0);
+    final provider = Provider.of<FleetStateProvider>(context, listen: false);
+    if (provider.isLoggedIn) {
+      String wsCmd = 'forward';
+      if (dirName.toLowerCase() == 'left') {
+        wsCmd = 'rotate_left';
+      } else if (dirName.toLowerCase() == 'right') {
+        wsCmd = 'rotate_right';
+      } else if (dirName.toLowerCase() == 'backward') {
+        wsCmd = 'backward';
       }
-      _updateRobotState();
-      _logAction('CMD: Manual Override -> Move $dirName');
-    });
+      provider.moveRobot(_robot!.id, wsCmd);
+    } else {
+      setState(() {
+        _isManualOverride = true;
+        _currentX = (_currentX + dx).clamp(2.0, 23.0);
+        _currentY = (_currentY + dy).clamp(2.0, 18.0);
+        
+        final double newAngle = math.atan2(dy, dx) * 180 / math.pi;
+        // Calculate shortest path to new angle to prevent wrapping animations
+        double diff = (newAngle - _angle) % 360;
+        if (diff > 180) diff -= 360;
+        _angle = _angle + diff;
+        
+        _updateDirection(_angle);
+        _speed = 0.8;
+        _trail.add(Offset(_currentX, _currentY));
+        if (_trail.length > 8) {
+          _trail.removeAt(0);
+        }
+        _updateRobotState();
+        _logAction('CMD: Manual Override -> Move $dirName');
+      });
+    }
   }
 
   void _rotate180() {
     if (_status == 'E-STOPPED' || !_robot!.isOnline) return;
-    setState(() {
-      _isManualOverride = true;
-      _angle = _angle + 180;
-      _updateRobotState();
-      _logAction('CMD: Rotate 180° Initiated');
-    });
+    final provider = Provider.of<FleetStateProvider>(context, listen: false);
+    if (provider.isLoggedIn) {
+      provider.moveRobot(_robot!.id, 'rotate_right');
+      provider.moveRobot(_robot!.id, 'rotate_right');
+    } else {
+      setState(() {
+        _isManualOverride = true;
+        _angle = _angle + 180;
+        _updateRobotState();
+        _logAction('CMD: Rotate 180° Initiated');
+      });
+    }
   }
 
   void _emergencyStop() {
+    final provider = Provider.of<FleetStateProvider>(context, listen: false);
+    if (provider.isLoggedIn) {
+      provider.stopDelivery(_robot!.id);
+    }
     setState(() {
       _status = 'E-STOPPED';
       _speed = 0.0;
       _isManualOverride = true;
-      _updateRobotState();
+      if (!provider.isLoggedIn) {
+        _updateRobotState();
+      }
       _logAction('[ALERT] EMERGENCY BRAKE ENGAGED! ALL MOTORS POWER OFF.');
     });
   }
@@ -229,7 +257,32 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final Robot robot = _robot ?? sampleRobots[0];
+
+    final provider = Provider.of<FleetStateProvider>(context);
+    Robot robot = _robot ?? sampleRobots[0];
+
+    if (provider.isLoggedIn) {
+      final liveRobot = provider.robots.firstWhere((r) => r.id == robot.id, orElse: () => robot);
+      robot = liveRobot;
+      _status = robot.status;
+      _battery = robot.batteryLevel;
+      _speed = (robot.status.toLowerCase() == 'moving' || robot.status.toLowerCase() == 'delivering') ? 0.8 : 0.0;
+      
+      final coords = robot.position.split(', ');
+      final newX = double.tryParse(coords[0]) ?? _currentX;
+      final newY = double.tryParse(coords[1]) ?? _currentY;
+      
+      if (newX != _currentX || newY != _currentY) {
+        _currentX = newX;
+        _currentY = newY;
+        _trail.add(Offset(_currentX, _currentY));
+        if (_trail.length > 8) {
+          _trail.removeAt(0);
+        }
+      }
+      _angle = robot.angle;
+      _updateDirection(_angle);
+    }
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xff090d16) : const Color(0xfff8fafc),
@@ -512,9 +565,11 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
                       ),
                       child: ListView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                        itemCount: _activityLog.length,
+                        itemCount: (provider.isLoggedIn ? provider.activityLogs : _activityLog).length,
                         itemBuilder: (context, index) {
-                          final log = _activityLog[_activityLog.length - 1 - index];
+                          final log = provider.isLoggedIn 
+                              ? provider.activityLogs[index] 
+                              : _activityLog[_activityLog.length - 1 - index];
                           
                           // Extract timestamp if format matches [12:34:56]
                           String time = '';
