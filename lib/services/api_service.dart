@@ -13,8 +13,9 @@ class ApiService extends ChangeNotifier {
   IOWebSocketChannel? _wsChannel;
   bool _isConnected = false;
 
-  String get baseUrl => "http://127.0.0.1:8000";
-  String get wsUrl => "ws://127.0.0.1:8000";
+  static const String _serverIp = "192.168.0.107";
+  String get baseUrl => "http://$_serverIp:8000";
+  String get wsUrl => "ws://$_serverIp:8000";
 
   bool get isAuthenticated => _token != null;
   String? get token => _token;

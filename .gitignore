@@ -11,6 +11,10 @@ build/
 *.iml
 .vscode/
 
-# Web-simulator code to exclude
+# Web-simulator code to exclude (per user request)
+/index.html
+/app.js
+/style.css
 /Research and development report.docx
+/preview_on_phone.bat
 /scratch/

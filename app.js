@@ -1028,7 +1028,8 @@ function handleLoginSubmit(e) {
   btn.disabled = true;
 
   // Real HTTP POST login call to backend
-  fetch('http://localhost:8000/login', {
+  const host = window.location.hostname || 'localhost';
+  fetch(`http://${host}:8000/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
