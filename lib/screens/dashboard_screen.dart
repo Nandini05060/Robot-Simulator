@@ -39,325 +39,761 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  void _showSystemDiagnostics() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: isDark ? const Color(0xff131926) : Colors.white,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xff5de6ff).withOpacity(0.1),
+                      ),
+                      child: const Icon(Icons.analytics_outlined, color: Color(0xff3b82f6), size: 18),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'SYSTEM HEALTH',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            'SYSTEMS OPTIMAL',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Color(0xff10b981),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 18, color: Colors.white),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    )
+                  ],
+                ),
+                const Divider(height: 20, color: Color(0xff1e293b)),
+                const SizedBox(height: 8),
+                _buildDiagnosticRow('LIDAR Rangefinder', '100% SIGNAL', const Color(0xff10b981)),
+                const SizedBox(height: 10),
+                _buildDiagnosticRow('Network Uplink Ping', '12ms (EXCELLENT)', const Color(0xff2563eb)),
+                const SizedBox(height: 10),
+                _buildDiagnosticRow('Servo Actuators', 'NOMINAL TEMP', const Color(0xff10b981)),
+                const SizedBox(height: 10),
+                _buildDiagnosticRow('Fleet Battery Health', '94.2% CAPACITY', Colors.white),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xff090d16),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xff1e293b)),
+                  ),
+                  child: const Text(
+                    '> CPU core temp: 42°C\n> Lidar frames: 60 FPS\n> Safety override: STANDBY\n> Calibration status: OK',
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 10,
+                      color: Color(0xff4ade80),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDiagnosticRow(String label, String value, Color valueColor) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, color: Color(0xff64748b), fontWeight: FontWeight.w500)),
+        Text(value, style: TextStyle(fontSize: 12, color: valueColor, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xff090d16) : const Color(0xfff8fafc),
+      backgroundColor: const Color(0xff090d16),
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        backgroundColor: const Color(0xff090d16),
         elevation: 0,
-        backgroundColor: isDark ? const Color(0xff131926) : Colors.white,
-        title: Row(
-          children: [
-            // Company Logo branding
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xff090d16) : const Color(0xfff1f5f9),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isDark ? const Color(0xff1e293b) : const Color(0xffcbd5e1),
-                  width: 1,
-                ),
-              ),
-              child: Image.asset(
-                isDark ? 'assets/logo_light.png' : 'assets/logo_dark.png',
-                height: 16,
-                fit: BoxFit.contain,
-              ),
-            ),
-            const Spacer(),
-            const Text(
-              'Robot Operations Center',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-            ),
-          ],
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white),
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
         ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // 1. Welcome Section
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Color(0xff2563eb),
-                  child: Text(
-                    'JD',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+        title: Image.asset(
+          'assets/logo_light.png',
+          height: 20,
+          fit: BoxFit.contain,
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none, color: Colors.white),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No new system notifications.'),
+                  behavior: SnackBarBehavior.floating,
                 ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, color: Colors.white),
+            onPressed: () {
+              MainNavigationShell.of(context).setTab(3); // Go to Settings
+            },
+          ),
+        ],
+      ),
+      drawer: Drawer(
+        backgroundColor: const Color(0xff090d16),
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              DrawerHeader(
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Color(0xff1e293b))),
+                ),
+                child: Row(
                   children: [
-                    Text(
-                      'Welcome, John Doe',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
-                    ),
+                    Image.asset('assets/logo_light.png', height: 24),
+                    const SizedBox(width: 8),
                     const Text(
-                      'Senior Operator • Active Session',
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                      'bluCursor',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                      ),
                     ),
                   ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // 2. About Application Card
-            Card(
-              color: const Color(0xff2563eb).withOpacity(0.06),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(
-                  color: const Color(0xff2563eb).withOpacity(0.15),
-                  width: 1,
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  children: [
+                    const SizedBox(height: 12),
+                    ListTile(
+                      leading: const Icon(Icons.home_outlined, color: Colors.white),
+                      title: const Text('Home Dashboard', style: TextStyle(color: Colors.white)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        MainNavigationShell.of(context).setTab(0);
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.local_shipping_outlined, color: Colors.white),
+                      title: const Text('Delivery Logistics', style: TextStyle(color: Colors.white)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        MainNavigationShell.of(context).setTab(1);
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.shield_outlined, color: Colors.white),
+                      title: const Text('Patrol Surveillance', style: TextStyle(color: Colors.white)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        MainNavigationShell.of(context).setTab(2);
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.settings_outlined, color: Colors.white),
+                      title: const Text('Settings & Profile', style: TextStyle(color: Colors.white)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        MainNavigationShell.of(context).setTab(3);
+                      },
+                    ),
+                  ],
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'v2.0 ENTERPRISE',
+                  style: TextStyle(color: Color(0xff64748b), fontSize: 10, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // 1. Welcome Card (About Card)
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xff131926),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xff1e293b)),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      children: const [
-                        Icon(Icons.info_outline, color: Color(0xff2563eb), size: 20),
-                        SizedBox(width: 8),
-                        Text(
-                          'SYSTEM CAPABILITIES',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Color(0xff2563eb),
-                            letterSpacing: 0.3,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Image.asset('assets/logo_light.png', height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xff2563eb).withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xff2563eb).withOpacity(0.2)),
+                          ),
+                          child: const Text(
+                            'v2.0 ENTERPRISE',
+                            style: TextStyle(
+                              color: Color(0xff3b82f6),
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     const Text(
-                      'Manage, track, and command corporate office robots. The control center provides telemetry metrics, real-time map trail vectors, manual steering, and safety override protocols.',
-                      style: TextStyle(fontSize: 13, height: 1.45),
+                      'bluCursor Fleet Operations Console',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Welcome to the bluCursor Fleet Portal. This interface allows authorized engineers to manage and coordinate smart office robotics, inspect cargo logistics pathways, view data graphs, and trigger real-time manual override steerings for logistics cart units.',
+                      style: TextStyle(
+                        color: Color(0xff94a3b8),
+                        fontSize: 11,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        _buildBadgeTag('Enterprise IT', Icons.cpu_outlined, const Color(0xff3b82f6)),
+                        const SizedBox(width: 6),
+                        _buildBadgeTag('Secure', Icons.verified_user_outlined, const Color(0xff10b981)),
+                        const SizedBox(width: 6),
+                        _buildBadgeTag('Telemetry', Icons.flash_on_outlined, const Color(0xfff59e0b)),
+                      ],
+                    )
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
-            // 3. Analytics Section
-            Text(
-              'System Analytics',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+              // 2. Hero Banner
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xff1e293b).withOpacity(0.4),
+                      const Color(0xff0f172a).withOpacity(0.6),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xff1e293b)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Core Command v1.2',
+                            style: TextStyle(
+                              color: Color(0xff3b82f6),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Fleet Command Center',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            'Monitor logistics paths, steering vectors, and safety overrides in real-time.',
+                            style: TextStyle(
+                              color: Color(0xff94a3b8),
+                              fontSize: 11,
+                              height: 1.4,
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          Row(
+                            children: [
+                              ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xff2563eb),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  elevation: 0,
+                                ),
+                                icon: const Icon(Icons.local_shipping_outlined, size: 12),
+                                label: const Text('Inspect Fleet', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold)),
+                                onPressed: () {
+                                  MainNavigationShell.of(context).setTab(1);
+                                },
+                              ),
+                              const SizedBox(width: 8),
+                              OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  side: const BorderSide(color: Color(0xff1e293b)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                                icon: const Icon(Icons.insights, size: 12),
+                                label: const Text('Active Telemetry', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold)),
+                                onPressed: () {
+                                  MainNavigationShell.of(context).setTab(1);
+                                },
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: Image.asset(
+                        'assets/robot_splash.png',
+                        height: 120,
+                        fit: BoxFit.contain,
+                      ),
+                    )
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.7,
-              children: [
-                _buildAnalyticsCard('Total Robots', '$_totalRobots', Icons.precision_manufacturing, const Color(0xff2563eb)),
-                _buildAnalyticsCard('Active Robots', '$_onlineRobots', Icons.play_circle_outline, const Color(0xff10b981)),
-                _buildAnalyticsCard('Delivery Carts', '3', Icons.local_shipping_outlined, const Color(0xff3b82f6)),
-                _buildAnalyticsCard('Average Battery', '${_averageBattery.toStringAsFixed(1)}%', Icons.battery_charging_full, const Color(0xff8b5cf6)),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _buildLargeAnalyticsCard('Robots Currently Online', '$_onlineRobots / $_totalRobots', Icons.wifi, const Color(0xff10b981)),
-            const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-            // 4. Main Category Selection
-            Text(
-              'Module Access',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+              // 3. Statistics Grid
+              const Text(
+                'FLEET STATISTICS',
+                style: TextStyle(
+                  color: Color(0xff64748b),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            
-            // Category 1: Delivery Cart Robots
-            Card(
-              color: isDark ? const Color(0xff131926) : Colors.white,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
+              const SizedBox(height: 10),
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 1.55,
+                children: [
+                  _buildStatCard('Total Fleet', '$_totalRobots', Icons.dns_outlined, Colors.blue, 1.0, 'Nominal'),
+                  _buildStatCard('Active Fleet', '$_onlineRobots', Icons.play_arrow_outlined, Colors.green, 0.8, '80% Online'),
+                  _buildStatCard('Tasks Done', '14', Icons.check_box_outlined, Colors.orange, 0.72, '+14 today'),
+                  _buildStatCard('System Health', '98%', Icons.favorite_border, Colors.cyan, 0.98, 'Optimal'),
+                ],
+              ),
+              const SizedBox(height: 10),
+              // Wide Stat
+              InkWell(
                 onTap: () {
-                  // Switch tab to Delivery (Index 1)
                   MainNavigationShell.of(context).setTab(1);
                 },
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xff2563eb).withOpacity(0.08),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Text('🚚', style: TextStyle(fontSize: 28)),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Delivery Cart Robots',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Manage robots assigned for delivery and transportation tasks.',
-                              style: TextStyle(
-                                color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Category 2: Patrolling Robots
-            Card(
-              color: isDark ? const Color(0xff131926) : Colors.white,
-              child: InkWell(
                 borderRadius: BorderRadius.circular(16),
-                onTap: () {
-                  // Switch tab to Patrolling (Index 2)
-                  MainNavigationShell.of(context).setTab(2);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xff131926),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xff1e293b)),
+                  ),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: const Color(0xff2563eb).withOpacity(0.08),
                           shape: BoxShape.circle,
                         ),
-                        child: const Text('🛡️', style: TextStyle(fontSize: 28)),
+                        child: const Icon(Icons.navigation_outlined, color: Color(0xff3b82f6), size: 18),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Patrolling Robots',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                            const SizedBox(height: 4),
+                          children: const [
                             Text(
-                              'Manage robots assigned for office surveillance and patrolling activities.',
-                              style: TextStyle(
-                                color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
-                                fontSize: 12,
-                              ),
+                              'Current Missions',
+                              style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
                             ),
+                            Text(
+                              'Active dispatch routing tasks',
+                              style: TextStyle(color: Color(0xff64748b), fontSize: 10.5),
+                            )
                           ],
                         ),
                       ),
-                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                      const Text(
+                        '3',
+                        style: TextStyle(color: Color(0xff3b82f6), fontSize: 24, fontWeight: FontWeight.w900),
+                      )
                     ],
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
+
+              // 4. Quick Actions
+              const Text(
+                'QUICK ACTIONS',
+                style: TextStyle(
+                  color: Color(0xff64748b),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const SizedBox(height: 10),
+              GridView.count(
+                crossAxisCount: 4,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                children: [
+                  _buildQuickActionCard('View Robots', Icons.list_alt, () {
+                    MainNavigationShell.of(context).setTab(1);
+                  }),
+                  _buildQuickActionCard('Open Map', Icons.map_outlined, () {
+                    MainNavigationShell.of(context).setTab(1);
+                  }),
+                  _buildQuickActionCard('Assign Task', Icons.add_circle_outline, () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Task scheduler is currently in auto-mode.')),
+                    );
+                  }),
+                  _buildQuickActionCard('View Stats', Icons.bar_chart_outlined, _showSystemDiagnostics),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // 5. System Capabilities (Features)
+              const Text(
+                'SYSTEM CAPABILITIES',
+                style: TextStyle(
+                  color: Color(0xff64748b),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const SizedBox(height: 10),
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 1.45,
+                children: [
+                  _buildFeatureCard('Real-Time Tracking', 'assets/robot_hermes.png', 'Interactive GPS coordinates.'),
+                  _buildFeatureCard('Live Office Map', 'assets/robot_splash.png', 'Observe automated trail maps.'),
+                  _buildFeatureCard('Multi-Robot Command', 'assets/robot_cronus.png', 'Coordinate active units.'),
+                  _buildFeatureCard('Navigation Control', 'assets/robot_ares.png', 'Manual overrides steering.'),
+                  _buildFeatureCard('Operational Stats', 'assets/robot_zeus.png', 'Inspect battery decay rates.'),
+                  _buildFeatureCard('Safety Monitoring', 'assets/robot_pallas.png', 'Instant emergency stops.'),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // 6. Fleet Modules Categories
+              const Text(
+                'FLEET MODULES',
+                style: TextStyle(
+                  color: Color(0xff64748b),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _buildFleetCategoryCard('Delivery Cart Robots', 'Manage cargo & office logistics', '3 Assigned Robots', 'assets/robot_hermes.png', 1),
+              const SizedBox(height: 10),
+              _buildFleetCategoryCard('Patrolling Robots', 'Area surveillance & security', '2 Assigned Robots', 'assets/robot_cronus.png', 2),
+              const SizedBox(height: 30),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBadgeTag(String label, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.1)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 9, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(color: color, fontSize: 8.5, fontWeight: FontWeight.w800),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String label, String value, IconData icon, Color themeColor, double fillPercent, String subText) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xff131926),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xff1e293b)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(color: Color(0xff64748b), fontSize: 11.5, fontWeight: FontWeight.w600),
+              ),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: themeColor.withOpacity(0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: themeColor, size: 14),
+              )
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                value,
+                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
+              ),
+              Text(
+                subText,
+                style: TextStyle(color: themeColor, fontSize: 8.5, fontWeight: FontWeight.bold),
+              )
+            ],
+          ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: fillPercent,
+              backgroundColor: const Color(0xff1e293b),
+              color: themeColor,
+              minHeight: 3.5,
             ),
-            const SizedBox(height: 16),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionCard(String label, IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xff131926),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xff1e293b)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.white, size: 20),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w500),
+              textAlign: TextAlign.center,
+            )
           ],
         ),
       ),
     );
   }
 
+  Widget _buildFeatureCard(String title, String imagePath, String desc) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xff131926),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xff1e293b)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: const Color(0xff2563eb).withOpacity(0.06),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xff2563eb).withOpacity(0.25)),
+            ),
+            child: Image.asset(imagePath, height: 26, width: 26, fit: BoxFit.contain),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            title,
+            style: const TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            desc,
+            style: const TextStyle(color: Color(0xff64748b), fontSize: 9.5),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          )
+        ],
+      ),
+    );
+  }
 
-
-  Widget _buildAnalyticsCard(String label, String value, IconData icon, Color color) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Card(
-      color: isDark ? const Color(0xff131926) : Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+  Widget _buildFleetCategoryCard(String title, String desc, String badgeText, String imagePath, int tabIndex) {
+    return InkWell(
+      onTap: () {
+        MainNavigationShell.of(context).setTab(tabIndex);
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xff131926),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xff1e293b)),
+        ),
         child: Row(
           children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: const Color(0xff2563eb).withOpacity(0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xff2563eb).withOpacity(0.2)),
+              ),
+              child: Image.asset(imagePath, height: 40, width: 40, fit: BoxFit.contain),
+            ),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    label,
-                    style: const TextStyle(color: Colors.grey, fontSize: 11, fontWeight: FontWeight.w600),
+                    title,
+                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
-                    value,
-                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20),
+                    desc,
+                    style: const TextStyle(color: Color(0xff64748b), fontSize: 11),
                   ),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xff2563eb).withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      badgeText,
+                      style: const TextStyle(color: Color(0xff3b82f6), fontSize: 9.5, fontWeight: FontWeight.bold),
+                    ),
+                  )
                 ],
               ),
             ),
-            Icon(icon, color: color, size: 24),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLargeAnalyticsCard(String label, String value, IconData icon, Color color) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Card(
-      color: isDark ? const Color(0xff131926) : Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 22),
-                const SizedBox(width: 12),
-                Text(
-                  label,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            Text(
-              value,
-              style: TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 22,
-                color: color,
-              ),
-            ),
+            const Icon(Icons.chevron_right, color: Color(0xff3b82f6), size: 20)
           ],
         ),
       ),
