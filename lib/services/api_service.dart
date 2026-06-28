@@ -26,7 +26,7 @@ class ApiService extends ChangeNotifier {
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'username': username, 'password': password}),
-      ).timeout(const Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 35));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -44,7 +44,7 @@ class ApiService extends ChangeNotifier {
   Future<void> fetchRobots() async {
     try {
       final response = await http.get(Uri.parse('$baseUrl/robots'))
-          .timeout(const Duration(seconds: 5));
+          .timeout(const Duration(seconds: 35));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         for (var item in data) {
