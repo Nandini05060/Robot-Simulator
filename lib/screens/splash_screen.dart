@@ -13,7 +13,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   late AnimationController _robotMoveController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
-  late Animation<double> _robotPositionAnimation;
   double _loadingProgress = 0.0;
   Timer? _progressTimer;
 
@@ -37,10 +36,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
-
-    _robotPositionAnimation = Tween<double>(begin: -110.0, end: 110.0).animate(
-      CurvedAnimation(parent: _robotMoveController, curve: Curves.easeInOut),
     );
 
     _controller.forward();
