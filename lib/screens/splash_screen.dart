@@ -8,30 +8,28 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+class _LoginNavigationHelper {
+  static bool navigated = false;
+}
+
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late AnimationController _robotMoveController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
-  double _loadingProgress = 0.0;
-  Timer? _progressTimer;
+  Timer? _autoTransitionTimer;
 
   @override
   void initState() {
     super.initState();
-    
+    _LoginNavigationHelper.navigated = false;
+
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1200),
     );
 
-    _robotMoveController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat(reverse: true);
-
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -40,170 +38,153 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
     _controller.forward();
 
-    // Simulate loading progress
-    _progressTimer = Timer.periodic(const Duration(milliseconds: 25), (timer) {
-      setState(() {
-        if (_loadingProgress < 1.0) {
-          _loadingProgress += 0.01;
-        } else {
-          _progressTimer?.cancel();
-          _navigateToLogin();
-        }
-      });
+    // Auto-transition fallback after 6 seconds
+    _autoTransitionTimer = Timer(const Duration(seconds: 6), () {
+      _navigateToLogin();
     });
   }
 
   void _navigateToLogin() {
+    if (_LoginNavigationHelper.navigated) return;
+    _LoginNavigationHelper.navigated = true;
+    _autoTransitionTimer?.cancel();
     Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _robotMoveController.dispose();
-    _progressTimer?.cancel();
+    _autoTransitionTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xff090d16) : const Color(0xfff8fafc),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(flex: 3),
-              // Blucursor Logo/Illustration Card
-              ScaleTransition(
-                scale: _scaleAnimation,
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xff131926) : Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isDark 
-                              ? Colors.black.withOpacity(0.4) 
-                              : const Color(0xff2563eb).withOpacity(0.08),
-                          blurRadius: 35,
-                          offset: const Offset(0, 15),
-                        )
-                      ],
-                      border: Border.all(
-                        color: isDark 
-                            ? const Color(0xff1e293b) 
-                            : const Color(0xffcbd5e1),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Image.asset(
-                      isDark ? 'assets/logo_light.png' : 'assets/logo_dark.png',
-                      height: 38,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 40),
-              
-              // App Name
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: Column(
-                  children: [
-                    Text(
-                      'ROBOT MANAGEMENT SYSTEM',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        letterSpacing: 2.0,
-                        fontWeight: FontWeight.w900,
-                        color: const Color(0xff2563eb),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Smart Office Control',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.displayMedium?.copyWith(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
-                        color: isDark ? Colors.white : const Color(0xff0f172a),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'ENTERPRISE ROBOTICS PLATFORM',
-                      style: TextStyle(
-                        color: isDark ? const Color(0xff64748b) : const Color(0xff475569),
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              const Spacer(flex: 1),
-
-              // Realistic Robot Illustration Card
-              Container(
-                height: 150,
-                width: 150,
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: const Color(0xff2563eb).withOpacity(0.05),
-                  border: Border.all(
-                    color: const Color(0xff2563eb).withOpacity(0.15),
-                    width: 1,
-                  ),
-                ),
-                child: Image.asset(
-                  'assets/robot_splash.png',
-                  fit: BoxFit.contain,
-                ),
-              ),
-
-              const Spacer(flex: 1),
-
-              // Progress Bar
-              Column(
+      backgroundColor: const Color(0xff090d16),
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _navigateToLogin,
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: SizedBox(
-                      height: 4,
-                      width: 200,
-                      child: LinearProgressIndicator(
-                        value: _loadingProgress,
-                        backgroundColor: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0),
-                        color: const Color(0xff2563eb),
+                  // Top Logo
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 24.0),
+                      child: Image.asset(
+                        'assets/logo_light.png',
+                        height: 32,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Loading Simulator Engine... ${( _loadingProgress * 100).toInt()}%',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: isDark ? const Color(0xff64748b) : const Color(0xff475569),
-                      fontWeight: FontWeight.w500,
+
+                  // Center Image/Frame
+                  ScaleTransition(
+                    scale: _scaleAnimation,
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: Container(
+                        width: 280,
+                        height: 280,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xff3b82f6).withOpacity(0.15),
+                              blurRadius: 40,
+                              spreadRadius: 5,
+                            )
+                          ],
+                          border: Border.all(
+                            color: const Color(0xff1e293b),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(26),
+                          child: Image.asset(
+                            'assets/robocore_splash.jpg',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Bottom Catcher, Title, Subtitle, and Button
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 24.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            'BLUCURSOR',
+                            style: const TextStyle(
+                              fontFamily: 'Outfit',
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.5,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'ENTERPRISE FLEET COMMAND',
+                            style: TextStyle(
+                              color: const Color(0xff94a3b8),
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 2.0,
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                          // Interactive Tap Button
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xff1e293b).withOpacity(0.4),
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(
+                                color: const Color(0xff3b82f6).withOpacity(0.15),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.flash_on,
+                                  color: Color(0xff3b82f6),
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'TAP SCREEN TO ENTER PORTAL',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11.5,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
-              const Spacer(flex: 1),
-            ],
+            ),
           ),
         ),
       ),
