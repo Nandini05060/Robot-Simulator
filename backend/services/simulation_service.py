@@ -1,5 +1,6 @@
 from services.robot_service import get_robot
 from data.maps import MAP_WIDTH, MAP_HEIGHT, OBSTACLES
+from typing import Union
 
 DIRECTIONS = ["North", "East", "South", "West"]
 
@@ -19,7 +20,7 @@ def rotate_robot(robot, rotation):
     robot.direction = DIRECTIONS[index]
 
 
-def move_robot(robot_id: int, command: str):
+def move_robot(robot_id: Union[int, str], command: str):
 
     robot = get_robot(robot_id)
 

@@ -1,4 +1,5 @@
 import asyncio
+from typing import Union
 
 from services.robot_service import get_robot
 from services.telemetry_service import build_telemetry
@@ -6,7 +7,7 @@ from core.websocket_manager import manager
 
 
 async def start_navigation(
-    robot_id: int,
+    robot_id: Union[int, str],
     start_x: float,
     start_y: float,
     destination_x: float,
@@ -75,7 +76,7 @@ async def start_navigation(
     }
 
 
-def stop_navigation(robot_id: int):
+def stop_navigation(robot_id: Union[int, str]):
 
     robot = get_robot(robot_id)
 
