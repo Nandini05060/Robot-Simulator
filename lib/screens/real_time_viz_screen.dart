@@ -140,7 +140,7 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
         final dx = nextPoint.x - _currentX;
         final dy = nextPoint.y - _currentY;
         if (dx != 0 || dy != 0) {
-          final double targetAngle = math.atan2(dy, dx) * 180 / math.pi;
+          final targetAngle = (math.atan2(dy, dx) * 180 / math.pi) + 90;
           double diff = (targetAngle - _angle) % 360;
           if (diff > 180) diff -= 360;
           _angle = _angle + diff;
@@ -177,28 +177,25 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
   }
 
   void _updateDirection(double angle) {
-    double normalizedAngle = (angle + 180) % 360;
-    if (normalizedAngle < 0) {
-      normalizedAngle += 360;
-    }
-    normalizedAngle -= 180;
-
-    if (normalizedAngle >= -22.5 && normalizedAngle < 22.5) {
-      _direction = 'East';
-    } else if (normalizedAngle >= 22.5 && normalizedAngle < 67.5) {
-      _direction = 'South-East';
-    } else if (normalizedAngle >= 67.5 && normalizedAngle < 112.5) {
-      _direction = 'South';
-    } else if (normalizedAngle >= 112.5 && normalizedAngle < 157.5) {
-      _direction = 'South-West';
-    } else if (normalizedAngle >= 157.5 || normalizedAngle < -157.5) {
-      _direction = 'West';
-    } else if (normalizedAngle >= -157.5 && normalizedAngle < -112.5) {
-      _direction = 'North-West';
-    } else if (normalizedAngle >= -112.5 && normalizedAngle < -67.5) {
+    double normAngle = (angle % 360 + 360) % 360;
+    if (normAngle >= 337.5 || normAngle < 22.5) {
       _direction = 'North';
-    } else {
+    } else if (normAngle >= 22.5 && normAngle < 67.5) {
       _direction = 'North-East';
+    } else if (normAngle >= 67.5 && normAngle < 112.5) {
+      _direction = 'East';
+    } else if (normAngle >= 112.5 && normAngle < 157.5) {
+      _direction = 'South-East';
+    } else if (normAngle >= 157.5 && normAngle < 202.5) {
+      _direction = 'South';
+    } else if (normAngle >= 202.5 && normAngle < 247.5) {
+      _direction = 'South-West';
+    } else if (normAngle >= 247.5 && normAngle < 292.5) {
+      _direction = 'West';
+    } else if (normAngle >= 292.5 && normAngle < 337.5) {
+      _direction = 'North-West';
+    } else {
+      _direction = 'Idle';
     }
   }
 
@@ -233,7 +230,7 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
       _currentX = (_currentX + dx).clamp(2.0, 23.0);
       _currentY = (_currentY + dy).clamp(2.0, 18.0);
       
-      final double newAngle = math.atan2(dy, dx) * 180 / math.pi;
+      final double newAngle = (math.atan2(dy, dx) * 180 / math.pi) + 90;
       double diff = (newAngle - _angle) % 360;
       if (diff > 180) diff -= 360;
       _angle = _angle + diff;
@@ -723,7 +720,7 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
               ),
             ),
             AnimatedRotation(
-              turns: (angle + 90) / 360,
+              turns: angle / 360,
               duration: const Duration(milliseconds: 500),
               curve: Curves.easeOut,
               child: Icon(Icons.navigation, color: activeColor, size: 16),
@@ -891,7 +888,7 @@ class _PulsingRobotIndicatorState extends State<PulsingRobotIndicator> with Sing
               ),
             ),
             AnimatedRotation(
-              turns: (widget.angle + 90) / 360,
+              turns: widget.angle / 360,
               duration: const Duration(milliseconds: 500),
               curve: Curves.easeOut,
               child: Container(
