@@ -60,8 +60,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xff090d16),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _navigateToLogin,
@@ -78,7 +81,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     child: Padding(
                       padding: const EdgeInsets.only(top: 24.0),
                       child: Image.asset(
-                        'assets/logo_light.png',
+                        isDark ? 'assets/logo_light.png' : 'assets/logo_dark.png',
                         height: 32,
                         fit: BoxFit.contain,
                       ),
@@ -97,13 +100,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xff3b82f6).withOpacity(0.15),
+                              color: const Color(0xff3b82f6).withOpacity(isDark ? 0.15 : 0.08),
                               blurRadius: 40,
                               spreadRadius: 5,
                             )
                           ],
                           border: Border.all(
-                            color: const Color(0xff1e293b),
+                            color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0),
                             width: 1.5,
                           ),
                         ),
@@ -127,19 +130,19 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         children: [
                           Text(
                             'BLUCURSOR',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Outfit',
                               fontSize: 32,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 1.5,
-                              color: Colors.white,
+                              color: isDark ? Colors.white : const Color(0xff0f172a),
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'ENTERPRISE FLEET COMMAND',
                             style: TextStyle(
-                              color: const Color(0xff94a3b8),
+                              color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 2.0,
@@ -150,10 +153,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                             decoration: BoxDecoration(
-                              color: const Color(0xff1e293b).withOpacity(0.4),
+                              color: isDark ? const Color(0xff1e293b).withOpacity(0.4) : const Color(0xfff1f5f9),
                               borderRadius: BorderRadius.circular(30),
                               border: Border.all(
-                                color: const Color(0xff3b82f6).withOpacity(0.15),
+                                color: const Color(0xff3b82f6).withOpacity(isDark ? 0.15 : 0.2),
                                 width: 1.5,
                               ),
                             ),
@@ -162,14 +165,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                               children: [
                                 const Icon(
                                   Icons.flash_on,
-                                  color: Color(0xff3b82f6),
+                                  color: Color(0xff2563eb),
                                   size: 16,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   'TAP SCREEN TO ENTER PORTAL',
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white : const Color(0xff0f172a),
                                     fontSize: 11.5,
                                     fontWeight: FontWeight.bold,
                                     letterSpacing: 1.0,
