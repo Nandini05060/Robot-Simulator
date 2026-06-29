@@ -52,6 +52,7 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
   bool _settingDestination = false;
   bool _autoNavActive = false;
   bool _showManualController = true;
+  List<Offset> _navPath = [];
 
   @override
   void didChangeDependencies() {
@@ -295,6 +296,135 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
     });
   }
 
+  void _recalculatePath() {
+    if (_startX != null && _destX != null) {
+      _navPath = _astar(Offset(_startX!, _startY!), Offset(_destX!, _destY!));
+    } else {
+      _navPath = [];
+    }
+  }
+
+  List<Offset> _astar(Offset start, Offset goal) {
+    final grid = List.generate(25, (_) => List.generate(20, (_) => 0));
+
+    // Populate boundary walls
+    for (int x = 0; x < 25; x++) {
+      grid[x][0] = 1;
+      grid[x][19] = 1;
+    }
+    for (int y = 0; y < 20; y++) {
+      grid[0][y] = 1;
+      grid[24][y] = 1;
+    }
+
+    // Populate horizontal partition wall at y=11 (Doors at x=9 and x=14)
+    for (int x = 0; x < 25; x++) {
+      if (x != 9 && x != 14) {
+        grid[x][11] = 1;
+      }
+    }
+
+    // Populate vertical partition wall at x=12 from y=11 to 20
+    for (int y = 11; y < 20; y++) {
+      grid[12][y] = 1;
+    }
+
+    // Populate vertical wall for left rooms at x=5 from y=0 to 11 (Door at y=3)
+    for (int y = 0; y < 11; y++) {
+      if (y != 3) {
+        grid[5][y] = 1;
+      }
+    }
+
+    // Populate horizontal wall at y=6 from x=0 to 5
+    for (int x = 0; x < 6; x++) {
+      grid[x][6] = 1;
+    }
+
+    // Populate office desks and chairs (obstacles)
+    for (int y = 1; y < 10; y++) {
+      grid[15][y] = 1;
+      grid[13][y] = 1;
+      grid[17][y] = 1;
+    }
+
+    for (int y in [3, 6, 9]) {
+      grid[22][y] = 1;
+      grid[23][y] = 1;
+    }
+
+    for (int x = 0; x < 5; x++) {
+      grid[x][2] = 1;
+    }
+
+    math.Point<int> findClosestFree(math.Point<int> pt) {
+      if (grid[pt.x][pt.y] == 0) return pt;
+      final queue = <math.Point<int>>[pt];
+      final visited = <math.Point<int>>{pt};
+      while (queue.isNotEmpty) {
+        final current = queue.removeAt(0);
+        if (grid[current.x][current.y] == 0) return current;
+        for (final dir in [
+          const math.Point(-1, 0), const math.Point(1, 0), const math.Point(0, -1), const math.Point(0, 1),
+          const math.Point(-1, -1), const math.Point(1, 1), const math.Point(-1, 1), const math.Point(1, -1)
+        ]) {
+          final nx = current.x + dir.x;
+          final ny = current.y + dir.y;
+          if (nx >= 0 && nx < 25 && ny >= 0 && ny < 20) {
+            final neighbor = math.Point(nx, ny);
+            if (!visited.contains(neighbor)) {
+              visited.add(neighbor);
+              queue.add(neighbor);
+            }
+          }
+        }
+      }
+      return pt;
+    }
+
+    final startPt = findClosestFree(math.Point(start.dx.round().clamp(0, 24), start.dy.round().clamp(0, 19)));
+    final goalPt = findClosestFree(math.Point(goal.dx.round().clamp(0, 24), goal.dy.round().clamp(0, 19)));
+
+    // BFS search
+    final openSet = <math.Point<int>>[startPt];
+    final cameFrom = <math.Point<int>, math.Point<int>>{};
+    final gScore = <math.Point<int>, int>{startPt: 0};
+    final fScore = <math.Point<int>, int>{startPt: (startPt.x - goalPt.x).abs() + (startPt.y - goalPt.y).abs()};
+
+    while (openSet.isNotEmpty) {
+      openSet.sort((a, b) => (fScore[a] ?? 999999).compareTo(fScore[b] ?? 999999));
+      final current = openSet.removeAt(0);
+
+      if (current == goalPt) {
+        final path = <Offset>[];
+        var curr = current;
+        path.add(Offset(curr.x.toDouble(), curr.y.toDouble()));
+        while (cameFrom.containsKey(curr)) {
+          curr = cameFrom[curr]!;
+          path.insert(0, Offset(curr.x.toDouble(), curr.y.toDouble()));
+        }
+        return path;
+      }
+
+      for (final dir in [const math.Point(-1, 0), const math.Point(1, 0), const math.Point(0, -1), const math.Point(0, 1)]) {
+        final neighbor = math.Point(current.x + dir.x, current.y + dir.y);
+        if (neighbor.x >= 0 && neighbor.x < 25 && neighbor.y >= 0 && neighbor.y < 20 && grid[neighbor.x][neighbor.y] == 0) {
+          final tentativeG = (gScore[current] ?? 999999) + 1;
+          if (tentativeG < (gScore[neighbor] ?? 999999)) {
+            cameFrom[neighbor] = current;
+            gScore[neighbor] = tentativeG;
+            fScore[neighbor] = tentativeG + (neighbor.x - goalPt.x).abs() + (neighbor.y - goalPt.y).abs();
+            if (!openSet.contains(neighbor)) {
+              openSet.add(neighbor);
+            }
+          }
+        }
+      }
+    }
+
+    return [start, goal];
+  }
+
   void _startAutoNavigation() {
     if (_startX == null || _destX == null) return;
     
@@ -320,38 +450,53 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
       _trail.clear();
       _trail.add(Offset(_currentX, _currentY));
     });
+
+    final path = _astar(Offset(_currentX, _currentY), Offset(_destX!, _destY!));
+    int pathIndex = 0;
     
-    _simulationTimer = Timer.periodic(const Duration(milliseconds: 300), (timer) {
+    _simulationTimer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
       if (!mounted || _isManualOverride || !_autoNavActive) {
         timer.cancel();
         return;
       }
       
-      setState(() {
-        double dx = _destX! - _currentX;
-        double dy = _destY! - _currentY;
-        
-        if (dx.abs() > 0.1) {
-          final step = _speed * 0.5;
-          _currentX += dx > 0 ? step : -step;
-          _angle = dx > 0 ? 90.0 : 270.0;
-        } else if (dy.abs() > 0.1) {
-          final step = _speed * 0.5;
-          _currentY += dy > 0 ? step : -step;
-          _angle = dy > 0 ? 180.0 : 0.0;
-        } else {
-          _currentX = _destX!;
-          _currentY = _destY!;
+      if (pathIndex >= path.length) {
+        setState(() {
           _autoNavActive = false;
           _status = 'Idle';
           _logAction('Auto Nav: Destination Reached!');
-          timer.cancel();
+        });
+        timer.cancel();
+        return;
+      }
+      
+      setState(() {
+        final target = path[pathIndex];
+        double dx = target.dx - _currentX;
+        double dy = target.dy - _currentY;
+        double distance = math.sqrt(dx * dx + dy * dy);
+        
+        final stepSize = _speed * 0.5;
+        
+        if (distance <= stepSize) {
+          _currentX = target.dx;
+          _currentY = target.dy;
+          pathIndex++;
+        } else {
+          _currentX += (dx / distance) * stepSize;
+          _currentY += (dy / distance) * stepSize;
+          
+          if (dx.abs() > dy.abs()) {
+            _angle = dx > 0 ? 90.0 : 270.0;
+          } else {
+            _angle = dy > 0 ? 180.0 : 0.0;
+          }
         }
         
         _updateDirection(_angle);
         _battery = math.max(10, _battery - 1);
         _trail.add(Offset(_currentX, _currentY));
-        if (_trail.length > 8) {
+        if (_trail.length > 25) {
           _trail.removeAt(0);
         }
         _updateRobotState();
@@ -446,7 +591,13 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
           Expanded(
             flex: 4,
             child: Container(
-              color: isDark ? const Color(0xff0b0f19) : const Color(0xffcbd5e1).withOpacity(0.3),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xff0b0f19) : const Color(0xffcbd5e1).withOpacity(0.3),
+                image: const DecorationImage(
+                  image: AssetImage('assets/map_6.png'),
+                  fit: BoxFit.fill,
+                ),
+              ),
               child: ClipRect(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
@@ -482,6 +633,7 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
                             _settingDestination = false;
                             _logAction('Set Target to [${mapX.toStringAsFixed(1)}, ${mapY.toStringAsFixed(1)}]');
                           }
+                          _recalculatePath();
                         });
                       },
                       child: Stack(
@@ -495,8 +647,7 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
                             Positioned.fill(
                               child: CustomPaint(
                                 painter: ConnectorLinePainter(
-                                  start: Offset(_startX!, _startY!),
-                                  end: Offset(_destX!, _destY!),
+                                  path: _navPath,
                                   isDark: isDark,
                                 ),
                               ),
@@ -972,15 +1123,14 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
 }
 
 class ConnectorLinePainter extends CustomPainter {
-  final Offset? start;
-  final Offset? end;
+  final List<Offset> path;
   final bool isDark;
 
-  ConnectorLinePainter({this.start, this.end, required this.isDark});
+  ConnectorLinePainter({required this.path, required this.isDark});
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (start == null || end == null) return;
+    if (path.length < 2) return;
 
     final paint = Paint()
       ..color = const Color(0xff2563eb).withOpacity(0.6)
@@ -990,27 +1140,29 @@ class ConnectorLinePainter extends CustomPainter {
     final double mapWidth = size.width;
     final double mapHeight = size.height;
     
-    final double p1x = 8 + (start!.dx / 25) * (mapWidth - 16);
-    final double p1y = 8 + (start!.dy / 20) * (mapHeight - 16);
-    
-    final double p2x = 8 + (end!.dx / 25) * (mapWidth - 16);
-    final double p2y = 8 + (end!.dy / 20) * (mapHeight - 16);
+    for (int i = 0; i < path.length - 1; i++) {
+      final double p1x = 8 + (path[i].dx / 25) * (mapWidth - 16);
+      final double p1y = 8 + (path[i].dy / 20) * (mapHeight - 16);
+      
+      final double p2x = 8 + (path[i+1].dx / 25) * (mapWidth - 16);
+      final double p2y = 8 + (path[i+1].dy / 20) * (mapHeight - 16);
 
-    final p1 = Offset(p1x, p1y);
-    final p2 = Offset(p2x, p2y);
+      final p1 = Offset(p1x, p1y);
+      final p2 = Offset(p2x, p2y);
 
-    final distance = (p2 - p1).distance;
-    final int dashCount = (distance / 6).floor();
-    
-    for (int i = 0; i < dashCount; i++) {
-      if (i % 2 == 0) {
-        final double t1 = i / dashCount;
-        final double t2 = (i + 1) / dashCount;
-        canvas.drawLine(
-          Offset.lerp(p1, p2, t1)!,
-          Offset.lerp(p1, p2, t2)!,
-          paint,
-        );
+      final distance = (p2 - p1).distance;
+      final int dashCount = (distance / 6).floor();
+      
+      for (int j = 0; j < dashCount; j++) {
+        if (j % 2 == 0) {
+          final double t1 = j / dashCount;
+          final double t2 = (j + 1) / dashCount;
+          canvas.drawLine(
+            Offset.lerp(p1, p2, t1)!,
+            Offset.lerp(p1, p2, t2)!,
+            paint,
+          );
+        }
       }
     }
   }

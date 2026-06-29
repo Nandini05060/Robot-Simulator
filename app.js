@@ -18,13 +18,14 @@ let realtimePathIndex = 0;
 let realtimeTrail = [];
 let consoleLogs = [];
 let isAdminSimMode = false;
-let activeMapImg = 'assets/map_1.png';
+let activeMapImg = 'assets/map_6.png';
 const mapRatios = {
   'assets/map_1.png': 1.0000,
   'assets/map_2.png': 1.2147,
   'assets/map_3.png': 0.9333,
   'assets/map_4.png': 1.1506,
-  'assets/map_5.png': 0.7930
+  'assets/map_5.png': 0.7930,
+  'assets/map_6.png': 0.7930
 };
 
 const routePath = [
@@ -1136,11 +1137,7 @@ function showRobotPopup(type, robotId, mapName) {
   if (!r) return;
 
   // Dynamically map layout/zone names to corresponding image files
-  let mapImg = 'assets/map_1.png';
-  if (mapName.includes('Map B') || mapName.includes('Zone B')) mapImg = 'assets/map_2.png';
-  else if (mapName.includes('Map C') || mapName.includes('Zone C')) mapImg = 'assets/map_3.png';
-  else if (mapName.includes('Map D') || mapName.includes('Zone D')) mapImg = 'assets/map_4.png';
-  else if (mapName.includes('Map E') || mapName.includes('Zone E')) mapImg = 'assets/map_5.png';
+  let mapImg = 'assets/map_6.png';
   
   activeMapImg = mapImg;
   
@@ -2498,7 +2495,125 @@ function onWebMapClick(event) {
     } else {
       btnAuto.style.display = 'none';
     }
+  }// JavaScript implementation of A* grid matching backend
+const webGrid = Array.from({ length: 25 }, () => Array(20).fill(0));
+
+// Populate boundary walls
+for (let x = 0; x < 25; x++) {
+  webGrid[x][0] = 1;
+  webGrid[x][19] = 1;
+}
+for (let y = 0; y < 20; y++) {
+  webGrid[0][y] = 1;
+  webGrid[24][y] = 1;
+}
+
+// Populate horizontal partition wall at y=11 (Doors at x=9 and x=14)
+for (let x = 0; x < 25; x++) {
+  if (x !== 9 && x !== 14) {
+    webGrid[x][11] = 1;
   }
+}
+
+// Populate vertical partition wall at x=12 from y=11 to 20
+for (let y = 11; y < 20; y++) {
+  webGrid[12][y] = 1;
+}
+
+// Populate vertical wall for left rooms at x=5 from y=0 to 11 (Door at y=3)
+for (let y = 0; y < 11; y++) {
+  if (y !== 3) {
+    webGrid[5][y] = 1;
+  }
+}
+
+// Populate horizontal wall at y=6 from x=0 to 5
+for (let x = 0; x < 6; x++) {
+  webGrid[x][6] = 1;
+}
+
+// Populate office desks and chairs (obstacles)
+for (let y = 1; y < 10; y++) {
+  webGrid[15][y] = 1;
+  webGrid[13][y] = 1;
+  webGrid[17][y] = 1;
+}
+
+for (let y of [3, 6, 9]) {
+  webGrid[22][y] = 1;
+  webGrid[23][y] = 1;
+}
+
+for (let x = 0; x < 5; x++) {
+  webGrid[x][2] = 1;
+}
+
+function findWebClosestFree(pt) {
+  let [x, y] = pt;
+  if (webGrid[x][y] === 0) return pt;
+  
+  const queue = [pt];
+  const visited = new Set([`${x},${y}`]);
+  
+  while (queue.length > 0) {
+    const [cx, cy] = queue.shift();
+    if (webGrid[cx][cy] === 0) return [cx, cy];
+    
+    for (const [dx, dy] of [
+      [-1, 0], [1, 0], [0, -1], [0, 1],
+      [-1, -1], [1, 1], [-1, 1], [1, -1]
+    ]) {
+      const nx = cx + dx;
+      const ny = cy + dy;
+      if (nx >= 0 && nx < 25 && ny >= 0 && ny < 20) {
+        const key = `${nx},${ny}`;
+        if (!visited.has(key)) {
+          visited.add(key);
+          queue.push([nx, ny]);
+        }
+      }
+    }
+  }
+  return pt;
+}
+
+function webAstar(start, goal) {
+  const start_grid = findWebClosestFree([Math.round(start[0]), Math.round(start[1])]);
+  const goal_grid = findWebClosestFree([Math.round(goal[0]), Math.round(goal[1])]);
+  
+  const queue = [{ f: 0, g: 0, current: start_grid, path: [start_grid] }];
+  const visited = new Set();
+  
+  while (queue.length > 0) {
+    queue.sort((a, b) => a.f - b.f);
+    const { g, current, path } = queue.shift();
+    
+    const [cx, cy] = current;
+    if (cx === goal_grid[0] && cy === goal_grid[1]) {
+      return path;
+    }
+    
+    const key = `${cx},${cy}`;
+    if (visited.has(key)) continue;
+    visited.add(key);
+    
+    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+      const nx = cx + dx;
+      const ny = cy + dy;
+      if (nx >= 0 && nx < 25 && ny >= 0 && ny < 20 && webGrid[nx][ny] === 0) {
+        const neighbor = [nx, ny];
+        const g_score = g + 1;
+        const h_score = Math.abs(nx - goal_grid[0]) + Math.abs(ny - goal_grid[1]);
+        queue.push({
+          f: g_score + h_score,
+          g: g_score,
+          current: neighbor,
+          path: [...path, neighbor]
+        });
+      }
+    }
+  }
+  return [start, goal];
 }
 
 function drawWebPath() {
@@ -2512,15 +2627,21 @@ function drawWebPath() {
   
   if (webStartX === null || webDestX === null) return;
   
-  const p1 = getPixelOffset(webStartX, webStartY);
-  const p2 = getPixelOffset(webDestX, webDestY);
+  const path = webAstar([webStartX, webStartY], [webDestX, webDestY]);
+  if (path.length < 2) return;
   
   ctx.beginPath();
   ctx.setLineDash([5, 5]);
   ctx.strokeStyle = 'rgba(37, 99, 235, 0.6)';
   ctx.lineWidth = 2.5;
-  ctx.moveTo(p1.px, p1.py);
-  ctx.lineTo(p2.px, p2.py);
+  
+  const pStart = getPixelOffset(path[0][0], path[0][1]);
+  ctx.moveTo(pStart.px, pStart.py);
+  
+  for (let i = 1; i < path.length; i++) {
+    const p = getPixelOffset(path[i][0], path[i][1]);
+    ctx.lineTo(p.px, p.py);
+  }
   ctx.stroke();
 }
 
@@ -2558,39 +2679,56 @@ function toggleWebAutoNav() {
     return;
   }
   
-  // Local offline simulation
+  // Local offline simulation using A* waypoints
+  const path = webAstar([webStartX, webStartY], [webDestX, webDestY]);
+  let pathIndex = 0;
+  
   activeRobot.position = `${webStartX.toFixed(1)}, ${webStartY.toFixed(1)}`;
   activeRobot.status = 'Online';
   realtimeTrail = [[webStartX, webStartY]];
   updateRobotAndTrailDOM();
   
   webAutoNavTimer = setInterval(() => {
+    if (pathIndex >= path.length) {
+      stopWebAutoNav();
+      const ts = new Date().toTimeString().split(' ')[0];
+      consoleLogs.push(`[${ts}] Auto Nav: Destination Reached!`);
+      renderConsoleFeed();
+      return;
+    }
+    
     const parts = activeRobot.position.split(', ');
     let cx = parseFloat(parts[0]);
     let cy = parseFloat(parts[1]);
     
-    let dx = webDestX - cx;
-    let dy = webDestY - cy;
+    const target = path[pathIndex];
+    const tx = target[0];
+    const ty = target[1];
     
-    if (Math.abs(dx) > 0.15) {
-      cx += dx > 0 ? 0.4 : -0.4;
-      activeRobot.angle = dx > 0 ? 90 : 270;
-    } else if (Math.abs(dy) > 0.15) {
-      cy += dy > 0 ? 0.4 : -0.4;
-      activeRobot.angle = dy > 0 ? 180 : 0;
+    let dx = tx - cx;
+    let dy = ty - cy;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    
+    const stepSize = 0.4;
+    
+    if (distance <= stepSize) {
+      cx = tx;
+      cy = ty;
+      pathIndex++;
     } else {
-      cx = webDestX;
-      cy = webDestY;
-      stopWebAutoNav();
+      cx += (dx / distance) * stepSize;
+      cy += (dy / distance) * stepSize;
       
-      const ts = new Date().toTimeString().split(' ')[0];
-      consoleLogs.push(`[${ts}] Auto Nav: Destination Reached!`);
-      renderConsoleFeed();
+      if (Math.abs(dx) > Math.abs(dy)) {
+        activeRobot.angle = dx > 0 ? 90 : 270;
+      } else {
+        activeRobot.angle = dy > 0 ? 180 : 0;
+      }
     }
     
     activeRobot.position = `${cx.toFixed(1)}, ${cy.toFixed(1)}`;
     realtimeTrail.push([cx, cy]);
-    if (realtimeTrail.length > 15) realtimeTrail.shift();
+    if (realtimeTrail.length > 25) realtimeTrail.shift();
     updateRobotAndTrailDOM();
     
     document.getElementById('hud-tracking-desc').innerText = `GPS Latency: < 12ms | Coordinates: [${cx.toFixed(2)}, ${cy.toFixed(2)}]`;
