@@ -8,6 +8,13 @@ class Robot {
   final String lastActivity;
   final String modelType;
   final String imagePath; // Local asset path for robot pic
+  
+  // Auto-navigation fields
+  final double? startX;
+  final double? startY;
+  final double? destinationX;
+  final double? destinationY;
+  final bool autoNavigation;
 
   Robot({
     required this.id,
@@ -19,6 +26,11 @@ class Robot {
     required this.lastActivity,
     required this.modelType,
     required this.imagePath,
+    this.startX,
+    this.startY,
+    this.destinationX,
+    this.destinationY,
+    this.autoNavigation = false,
   });
 
   bool get isOnline => status.toLowerCase() == 'online';
@@ -33,6 +45,11 @@ class Robot {
     String? lastActivity,
     String? modelType,
     String? imagePath,
+    double? startX,
+    double? startY,
+    double? destinationX,
+    double? destinationY,
+    bool? autoNavigation,
   }) {
     return Robot(
       id: id ?? this.id,
@@ -44,6 +61,11 @@ class Robot {
       lastActivity: lastActivity ?? this.lastActivity,
       modelType: modelType ?? this.modelType,
       imagePath: imagePath ?? this.imagePath,
+      startX: startX ?? this.startX,
+      startY: startY ?? this.startY,
+      destinationX: destinationX ?? this.destinationX,
+      destinationY: destinationY ?? this.destinationY,
+      autoNavigation: autoNavigation ?? this.autoNavigation,
     );
   }
 }

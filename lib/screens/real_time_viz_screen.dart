@@ -43,6 +43,16 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
   ];
   int _currentPathIndex = 0;
 
+  // Auto Navigation destination states
+  double? _startX;
+  double? _startY;
+  double? _destX;
+  double? _destY;
+  bool _settingStart = false;
+  bool _settingDestination = false;
+  bool _autoNavActive = false;
+  bool _showManualController = true;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -120,6 +130,16 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
         _battery = updated.batteryLevel;
         _status = updated.status;
         _speed = updated.isOnline ? 0.8 : 0.0;
+        
+        if (updated.autoNavigation) {
+          _startX = updated.startX;
+          _startY = updated.startY;
+          _destX = updated.destinationX;
+          _destY = updated.destinationY;
+          _autoNavActive = true;
+        } else if (_autoNavActive && !updated.autoNavigation) {
+          _autoNavActive = false;
+        }
         
         _trail.add(Offset(_currentX, _currentY));
         if (_trail.length > 8) {
@@ -211,6 +231,10 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
     if (_status == 'E-STOPPED' || !_robot!.isOnline) return;
     if (dy > 0) return; // Disable backward movement
 
+    if (_autoNavActive) {
+      _stopAutoNavigation();
+    }
+
     if (ApiService().isConnected) {
       String command = "forward";
       if (dx == 0 && dy < 0) command = "forward";
@@ -248,6 +272,9 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
 
   void _rotate180() {
     if (_status == 'E-STOPPED' || !_robot!.isOnline) return;
+    if (_autoNavActive) {
+      _stopAutoNavigation();
+    }
     if (ApiService().isConnected) {
       ApiService().sendMoveCommand(_robot!.id, "rotate_right");
       Future.delayed(const Duration(milliseconds: 300), () {
@@ -266,6 +293,83 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
       _updateRobotState();
       _logAction('CMD: Rotate 180° Initiated');
     });
+  }
+
+  void _startAutoNavigation() {
+    if (_startX == null || _destX == null) return;
+    
+    setState(() {
+      _autoNavActive = true;
+      _isManualOverride = false;
+      _status = 'Auto Navigating';
+    });
+    
+    _logAction('Auto Nav: [${_startX!.toStringAsFixed(1)}, ${_startY!.toStringAsFixed(1)}] -> [${_destX!.toStringAsFixed(1)}, ${_destY!.toStringAsFixed(1)}]');
+    
+    if (ApiService().isConnected) {
+      ApiService().sendStartAuto(_robot!.id, _startX!, _startY!, _destX!, _destY!);
+      return;
+    }
+    
+    // Offline simulation mode
+    _simulationTimer?.cancel();
+    
+    setState(() {
+      _currentX = _startX!;
+      _currentY = _startY!;
+      _trail.clear();
+      _trail.add(Offset(_currentX, _currentY));
+    });
+    
+    _simulationTimer = Timer.periodic(const Duration(milliseconds: 300), (timer) {
+      if (!mounted || _isManualOverride || !_autoNavActive) {
+        timer.cancel();
+        return;
+      }
+      
+      setState(() {
+        double dx = _destX! - _currentX;
+        double dy = _destY! - _currentY;
+        
+        if (dx.abs() > 0.1) {
+          final step = _speed * 0.5;
+          _currentX += dx > 0 ? step : -step;
+          _angle = dx > 0 ? 90.0 : 270.0;
+        } else if (dy.abs() > 0.1) {
+          final step = _speed * 0.5;
+          _currentY += dy > 0 ? step : -step;
+          _angle = dy > 0 ? 180.0 : 0.0;
+        } else {
+          _currentX = _destX!;
+          _currentY = _destY!;
+          _autoNavActive = false;
+          _status = 'Idle';
+          _logAction('Auto Nav: Destination Reached!');
+          timer.cancel();
+        }
+        
+        _updateDirection(_angle);
+        _battery = math.max(10, _battery - 1);
+        _trail.add(Offset(_currentX, _currentY));
+        if (_trail.length > 8) {
+          _trail.removeAt(0);
+        }
+        _updateRobotState();
+      });
+    });
+  }
+
+  void _stopAutoNavigation() {
+    setState(() {
+      _autoNavActive = false;
+      _status = 'Idle';
+    });
+    _logAction('Auto Nav: Stopped by user.');
+    if (ApiService().isConnected) {
+      ApiService().sendStopAuto(_robot!.id);
+    } else {
+      _simulationTimer?.cancel();
+    }
   }
 
   void _emergencyStop() {
@@ -352,57 +456,154 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
                     final double robotX = 8 + (_currentX / 25) * (mapWidth - 16);
                     final double robotY = 8 + (_currentY / 20) * (mapHeight - 16);
 
-                    return Stack(
-                      children: [
-                        // Grid Painter
-                        Positioned.fill(
-                          child: CustomPaint(
-                            painter: OfficeMapPainter(isDark: isDark),
+                    double? startPixelX = _startX != null ? 8 + (_startX! / 25) * (mapWidth - 16) : null;
+                    double? startPixelY = _startY != null ? 8 + (_startY! / 20) * (mapHeight - 16) : null;
+                    double? destPixelX = _destX != null ? 8 + (_destX! / 25) * (mapWidth - 16) : null;
+                    double? destPixelY = _destY != null ? 8 + (_destY! / 20) * (mapHeight - 16) : null;
+
+                    return GestureDetector(
+                      onTapUp: (details) {
+                        if (!_settingStart && !_settingDestination) return;
+                        final double tapX = details.localPosition.dx;
+                        final double tapY = details.localPosition.dy;
+                        
+                        final double mapX = (((tapX - 8) / (mapWidth - 16)) * 25).clamp(0.0, 25.0);
+                        final double mapY = (((tapY - 8) / (mapHeight - 16)) * 20).clamp(0.0, 20.0);
+                        
+                        setState(() {
+                          if (_settingStart) {
+                            _startX = mapX;
+                            _startY = mapY;
+                            _settingStart = false;
+                            _logAction('Set Start to [${mapX.toStringAsFixed(1)}, ${mapY.toStringAsFixed(1)}]');
+                          } else if (_settingDestination) {
+                            _destX = mapX;
+                            _destY = mapY;
+                            _settingDestination = false;
+                            _logAction('Set Target to [${mapX.toStringAsFixed(1)}, ${mapY.toStringAsFixed(1)}]');
+                          }
+                        });
+                      },
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: CustomPaint(
+                              painter: OfficeMapPainter(isDark: isDark),
+                            ),
                           ),
-                        ),
-                        // Movement Trail
-                        Positioned.fill(
-                          child: CustomPaint(
-                            painter: TrailPainter(trail: _trail, isDark: isDark),
-                          ),
-                        ),
-                        // Live Position Arrow Indicator
-                        Positioned(
-                          left: robotX - 18,
-                          top: robotY - 18,
-                          width: 36,
-                          height: 36,
-                          child: PulsingRobotIndicator(angle: _angle),
-                        ),
-                    // Tracking HUD Box
-                    Positioned(
-                      top: 12,
-                      left: 12,
-                      right: 12,
-                      child: Card(
-                        color: isDark ? const Color(0xff131926).withOpacity(0.85) : Colors.white.withOpacity(0.9),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.gps_fixed, color: Color(0xff2563eb), size: 18),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'GPS Latency: < 12ms | Coordinates: [${_currentX.toStringAsFixed(2)}, ${_currentY.toStringAsFixed(2)}]',
-                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                          if (_startX != null && _destX != null)
+                            Positioned.fill(
+                              child: CustomPaint(
+                                painter: ConnectorLinePainter(
+                                  start: Offset(_startX!, _startY!),
+                                  end: Offset(_destX!, _destY!),
+                                  isDark: isDark,
                                 ),
                               ),
-                            ],
+                            ),
+                          Positioned.fill(
+                            child: CustomPaint(
+                              painter: TrailPainter(trail: _trail, isDark: isDark),
+                            ),
                           ),
-                        ),
+                          if (startPixelX != null && startPixelY != null)
+                            Positioned(
+                              left: startPixelX - 12,
+                              top: startPixelY - 24,
+                              width: 24,
+                              height: 24,
+                              child: const Icon(Icons.location_on, color: Colors.green, size: 24),
+                            ),
+                          if (destPixelX != null && destPixelY != null)
+                            Positioned(
+                              left: destPixelX - 12,
+                              top: destPixelY - 24,
+                              width: 24,
+                              height: 24,
+                              child: const Icon(Icons.flag, color: Colors.red, size: 24),
+                            ),
+                          Positioned(
+                            left: robotX - 18,
+                            top: robotY - 18,
+                            width: 36,
+                            height: 36,
+                            child: PulsingRobotIndicator(angle: _angle),
+                          ),
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            right: 12,
+                            child: Card(
+                              color: isDark ? const Color(0xff131926).withOpacity(0.85) : Colors.white.withOpacity(0.9),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.gps_fixed, color: Color(0xff2563eb), size: 18),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'GPS: [${_currentX.toStringAsFixed(2)}, ${_currentY.toStringAsFixed(2)}]${_startX != null && _destX != null ? " | Path: [${_startX!.toStringAsFixed(1)}, ${_startY!.toStringAsFixed(1)}] -> [${_destX!.toStringAsFixed(1)}, ${_destY!.toStringAsFixed(1)}]" : ""}',
+                                        style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: 12,
+                            top: 70,
+                            child: Column(
+                              children: [
+                                _buildFloatingMapBtn(
+                                  icon: Icons.pin_drop,
+                                  color: _settingStart ? Colors.green : Colors.grey,
+                                  onPressed: () {
+                                    setState(() {
+                                      _settingStart = !_settingStart;
+                                      _settingDestination = false;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(height: 8),
+                                _buildFloatingMapBtn(
+                                  icon: Icons.flag,
+                                  color: _settingDestination ? Colors.red : Colors.grey,
+                                  onPressed: () {
+                                    setState(() {
+                                      _settingDestination = !_settingDestination;
+                                      _settingStart = false;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(height: 8),
+                                if (_startX != null && _destX != null)
+                                  _buildFloatingMapBtn(
+                                    icon: _autoNavActive ? Icons.stop : Icons.play_arrow,
+                                    color: _autoNavActive ? Colors.orange : const Color(0xff2563eb),
+                                    onPressed: _autoNavActive ? _stopAutoNavigation : _startAutoNavigation,
+                                  ),
+                                const SizedBox(height: 8),
+                                _buildFloatingMapBtn(
+                                  icon: Icons.gamepad,
+                                  color: _showManualController ? const Color(0xff2563eb) : Colors.grey,
+                                  onPressed: () {
+                                    setState(() {
+                                      _showManualController = !_showManualController;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
 
@@ -453,111 +654,112 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
                       ],
                     ),
                     const Divider(height: 24),
-
-                    // 2. Control Panel
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Manual Override Controls',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                        ),
-                        if (_isManualOverride)
-                          TextButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                _isManualOverride = false;
-                                if (_status == 'E-STOPPED') {
-                                  _status = 'Online';
-                                }
-                                _speed = 0.8;
-                                _updateRobotState();
-                                _logAction('CMD: Resume Autonomous Navigation');
-                              });
-                            },
-                            icon: const Icon(Icons.play_arrow, size: 16, color: Color(0xff2563eb)),
-                            label: const Text(
-                              'Resume Auto',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xff2563eb)),
+                    if (_showManualController) ...[
+                      // 2. Control Panel
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Manual Override Controls',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                          if (_isManualOverride)
+                            TextButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _isManualOverride = false;
+                                  if (_status == 'E-STOPPED') {
+                                    _status = 'Online';
+                                  }
+                                  _speed = 0.8;
+                                  _updateRobotState();
+                                  _logAction('CMD: Resume Autonomous Navigation');
+                                });
+                              },
+                              icon: const Icon(Icons.play_arrow, size: 16, color: Color(0xff2563eb)),
+                              label: const Text(
+                                'Resume Auto',
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xff2563eb)),
+                              ),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                backgroundColor: const Color(0xff2563eb).withOpacity(0.08),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
                             ),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              backgroundColor: const Color(0xff2563eb).withOpacity(0.08),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          // Joystick D-Pad Layout
+                          Expanded(
+                            flex: 3,
+                            child: Column(
+                              children: [
+                                IconButton(
+                                  onPressed: () => _triggerManualMove(0, -0.8, 'Forward'),
+                                  icon: const Icon(Icons.arrow_upward),
+                                  color: const Color(0xff2563eb),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () => _triggerManualMove(-0.8, 0, 'Left'),
+                                      icon: const Icon(Icons.arrow_back),
+                                      color: const Color(0xff2563eb),
+                                    ),
+                                    const SizedBox(width: 24),
+                                    IconButton(
+                                      onPressed: () => _triggerManualMove(0.8, 0, 'Right'),
+                                      icon: const Icon(Icons.arrow_forward),
+                                      color: const Color(0xff2563eb),
+                                    ),
+                                  ],
+                                ),
+                                IconButton(
+                                  onPressed: () => _triggerManualMove(0, 0.8, 'Backward'),
+                                  icon: const Icon(Icons.arrow_downward),
+                                  color: const Color(0xff2563eb),
+                                ),
+                              ],
                             ),
                           ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        // Joystick D-Pad Layout
-                        Expanded(
-                          flex: 3,
-                          child: Column(
-                            children: [
-                              IconButton(
-                                onPressed: () => _triggerManualMove(0, -0.8, 'Forward'),
-                                icon: const Icon(Icons.arrow_upward),
-                                color: const Color(0xff2563eb),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  IconButton(
-                                    onPressed: () => _triggerManualMove(-0.8, 0, 'Left'),
-                                    icon: const Icon(Icons.arrow_back),
-                                    color: const Color(0xff2563eb),
+                          // Quick Action Buttons
+                          Expanded(
+                            flex: 4,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: _rotate180,
+                                  icon: const Icon(Icons.cached, size: 18),
+                                  label: const Text('Rotate 180°'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xff2563eb),
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                   ),
-                                  const SizedBox(width: 24),
-                                  IconButton(
-                                    onPressed: () => _triggerManualMove(0.8, 0, 'Right'),
-                                    icon: const Icon(Icons.arrow_forward),
-                                    color: const Color(0xff2563eb),
+                                ),
+                                const SizedBox(height: 10),
+                                ElevatedButton.icon(
+                                  onPressed: _emergencyStop,
+                                  icon: const Icon(Icons.warning, size: 18),
+                                  label: const Text('EMERGENCY STOP'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red[800],
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                   ),
-                                ],
-                              ),
-                              IconButton(
-                                onPressed: () => _triggerManualMove(0, 0.8, 'Backward'),
-                                icon: const Icon(Icons.arrow_downward),
-                                color: const Color(0xff2563eb),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Quick Action Buttons
-                        Expanded(
-                          flex: 4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              ElevatedButton.icon(
-                                onPressed: _rotate180,
-                                icon: const Icon(Icons.cached, size: 18),
-                                label: const Text('Rotate 180°'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xff2563eb),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                 ),
-                              ),
-                              const SizedBox(height: 10),
-                              ElevatedButton.icon(
-                                onPressed: _emergencyStop,
-                                icon: const Icon(Icons.warning, size: 18),
-                                label: const Text('EMERGENCY STOP'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red[800],
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const Divider(height: 24),
+                        ],
+                      ),
+                      const Divider(height: 24),
+                    ],
 
                     // 3. Activity Log Console
                     const Text(
@@ -742,6 +944,79 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
       ],
     );
   }
+
+  Widget _buildFloatingMapBtn({required IconData icon, required Color color, required VoidCallback onPressed}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xff131926).withOpacity(0.9) : Colors.white.withOpacity(0.9),
+        shape: BoxShape.circle,
+        border: Border.all(color: color.withOpacity(0.4), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(20),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: IconButton(
+        icon: Icon(icon, size: 20, color: color),
+        padding: EdgeInsets.zero,
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+class ConnectorLinePainter extends CustomPainter {
+  final Offset? start;
+  final Offset? end;
+  final bool isDark;
+
+  ConnectorLinePainter({this.start, this.end, required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (start == null || end == null) return;
+
+    final paint = Paint()
+      ..color = const Color(0xff2563eb).withOpacity(0.6)
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+
+    final double mapWidth = size.width;
+    final double mapHeight = size.height;
+    
+    final double p1x = 8 + (start!.dx / 25) * (mapWidth - 16);
+    final double p1y = 8 + (start!.dy / 20) * (mapHeight - 16);
+    
+    final double p2x = 8 + (end!.dx / 25) * (mapWidth - 16);
+    final double p2y = 8 + (end!.dy / 20) * (mapHeight - 16);
+
+    final p1 = Offset(p1x, p1y);
+    final p2 = Offset(p2x, p2y);
+
+    final distance = (p2 - p1).distance;
+    final int dashCount = (distance / 6).floor();
+    
+    for (int i = 0; i < dashCount; i++) {
+      if (i % 2 == 0) {
+        final double t1 = i / dashCount;
+        final double t2 = (i + 1) / dashCount;
+        canvas.drawLine(
+          Offset.lerp(p1, p2, t1)!,
+          Offset.lerp(p1, p2, t2)!,
+          paint,
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 // Office Map Custom Painter

@@ -1897,6 +1897,10 @@ function startRealtimeSimulation() {
 function sendRemoteCmd(cmdName, dx, dy) {
   if (activeRobot.status !== 'Online') return;
 
+  if (webAutoNavActive) {
+    stopWebAutoNav();
+  }
+
   // Send command to backend WebSocket if connected
   if (webSocket && webSocket.readyState === WebSocket.OPEN) {
     const matchR = activeRobot.id.match(/\d+$/);
@@ -2012,6 +2016,10 @@ function sendRemoteCmd(cmdName, dx, dy) {
 
 function rotateRobot() {
   if (activeRobot.status !== 'Online') return;
+  
+  if (webAutoNavActive) {
+    stopWebAutoNav();
+  }
   
   isManualOverride = true;
   const resumeContainer = document.getElementById('resume-autonav-container');
@@ -2361,5 +2369,267 @@ function switchRightPanelTab(tabId) {
     if (btnAbout) btnAbout.classList.remove('active');
     if (viewCode) viewCode.style.display = 'flex';
     if (viewAbout) viewAbout.style.display = 'none';
+  }
+}
+
+// Switch company intro tabs on dashboard
+function switchIntroTab(index) {
+  document.querySelectorAll('.intro-tab-content').forEach(content => {
+    content.style.display = 'none';
+  });
+  document.querySelectorAll('.intro-tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const contentEl = document.getElementById(`intro-content-${index}`);
+  if (contentEl) contentEl.style.display = 'block';
+  const btnEl = document.getElementById(`tab-intro-${index}`);
+  if (btnEl) btnEl.classList.add('active');
+}
+
+// Web Simulator Auto-Navigation and Manual controller toggling
+let webStartX = null;
+let webStartY = null;
+let webDestX = null;
+let webDestY = null;
+let webSettingMode = null; // 'start' | 'target' | null
+let webAutoNavActive = false;
+let webAutoNavTimer = null;
+let webShowManual = true;
+
+function toggleWebSettingMode(mode) {
+  const btnStart = document.getElementById('btn-web-start');
+  const btnTarget = document.getElementById('btn-web-target');
+  
+  if (webSettingMode === mode) {
+    webSettingMode = null;
+    if (btnStart) btnStart.classList.remove('active-start');
+    if (btnTarget) btnTarget.classList.remove('active-target');
+    return;
+  }
+  
+  webSettingMode = mode;
+  if (mode === 'start') {
+    if (btnStart) btnStart.classList.add('active-start');
+    if (btnTarget) btnTarget.classList.remove('active-target');
+  } else {
+    if (btnTarget) btnTarget.classList.add('active-target');
+    if (btnStart) btnStart.classList.remove('active-start');
+  }
+}
+
+function onWebMapClick(event) {
+  if (!webSettingMode) return;
+  
+  const viewport = document.getElementById('viz-map-container');
+  if (!viewport) return;
+  const rect = viewport.getBoundingClientRect();
+  const px = event.clientX - rect.left;
+  const py = event.clientY - rect.top;
+  
+  // Calculate map coordinates
+  const W = viewport.clientWidth;
+  const H = viewport.clientHeight;
+  const mapImg = activeMapImg || 'assets/map_1.png';
+  const R = mapRatios[mapImg] || 0.7119;
+  
+  let w_img = W;
+  let h_img = H;
+  let dx = 0;
+  let dy = 0;
+  
+  if (W / H > R) {
+    h_img = H;
+    w_img = H * R;
+    dx = (W - w_img) / 2;
+  } else {
+    w_img = W;
+    h_img = W / R;
+    dy = (H - h_img) / 2;
+  }
+  
+  const padding = 12;
+  const x = Math.max(0, Math.min(25, ((px - dx - padding) / (w_img - padding * 2)) * 25));
+  const y = Math.max(0, Math.min(20, ((py - dy - padding) / (h_img - padding * 2)) * 20));
+  
+  if (webSettingMode === 'start') {
+    webStartX = x;
+    webStartY = y;
+    const marker = document.getElementById('web-start-marker');
+    if (marker) {
+      marker.style.left = `${px}px`;
+      marker.style.top = `${py}px`;
+      marker.style.display = 'block';
+    }
+    
+    // Deactivate start button
+    const btnStart = document.getElementById('btn-web-start');
+    if (btnStart) btnStart.classList.remove('active-start');
+    webSettingMode = null;
+    
+    const timestamp = new Date().toTimeString().split(' ')[0];
+    consoleLogs.push(`[${timestamp}] Set Start to [${x.toFixed(1)}, ${y.toFixed(1)}]`);
+  } else if (webSettingMode === 'target') {
+    webDestX = x;
+    webDestY = y;
+    const marker = document.getElementById('web-target-marker');
+    if (marker) {
+      marker.style.left = `${px}px`;
+      marker.style.top = `${py}px`;
+      marker.style.display = 'block';
+    }
+    
+    // Deactivate target button
+    const btnTarget = document.getElementById('btn-web-target');
+    if (btnTarget) btnTarget.classList.remove('active-target');
+    webSettingMode = null;
+    
+    const timestamp = new Date().toTimeString().split(' ')[0];
+    consoleLogs.push(`[${timestamp}] Set Target to [${x.toFixed(1)}, ${y.toFixed(1)}]`);
+  }
+  
+  renderConsoleFeed();
+  drawWebPath();
+  
+  // Show/hide auto nav button
+  const btnAuto = document.getElementById('btn-web-auto');
+  if (btnAuto) {
+    if (webStartX !== null && webDestX !== null) {
+      btnAuto.style.display = 'flex';
+    } else {
+      btnAuto.style.display = 'none';
+    }
+  }
+}
+
+function drawWebPath() {
+  const canvas = document.getElementById('web-path-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  if (webStartX === null || webDestX === null) return;
+  
+  const p1 = getPixelOffset(webStartX, webStartY);
+  const p2 = getPixelOffset(webDestX, webDestY);
+  
+  ctx.beginPath();
+  ctx.setLineDash([5, 5]);
+  ctx.strokeStyle = 'rgba(37, 99, 235, 0.6)';
+  ctx.lineWidth = 2.5;
+  ctx.moveTo(p1.px, p1.py);
+  ctx.lineTo(p2.px, p2.py);
+  ctx.stroke();
+}
+
+function toggleWebAutoNav() {
+  const btnAuto = document.getElementById('btn-web-auto');
+  const iconAuto = document.getElementById('icon-web-auto');
+  
+  if (webAutoNavActive) {
+    stopWebAutoNav();
+    return;
+  }
+  
+  webAutoNavActive = true;
+  if (btnAuto) btnAuto.classList.add('active-auto');
+  if (iconAuto) iconAuto.className = 'icon-stop';
+  
+  const timestamp = new Date().toTimeString().split(' ')[0];
+  consoleLogs.push(`[${timestamp}] Auto Nav: [${webStartX.toFixed(1)}, ${webStartY.toFixed(1)}] -> [${webDestX.toFixed(1)}, ${webDestY.toFixed(1)}]`);
+  renderConsoleFeed();
+  
+  // Send websocket start command if connected
+  if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+    const matchR = activeRobot.id.match(/\d+$/);
+    const intId = matchR ? parseInt(matchR[0]) : 1;
+    webSocket.send(JSON.stringify({
+      type: "START_AUTO",
+      robot_id: intId,
+      payload: {
+        start_x: webStartX,
+        start_y: webStartY,
+        destination_x: webDestX,
+        destination_y: webDestY
+      }
+    }));
+    return;
+  }
+  
+  // Local offline simulation
+  activeRobot.position = `${webStartX.toFixed(1)}, ${webStartY.toFixed(1)}`;
+  activeRobot.status = 'Online';
+  realtimeTrail = [[webStartX, webStartY]];
+  updateRobotAndTrailDOM();
+  
+  webAutoNavTimer = setInterval(() => {
+    const parts = activeRobot.position.split(', ');
+    let cx = parseFloat(parts[0]);
+    let cy = parseFloat(parts[1]);
+    
+    let dx = webDestX - cx;
+    let dy = webDestY - cy;
+    
+    if (Math.abs(dx) > 0.15) {
+      cx += dx > 0 ? 0.4 : -0.4;
+      activeRobot.angle = dx > 0 ? 90 : 270;
+    } else if (Math.abs(dy) > 0.15) {
+      cy += dy > 0 ? 0.4 : -0.4;
+      activeRobot.angle = dy > 0 ? 180 : 0;
+    } else {
+      cx = webDestX;
+      cy = webDestY;
+      stopWebAutoNav();
+      
+      const ts = new Date().toTimeString().split(' ')[0];
+      consoleLogs.push(`[${ts}] Auto Nav: Destination Reached!`);
+      renderConsoleFeed();
+    }
+    
+    activeRobot.position = `${cx.toFixed(1)}, ${cy.toFixed(1)}`;
+    realtimeTrail.push([cx, cy]);
+    if (realtimeTrail.length > 15) realtimeTrail.shift();
+    updateRobotAndTrailDOM();
+    
+    document.getElementById('hud-tracking-desc').innerText = `GPS Latency: < 12ms | Coordinates: [${cx.toFixed(2)}, ${cy.toFixed(2)}]`;
+  }, 250);
+}
+
+function stopWebAutoNav() {
+  if (!webAutoNavActive) return;
+  webAutoNavActive = false;
+  
+  const btnAuto = document.getElementById('btn-web-auto');
+  const iconAuto = document.getElementById('icon-web-auto');
+  if (btnAuto) btnAuto.classList.remove('active-auto');
+  if (iconAuto) iconAuto.className = 'icon-play';
+  
+  if (webAutoNavTimer) clearInterval(webAutoNavTimer);
+  
+  if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+    const matchR = activeRobot.id.match(/\d+$/);
+    const intId = matchR ? parseInt(matchR[0]) : 1;
+    webSocket.send(JSON.stringify({
+      type: "STOP_AUTO",
+      robot_id: intId
+    }));
+  }
+}
+
+function toggleWebGamepad() {
+  const panel = document.getElementById('manual-controls-section');
+  const btnGamepad = document.getElementById('btn-web-gamepad');
+  
+  webShowManual = !webShowManual;
+  if (panel && btnGamepad) {
+    if (webShowManual) {
+      panel.style.display = 'block';
+      btnGamepad.style.color = 'var(--app-primary)';
+    } else {
+      panel.style.display = 'none';
+      btnGamepad.style.color = 'var(--app-text-muted)';
+    }
   }
 }

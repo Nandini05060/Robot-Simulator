@@ -1,8 +1,9 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class Robot(BaseModel):
-    id: str
+    id: int
     name: str
     model_type: str
 
@@ -23,3 +24,15 @@ class Robot(BaseModel):
     current_task: str
 
     map_name: str
+
+    # Auto Navigation
+    start_x: Optional[float] = None
+    start_y: Optional[float] = None
+
+    destination_x: Optional[float] = None
+    destination_y: Optional[float] = None
+
+    auto_navigation: bool = False
+    task_paused: bool = False
+
+    previous_mode: Optional[str] = None

@@ -1,32 +1,25 @@
 from services.robot_service import get_robot
 from data.maps import MAP_WIDTH, MAP_HEIGHT, OBSTACLES
 
-DIRECTIONS = [
-    "North", "North-East", "East", "South-East",
-    "South", "South-West", "West", "North-West"
-]
+DIRECTIONS = ["North", "East", "South", "West"]
 
 
 def rotate_robot(robot, rotation):
-    # Coerce to North if current direction is somehow invalid
-    if robot.direction not in DIRECTIONS:
-        robot.direction = "North"
 
     index = DIRECTIONS.index(robot.direction)
 
-    # In 8-direction list, 90-degree rotation is 2 steps
     if rotation == "left":
-        index = (index - 2) % 8
+        index = (index - 1) % 4
         robot.angle = (robot.angle - 90) % 360
 
     elif rotation == "right":
-        index = (index + 2) % 8
+        index = (index + 1) % 4
         robot.angle = (robot.angle + 90) % 360
 
     robot.direction = DIRECTIONS[index]
 
 
-def move_robot(robot_id: str, command: str):
+def move_robot(robot_id: int, command: str):
 
     robot = get_robot(robot_id)
 
@@ -35,7 +28,16 @@ def move_robot(robot_id: str, command: str):
             "success": False,
             "message": "Robot not found"
         }
-    
+
+    # ==========================
+    # MANUAL OVERRIDE
+    # ==========================
+    if hasattr(robot, "auto_navigation") and robot.auto_navigation:
+        robot.auto_navigation = False
+        robot.mode = "Manual"
+        robot.status = "Manual Override"
+    # ==========================
+
     if robot.battery <= 0:
         return {
             "success": False,
@@ -63,36 +65,33 @@ def move_robot(robot_id: str, command: str):
     new_x = robot.x
     new_y = robot.y
 
-    # Calculate direction vectors
-    dx = 0.0
-    dy = 0.0
-
-    if robot.direction == "North":
-        dy = -1.0
-    elif robot.direction == "North-East":
-        dx = 0.707
-        dy = -0.707
-    elif robot.direction == "East":
-        dx = 1.0
-    elif robot.direction == "South-East":
-        dx = 0.707
-        dy = 0.707
-    elif robot.direction == "South":
-        dy = 1.0
-    elif robot.direction == "South-West":
-        dx = -0.707
-        dy = 0.707
-    elif robot.direction == "West":
-        dx = -1.0
-    elif robot.direction == "North-West":
-        dx = -0.707
-        dy = -0.707
-
     if command == "forward":
-        new_x += dx * robot.speed
-        new_y += dy * robot.speed
+
+        if robot.direction == "North":
+            new_y -= robot.speed
+
+        elif robot.direction == "South":
+            new_y += robot.speed
+
+        elif robot.direction == "East":
+            new_x += robot.speed
+
+        elif robot.direction == "West":
+            new_x -= robot.speed
+
     elif command == "backward":
-        return {"success": False, "message": "Backward movement is disabled"}
+
+        if robot.direction == "North":
+            new_y += robot.speed
+
+        elif robot.direction == "South":
+            new_y -= robot.speed
+
+        elif robot.direction == "East":
+            new_x -= robot.speed
+
+        elif robot.direction == "West":
+            new_x += robot.speed
 
     if new_x < 0 or new_x >= MAP_WIDTH:
         return {"success": False, "message": "Boundary reached"}
@@ -100,12 +99,11 @@ def move_robot(robot_id: str, command: str):
     if new_y < 0 or new_y >= MAP_HEIGHT:
         return {"success": False, "message": "Boundary reached"}
 
-    # Grid cell integer collision detection
-    if (int(new_x), int(new_y)) in OBSTACLES:
+    if (new_x, new_y) in OBSTACLES:
         return {"success": False, "message": "Obstacle detected"}
 
-    robot.x = round(new_x, 2)
-    robot.y = round(new_y, 2)
+    robot.x = new_x
+    robot.y = new_y
     robot.status = "Moving"
     robot.battery = max(0, robot.battery - 1)
 

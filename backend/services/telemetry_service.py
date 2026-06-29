@@ -27,5 +27,11 @@ def build_telemetry(robot: Robot):
 
         "map": robot.map_name,
 
-        "online": robot.is_online
+        "online": robot.is_online,
+        
+        "start_x": getattr(robot, 'start_x', None),
+        "start_y": getattr(robot, 'start_y', None),
+        "destination_x": getattr(robot, 'destination_x', None),
+        "destination_y": getattr(robot, 'destination_y', None),
+        "auto_navigation": getattr(robot, 'auto_navigation', False)
     }

@@ -62,29 +62,19 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Gradient Circles for brand aesthetic depth
-          Positioned(
-            top: -100,
-            left: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xff2563eb).withOpacity(isDark ? 0.2 : 0.15),
-              ),
+          // Background Image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/login_bg.png',
+              fit: BoxFit.cover,
             ),
           ),
-          Positioned(
-            bottom: -50,
-            right: -50,
+          // Subtle overlay for readability
+          Positioned.fill(
             child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xff3b82f6).withOpacity(isDark ? 0.15 : 0.1),
-              ),
+              color: isDark 
+                  ? Colors.black.withOpacity(0.4) 
+                  : Colors.white.withOpacity(0.15),
             ),
           ),
           

@@ -107,6 +107,11 @@ class ApiService extends ChangeNotifier {
                 position: "${data['position']['x'] ?? 0.0}, ${data['position']['y'] ?? 0.0}",
                 angle: (data['angle'] ?? 0).toDouble(),
                 lastActivity: data['current_task'] ?? 'Active',
+                startX: data['start_x'] != null ? (data['start_x'] as num).toDouble() : null,
+                startY: data['start_y'] != null ? (data['start_y'] as num).toDouble() : null,
+                destinationX: data['destination_x'] != null ? (data['destination_x'] as num).toDouble() : null,
+                destinationY: data['destination_y'] != null ? (data['destination_y'] as num).toDouble() : null,
+                autoNavigation: data['auto_navigation'] == true,
               );
               notifyListeners();
             }
@@ -138,6 +143,32 @@ class ApiService extends ChangeNotifier {
       "payload": {
         "command": command // forward, backward, rotate_left, rotate_right
       }
+    };
+    _wsChannel!.sink.add(jsonEncode(msg));
+  }
+
+  void sendStartAuto(String robotId, double startX, double startY, double destX, double destY) {
+    if (_wsChannel == null || !_isConnected) return;
+    final intId = int.tryParse(robotId.replaceAll(RegExp(r'\D'), '')) ?? 1;
+    final msg = {
+      "type": "START_AUTO",
+      "robot_id": intId,
+      "payload": {
+        "start_x": startX,
+        "start_y": startY,
+        "destination_x": destX,
+        "destination_y": destY
+      }
+    };
+    _wsChannel!.sink.add(jsonEncode(msg));
+  }
+
+  void sendStopAuto(String robotId) {
+    if (_wsChannel == null || !_isConnected) return;
+    final intId = int.tryParse(robotId.replaceAll(RegExp(r'\D'), '')) ?? 1;
+    final msg = {
+      "type": "STOP_AUTO",
+      "robot_id": intId
     };
     _wsChannel!.sink.add(jsonEncode(msg));
   }

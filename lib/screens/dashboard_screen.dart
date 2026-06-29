@@ -12,6 +12,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  int _activeIntroTab = 0;
   int _totalRobots = 5;
   int _onlineRobots = 4;
   double _averageBattery = 100.0;
@@ -378,14 +379,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. Welcome Card (About Card)
+              // 1. Persistent Top Navigation & Global Status Header
               Container(
-                margin: const EdgeInsets.only(top: 8),
+                margin: const EdgeInsets.only(top: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xff131926) : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffcbd5e1)),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.02),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    )
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -393,164 +401,113 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Image.asset(isDark ? 'assets/logo_light.png' : 'assets/logo_dark.png', height: 16),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: const Color(0xff2563eb).withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xff2563eb).withOpacity(0.2)),
-                          ),
-                          child: const Text(
-                            'v2.0 ENTERPRISE',
-                            style: TextStyle(
-                              color: Color(0xff3b82f6),
-                              fontSize: 8.5,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
+                        Row(
+                          children: [
+                            Image.asset(isDark ? 'assets/logo_light.png' : 'assets/logo_dark.png', height: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              'bluCursor',
+                              style: TextStyle(
+                                color: isDark ? Colors.white : const Color(0xff0f172a),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                              ),
                             ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xff10b981).withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xff10b981).withOpacity(0.2)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xff10b981),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Text(
+                                'FLEET SYSTEM NOMINAL',
+                                style: TextStyle(
+                                  color: Color(0xff10b981),
+                                  fontSize: 8.5,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const Divider(height: 24, color: Color(0xff1e293b)),
                     Text(
-                      'bluCursor Fleet Operations Console',
+                      'SYSTEM ALERTS & NOTIFICATIONS',
                       style: TextStyle(
-                        color: isDark ? Colors.white : const Color(0xff0f172a),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Welcome to the bluCursor Fleet Portal. This interface allows authorized engineers to manage and coordinate smart office robotics, inspect cargo logistics pathways, view data graphs, and trigger real-time manual override steerings for logistics cart units.',
-                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
                         color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
-                        fontSize: 11,
-                        height: 1.5,
+                        letterSpacing: 0.8,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        _buildBadgeTag('Enterprise IT', Icons.memory, const Color(0xff3b82f6)),
-                        const SizedBox(width: 6),
-                        _buildBadgeTag('Secure', Icons.gpp_good, const Color(0xff10b981)),
-                        const SizedBox(width: 6),
-                        _buildBadgeTag('Telemetry', Icons.flash_on, const Color(0xfff59e0b)),
-                      ],
-                    )
+                    const SizedBox(height: 8),
+                    _buildHeaderAlertItem(Icons.warning_amber_rounded, 'Failed simulation on Node-B', '12m ago', Colors.amber),
+                    const SizedBox(height: 6),
+                    _buildHeaderAlertItem(Icons.check_circle_outline_rounded, 'Batch render #402 complete', '1h ago', Colors.green),
+                    const SizedBox(height: 6),
+                    _buildHeaderAlertItem(Icons.info_outline_rounded, 'System Update: v2.0 Enterprise is live', '1d ago', Colors.blue),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
+              _buildCompanyIntroCard(),
+              const SizedBox(height: 16),
 
-              // 2. Hero Banner
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: isDark ? [
-                      const Color(0xff1e293b).withOpacity(0.4),
-                      const Color(0xff0f172a).withOpacity(0.6),
-                    ] : [
-                      const Color(0xff3b82f6).withOpacity(0.08),
-                      const Color(0xff2563eb).withOpacity(0.04),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0)),
+              // 2. Quick Start Actions (Getting Started)
+              const Text(
+                'GETTING STARTED',
+                style: TextStyle(
+                  color: Color(0xff64748b),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Core Command v1.2',
-                            style: TextStyle(
-                              color: Color(0xff3b82f6),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Fleet Command Center',
-                            style: TextStyle(
-                              color: isDark ? Colors.white : const Color(0xff0f172a),
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            'Monitor logistics paths, steering vectors, and safety overrides in real-time.',
-                            style: TextStyle(
-                              color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
-                              fontSize: 11,
-                              height: 1.4,
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Row(
-                            children: [
-                              ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xff2563eb),
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                  elevation: 0,
-                                ),
-                                icon: const Icon(Icons.local_shipping_outlined, size: 12),
-                                label: const Text('Inspect Fleet', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold)),
-                                onPressed: () {
-                                  MainNavigationShell.of(context).setTab(1);
-                                },
-                              ),
-                              const SizedBox(width: 8),
-                              OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: isDark ? Colors.white : const Color(0xff0f172a),
-                                  side: BorderSide(color: isDark ? const Color(0xff1e293b) : const Color(0xffcbd5e1)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                ),
-                                icon: const Icon(Icons.insights, size: 12),
-                                label: const Text('Active Telemetry', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold)),
-                                onPressed: () {
-                                  MainNavigationShell.of(context).setTab(1);
-                                },
-                              )
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      flex: 2,
-                      child: Image.asset(
-                        'assets/robot_splash.png',
-                        height: 120,
-                        fit: BoxFit.contain,
-                      ),
-                    )
-                  ],
-                ),
+              ),
+              const SizedBox(height: 10),
+              // Button 1: Patrol Simulation
+              _buildQuickStartButton(
+                context,
+                icon: Icons.shield_outlined,
+                title: 'Launch Patrol Simulation',
+                subtitle: 'Test Security & Coverage',
+                desc: 'Simulate guard routes, test camera blind spots, and optimize fleet battery life for continuous area surveillance.',
+                color: const Color(0xff2563eb),
+                onTap: () => MainNavigationShell.of(context).setTab(2),
+              ),
+              const SizedBox(height: 10),
+              // Button 2: Delivery Simulation
+              _buildQuickStartButton(
+                context,
+                icon: Icons.local_shipping_outlined,
+                title: 'Launch Delivery Simulation',
+                subtitle: 'Optimize Logistics & Routing',
+                desc: 'Run A-to-B delivery scenarios, test obstacle avoidance in crowded aisles, and measure package throughput.',
+                color: const Color(0xff10b981),
+                onTap: () => MainNavigationShell.of(context).setTab(1),
               ),
               const SizedBox(height: 20),
 
-              // 3. Statistics Grid
+              // 3. Live Fleet Overview
               const Text(
-                'FLEET STATISTICS',
+                'LIVE FLEET OVERVIEW',
                 style: TextStyle(
                   color: Color(0xff64748b),
                   fontSize: 11,
@@ -574,11 +531,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-              // Wide Stat
+              // Current Missions row
               InkWell(
-                onTap: () {
-                  MainNavigationShell.of(context).setTab(1);
-                },
+                onTap: () => MainNavigationShell.of(context).setTab(1),
                 borderRadius: BorderRadius.circular(16),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -606,9 +561,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               'Current Missions',
                               style: TextStyle(color: isDark ? Colors.white : const Color(0xff0f172a), fontSize: 13, fontWeight: FontWeight.bold),
                             ),
-                            Text(
+                            const Text(
                               'Active dispatch routing tasks',
-                              style: const TextStyle(color: Color(0xff64748b), fontSize: 10.5),
+                              style: TextStyle(color: Color(0xff64748b), fontSize: 10.5),
                             )
                           ],
                         ),
@@ -623,9 +578,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 20),
 
-              // 4. Quick Actions
+              // 4. System Health
               const Text(
-                'QUICK ACTIONS',
+                'SYSTEM HEALTH',
                 style: TextStyle(
                   color: Color(0xff64748b),
                   fontSize: 11,
@@ -634,32 +589,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              GridView.count(
-                crossAxisCount: 4,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                children: [
-                  _buildQuickActionCard('View Robots', Icons.list_alt, () {
-                    MainNavigationShell.of(context).setTab(1);
-                  }),
-                  _buildQuickActionCard('Open Map', Icons.map_outlined, () {
-                    MainNavigationShell.of(context).setTab(1);
-                  }),
-                  _buildQuickActionCard('Assign Task', Icons.add_circle_outline, () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Task scheduler is currently in auto-mode.')),
-                    );
-                  }),
-                  _buildQuickActionCard('View Stats', Icons.bar_chart_outlined, _showSystemDiagnostics),
-                ],
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xff131926) : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffcbd5e1)),
+                ),
+                child: Column(
+                  children: [
+                    _buildDiagnosticItem(Icons.radar_rounded, 'LIDAR Rangefinder', '100% SIGNAL', const Color(0xff10b981)),
+                    const SizedBox(height: 10),
+                    _buildDiagnosticItem(Icons.wifi_tethering_rounded, 'Network Uplink Ping', '12ms (EXCELLENT)', const Color(0xff2563eb)),
+                    const SizedBox(height: 10),
+                    _buildDiagnosticItem(Icons.settings_input_component_rounded, 'Servo Actuators', 'NOMINAL TEMP', const Color(0xff10b981)),
+                    const SizedBox(height: 10),
+                    _buildDiagnosticItem(Icons.battery_saver_rounded, 'Fleet Battery Health', '94.2% CAPACITY', isDark ? Colors.white : const Color(0xff0f172a)),
+                    const Divider(height: 24, color: Color(0xff1e293b)),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xff090d16) : const Color(0xfff8fafc),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0)),
+                      ),
+                      child: Text(
+                        '> CPU core temp: 42°C\n> Lidar frames: 60 FPS\n> Safety override: STANDBY\n> Calibration status: OK',
+                        style: TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 10,
+                          color: isDark ? const Color(0xff4ade80) : const Color(0xff15803d),
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-              // 5. System Capabilities (Features)
+              // 5. Your Recent Simulations (Empty State)
               const Text(
-                'SYSTEM CAPABILITIES',
+                'YOUR RECENT SIMULATIONS',
                 style: TextStyle(
                   color: Color(0xff64748b),
                   fontSize: 11,
@@ -668,38 +640,96 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 1.45,
-                children: [
-                  _buildFeatureCard('Real-Time Tracking', 'assets/robot_hermes.png', 'Interactive GPS coordinates.'),
-                  _buildFeatureCard('Live Office Map', 'assets/robot_splash.png', 'Observe automated trail maps.'),
-                  _buildFeatureCard('Multi-Robot Command', 'assets/robot_cronus.png', 'Coordinate active units.'),
-                  _buildFeatureCard('Navigation Control', 'assets/robot_ares.png', 'Manual overrides steering.'),
-                  _buildFeatureCard('Operational Stats', 'assets/robot_zeus.png', 'Inspect battery decay rates.'),
-                  _buildFeatureCard('Safety Monitoring', 'assets/robot_pallas.png', 'Instant emergency stops.'),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // 6. Fleet Modules Categories
-              const Text(
-                'FLEET MODULES',
-                style: TextStyle(
-                  color: Color(0xff64748b),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xff131926) : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffcbd5e1)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xff2563eb).withOpacity(0.08),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.analytics_outlined, color: Color(0xff3b82f6), size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'No Active Simulations Yet',
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : const Color(0xff0f172a),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'You don\'t have any running tests right now. Click on "Launch Patrol" or "Launch Delivery" above to start your first robot simulation.',
+                                style: TextStyle(
+                                  color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
+                                  fontSize: 11.5,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 24, color: Color(0xff1e293b)),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xff10b981).withOpacity(0.08),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.history_toggle_off_rounded, color: Color(0xff10b981), size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Recent Activity',
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : const Color(0xff0f172a),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'When your robots finish a route or trigger an alert, the details will appear right here for you to review.',
+                                style: TextStyle(
+                                  color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
+                                  fontSize: 11.5,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 10),
-              _buildFleetCategoryCard('Delivery Cart Robots', 'Manage cargo & office logistics', '3 Assigned Robots', 'assets/robot_hermes.png', 1),
-              const SizedBox(height: 10),
-              _buildFleetCategoryCard('Patrolling Robots', 'Area surveillance & security', '2 Assigned Robots', 'assets/robot_cronus.png', 2),
               const SizedBox(height: 30),
             ],
           ),
@@ -729,6 +759,132 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildHeaderAlertItem(IconData icon, String text, String time, Color iconColor) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: iconColor),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 11,
+              color: isDark ? const Color(0xffcbd5e1) : const Color(0xff334155),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Text(
+          time,
+          style: const TextStyle(
+            fontSize: 10,
+            color: Color(0xff64748b),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickStartButton(BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required String desc,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xff131926) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: color.withOpacity(0.2)),
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : const Color(0xff0f172a),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    desc,
+                    style: TextStyle(
+                      color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
+                      fontSize: 11,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right, color: Color(0xff64748b), size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDiagnosticItem(IconData icon, String label, String value, Color valueColor) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: const Color(0xff64748b)),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Color(0xff64748b),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const Spacer(),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 12,
+            color: valueColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 
@@ -912,6 +1068,291 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const Icon(Icons.chevron_right, color: Color(0xff3b82f6), size: 20)
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompanyIntroCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    Widget tabContent;
+    if (_activeIntroTab == 0) {
+      tabContent = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'bluCursor Infotech is an IT outsourcing, digital transformation, and software development company based in Indore, India. Established in 2013, we deliver customized technology solutions across the digital value chain.',
+            style: TextStyle(
+              color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
+              fontSize: 12.5,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'OUR PHILOSOPHY PILLARS',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildPillarBadge('🛡️ Passion', 'Tech & Solving', const Color(0xff2563eb)),
+              _buildPillarBadge('⚡ Power', 'Cost-effective', const Color(0xff10b981)),
+              _buildPillarBadge('🏆 Pride', 'Client Growth', const Color(0xfff59e0b)),
+            ],
+          ),
+        ],
+      );
+    } else if (_activeIntroTab == 1) {
+      tabContent = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildServiceRow('📱 Web & Mobile Development', 'Responsive web interfaces and dynamic mobile apps (85% mobile / 95% web focus).'),
+          const SizedBox(height: 10),
+          _buildServiceRow('🤖 AI & Machine Learning', 'Custom ML models, natural language processing, and predictive analytics.'),
+          const SizedBox(height: 10),
+          _buildServiceRow('🎨 UI/UX Design', 'Optimized, user-centric, and high-conversion digital experiences.'),
+          const SizedBox(height: 10),
+          _buildServiceRow('☁️ Cloud & DevOps', 'Scalable architecture on AWS & Microsoft Azure with CI/CD automation.'),
+          const SizedBox(height: 10),
+          _buildServiceRow('🤝 Salesforce Solutions', 'Preferred Salesforce partner for migration, integration, and development.'),
+        ],
+      );
+    } else {
+      tabContent = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Leveraging a robust, enterprise-grade technology stack for custom solutions.',
+            style: TextStyle(
+              color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildTechTag('React'),
+              _buildTechTag('Angular'),
+              _buildTechTag('Node.js'),
+              _buildTechTag('AWS (Amazon Web Services)'),
+              _buildTechTag('Microsoft Azure'),
+              _buildTechTag('GenAI Integrations'),
+              _buildTechTag('Large Language Models (LLMs)'),
+              _buildTechTag('Computer Vision'),
+              _buildTechTag('IoT Ecosystems'),
+            ],
+          ),
+        ],
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xff131926) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 120,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/blucursor_banner.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      (isDark ? const Color(0xff131926) : Colors.white).withOpacity(0.85),
+                      isDark ? const Color(0xff131926) : Colors.white,
+                    ],
+                  ),
+                ),
+                padding: const EdgeInsets.all(16),
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  'bluCursor Infotech',
+                  style: TextStyle(
+                    color: isDark ? Colors.white : const Color(0xff0f172a),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  _buildTabButton(0, 'Overview'),
+                  const SizedBox(width: 8),
+                  _buildTabButton(1, 'Services'),
+                  const SizedBox(width: 8),
+                  _buildTabButton(2, 'Tech Stack'),
+                ],
+              ),
+            ),
+            const Divider(height: 20, indent: 16, endIndent: 16),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: tabContent,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabButton(int index, String title) {
+    final isSelected = _activeIntroTab == index;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _activeIntroTab = index;
+          });
+        },
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected 
+                ? const Color(0xff2563eb).withOpacity(isDark ? 0.15 : 0.08) 
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected 
+                  ? const Color(0xff2563eb).withOpacity(0.3) 
+                  : Colors.transparent,
+            ),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: isSelected 
+                  ? const Color(0xff2563eb) 
+                  : (isDark ? const Color(0xff94a3b8) : const Color(0xff64748b)),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPillarBadge(String title, String subtitle, Color color) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: TextStyle(
+              color: isDark ? const Color(0xff94a3b8) : const Color(0xff64748b),
+              fontSize: 9,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceRow(String title, String desc) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: isDark ? Colors.white : const Color(0xff0f172a),
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                desc,
+                style: TextStyle(
+                  color: isDark ? const Color(0xff94a3b8) : const Color(0xff64748b),
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTechTag(String name) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xff1e293b) : const Color(0xfff1f5f9),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isDark ? const Color(0xff334155) : const Color(0xffe2e8f0)),
+      ),
+      child: Text(
+        name,
+        style: TextStyle(
+          color: isDark ? const Color(0xffe2e8f0) : const Color(0xff475569),
+          fontSize: 10.5,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
