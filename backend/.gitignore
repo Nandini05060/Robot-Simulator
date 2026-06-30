@@ -13,3 +13,6 @@ __pycache__/
 
 # PyCharm
 .idea/
+
+# User Activity Logs
+logs/

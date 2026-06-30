@@ -140,8 +140,8 @@ async def start_navigation(
     robot.mode = "Auto"
     robot.status = "Navigating"
 
-    # Compute A* path
-    path = astar((robot.x, robot.y), (destination_x, destination_y))
+    # Compute A* path in a background thread to avoid blocking the event loop
+    path = await asyncio.to_thread(astar, (robot.x, robot.y), (destination_x, destination_y))
     path_index = 0
     
     # Move step-by-step along the path waypoints

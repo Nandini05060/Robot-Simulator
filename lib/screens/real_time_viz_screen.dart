@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../models/robot.dart';
 import '../services/api_service.dart';
@@ -296,136 +297,27 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
     });
   }
 
-  void _recalculatePath() {
+  Future<void> _recalculatePath() async {
     if (_startX != null && _destX != null) {
-      _navPath = _astar(Offset(_startX!, _startY!), Offset(_destX!, _destY!));
+      final path = await compute(_astarIsolate, {
+        'startX': _startX!,
+        'startY': _startY!,
+        'goalX': _destX!,
+        'goalY': _destY!,
+      });
+      if (mounted) {
+        setState(() {
+          _navPath = path;
+        });
+      }
     } else {
-      _navPath = [];
+      setState(() {
+        _navPath = [];
+      });
     }
   }
 
-  List<Offset> _astar(Offset start, Offset goal) {
-    final grid = List.generate(25, (_) => List.generate(20, (_) => 0));
-
-    // Populate boundary walls
-    for (int x = 0; x < 25; x++) {
-      grid[x][0] = 1;
-      grid[x][19] = 1;
-    }
-    for (int y = 0; y < 20; y++) {
-      grid[0][y] = 1;
-      grid[24][y] = 1;
-    }
-
-    // Populate horizontal partition wall at y=11 (Doors at x=9 and x=14)
-    for (int x = 0; x < 25; x++) {
-      if (x != 9 && x != 14) {
-        grid[x][11] = 1;
-      }
-    }
-
-    // Populate vertical partition wall at x=12 from y=11 to 20
-    for (int y = 11; y < 20; y++) {
-      grid[12][y] = 1;
-    }
-
-    // Populate vertical wall for left rooms at x=5 from y=0 to 11 (Door at y=3)
-    for (int y = 0; y < 11; y++) {
-      if (y != 3) {
-        grid[5][y] = 1;
-      }
-    }
-
-    // Populate horizontal wall at y=6 from x=0 to 5
-    for (int x = 0; x < 6; x++) {
-      grid[x][6] = 1;
-    }
-
-    // Populate office desks and chairs (obstacles)
-    for (int y = 1; y < 10; y++) {
-      grid[15][y] = 1;
-      grid[13][y] = 1;
-      grid[17][y] = 1;
-    }
-
-    for (int y in [3, 6, 9]) {
-      grid[22][y] = 1;
-      grid[23][y] = 1;
-    }
-
-    for (int x = 0; x < 5; x++) {
-      grid[x][2] = 1;
-    }
-
-    math.Point<int> findClosestFree(math.Point<int> pt) {
-      if (grid[pt.x][pt.y] == 0) return pt;
-      final queue = <math.Point<int>>[pt];
-      final visited = <math.Point<int>>{pt};
-      while (queue.isNotEmpty) {
-        final current = queue.removeAt(0);
-        if (grid[current.x][current.y] == 0) return current;
-        for (final dir in [
-          const math.Point(-1, 0), const math.Point(1, 0), const math.Point(0, -1), const math.Point(0, 1),
-          const math.Point(-1, -1), const math.Point(1, 1), const math.Point(-1, 1), const math.Point(1, -1)
-        ]) {
-          final nx = current.x + dir.x;
-          final ny = current.y + dir.y;
-          if (nx >= 0 && nx < 25 && ny >= 0 && ny < 20) {
-            final neighbor = math.Point(nx, ny);
-            if (!visited.contains(neighbor)) {
-              visited.add(neighbor);
-              queue.add(neighbor);
-            }
-          }
-        }
-      }
-      return pt;
-    }
-
-    final startPt = findClosestFree(math.Point(start.dx.round().clamp(0, 24), start.dy.round().clamp(0, 19)));
-    final goalPt = findClosestFree(math.Point(goal.dx.round().clamp(0, 24), goal.dy.round().clamp(0, 19)));
-
-    // BFS search
-    final openSet = <math.Point<int>>[startPt];
-    final cameFrom = <math.Point<int>, math.Point<int>>{};
-    final gScore = <math.Point<int>, int>{startPt: 0};
-    final fScore = <math.Point<int>, int>{startPt: (startPt.x - goalPt.x).abs() + (startPt.y - goalPt.y).abs()};
-
-    while (openSet.isNotEmpty) {
-      openSet.sort((a, b) => (fScore[a] ?? 999999).compareTo(fScore[b] ?? 999999));
-      final current = openSet.removeAt(0);
-
-      if (current == goalPt) {
-        final path = <Offset>[];
-        var curr = current;
-        path.add(Offset(curr.x.toDouble(), curr.y.toDouble()));
-        while (cameFrom.containsKey(curr)) {
-          curr = cameFrom[curr]!;
-          path.insert(0, Offset(curr.x.toDouble(), curr.y.toDouble()));
-        }
-        return path;
-      }
-
-      for (final dir in [const math.Point(-1, 0), const math.Point(1, 0), const math.Point(0, -1), const math.Point(0, 1)]) {
-        final neighbor = math.Point(current.x + dir.x, current.y + dir.y);
-        if (neighbor.x >= 0 && neighbor.x < 25 && neighbor.y >= 0 && neighbor.y < 20 && grid[neighbor.x][neighbor.y] == 0) {
-          final tentativeG = (gScore[current] ?? 999999) + 1;
-          if (tentativeG < (gScore[neighbor] ?? 999999)) {
-            cameFrom[neighbor] = current;
-            gScore[neighbor] = tentativeG;
-            fScore[neighbor] = tentativeG + (neighbor.x - goalPt.x).abs() + (neighbor.y - goalPt.y).abs();
-            if (!openSet.contains(neighbor)) {
-              openSet.add(neighbor);
-            }
-          }
-        }
-      }
-    }
-
-    return [start, goal];
-  }
-
-  void _startAutoNavigation() {
+  Future<void> _startAutoNavigation() async {
     if (_startX == null || _destX == null) return;
     
     setState(() {
@@ -451,7 +343,12 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
       _trail.add(Offset(_currentX, _currentY));
     });
 
-    final path = _astar(Offset(_currentX, _currentY), Offset(_destX!, _destY!));
+    final path = await compute(_astarIsolate, {
+      'startX': _currentX,
+      'startY': _currentY,
+      'goalX': _destX!,
+      'goalY': _destY!,
+    });
     int pathIndex = 0;
     
     _simulationTimer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
@@ -1340,4 +1237,134 @@ class _PulsingRobotIndicatorState extends State<PulsingRobotIndicator> with Sing
       },
     );
   }
+}
+
+/// Top-level function for computing A* in a background Isolate
+List<Offset> _astarIsolate(Map<String, double> params) {
+  final startX = params['startX']!;
+  final startY = params['startY']!;
+  final goalX = params['goalX']!;
+  final goalY = params['goalY']!;
+
+  final start = Offset(startX, startY);
+  final goal = Offset(goalX, goalY);
+
+  final grid = List.generate(25, (_) => List.generate(20, (_) => 0));
+
+  // Populate boundary walls
+  for (int x = 0; x < 25; x++) {
+    grid[x][0] = 1;
+    grid[x][19] = 1;
+  }
+  for (int y = 0; y < 20; y++) {
+    grid[0][y] = 1;
+    grid[24][y] = 1;
+  }
+
+  // Populate horizontal partition wall at y=11 (Doors at x=9 and x=14)
+  for (int x = 0; x < 25; x++) {
+    if (x != 9 && x != 14) {
+      grid[x][11] = 1;
+    }
+  }
+
+  // Populate vertical partition wall at x=12 from y=11 to 20
+  for (int y = 11; y < 20; y++) {
+    grid[12][y] = 1;
+  }
+
+  // Populate vertical wall for left rooms at x=5 from y=0 to 11 (Door at y=3)
+  for (int y = 0; y < 11; y++) {
+    if (y != 3) {
+      grid[5][y] = 1;
+    }
+  }
+
+  // Populate horizontal wall at y=6 from x=0 to 5
+  for (int x = 0; x < 6; x++) {
+    grid[x][6] = 1;
+  }
+
+  // Populate office desks and chairs (obstacles)
+  for (int y = 1; y < 10; y++) {
+    grid[15][y] = 1;
+    grid[13][y] = 1;
+    grid[17][y] = 1;
+  }
+
+  for (int y in [3, 6, 9]) {
+    grid[22][y] = 1;
+    grid[23][y] = 1;
+  }
+
+  for (int x = 0; x < 5; x++) {
+    grid[x][2] = 1;
+  }
+
+  math.Point<int> findClosestFree(math.Point<int> pt) {
+    if (grid[pt.x][pt.y] == 0) return pt;
+    final queue = <math.Point<int>>[pt];
+    final visited = <math.Point<int>>{pt};
+    while (queue.isNotEmpty) {
+      final current = queue.removeAt(0);
+      if (grid[current.x][current.y] == 0) return current;
+      for (final dir in [
+        const math.Point(-1, 0), const math.Point(1, 0), const math.Point(0, -1), const math.Point(0, 1),
+        const math.Point(-1, -1), const math.Point(1, 1), const math.Point(-1, 1), const math.Point(1, -1)
+      ]) {
+        final nx = current.x + dir.x;
+        final ny = current.y + dir.y;
+        if (nx >= 0 && nx < 25 && ny >= 0 && ny < 20) {
+          final neighbor = math.Point(nx, ny);
+          if (!visited.contains(neighbor)) {
+            visited.add(neighbor);
+            queue.add(neighbor);
+          }
+        }
+      }
+    }
+    return pt;
+  }
+
+  final startPt = findClosestFree(math.Point(start.dx.round().clamp(0, 24), start.dy.round().clamp(0, 19)));
+  final goalPt = findClosestFree(math.Point(goal.dx.round().clamp(0, 24), goal.dy.round().clamp(0, 19)));
+
+  // BFS search
+  final openSet = <math.Point<int>>[startPt];
+  final cameFrom = <math.Point<int>, math.Point<int>>{};
+  final gScore = <math.Point<int>, int>{startPt: 0};
+  final fScore = <math.Point<int>, int>{startPt: (startPt.x - goalPt.x).abs() + (startPt.y - goalPt.y).abs()};
+
+  while (openSet.isNotEmpty) {
+    openSet.sort((a, b) => (fScore[a] ?? 999999).compareTo(fScore[b] ?? 999999));
+    final current = openSet.removeAt(0);
+
+    if (current == goalPt) {
+      final path = <Offset>[];
+      var curr = current;
+      path.add(Offset(curr.x.toDouble(), curr.y.toDouble()));
+      while (cameFrom.containsKey(curr)) {
+        curr = cameFrom[curr]!;
+        path.insert(0, Offset(curr.x.toDouble(), curr.y.toDouble()));
+      }
+      return path;
+    }
+
+    for (final dir in [const math.Point(-1, 0), const math.Point(1, 0), const math.Point(0, -1), const math.Point(0, 1)]) {
+      final neighbor = math.Point(current.x + dir.x, current.y + dir.y);
+      if (neighbor.x >= 0 && neighbor.x < 25 && neighbor.y >= 0 && neighbor.y < 20 && grid[neighbor.x][neighbor.y] == 0) {
+        final tentativeG = (gScore[current] ?? 999999) + 1;
+        if (tentativeG < (gScore[neighbor] ?? 999999)) {
+          cameFrom[neighbor] = current;
+          gScore[neighbor] = tentativeG;
+          fScore[neighbor] = tentativeG + (neighbor.x - goalPt.x).abs() + (neighbor.y - goalPt.y).abs();
+          if (!openSet.contains(neighbor)) {
+            openSet.add(neighbor);
+          }
+        }
+      }
+    }
+  }
+
+  return [start, goal];
 }

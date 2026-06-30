@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Header
 
 from models.user import UserLogin
 from services.auth_service import authenticate_user
-from core.jwt_handler import create_access_token
+from services.activity_logger import log_activity
+from core.jwt_handler import create_access_token, verify_access_token
 
 router = APIRouter()
 
@@ -25,7 +26,40 @@ def login(user: UserLogin):
         {"sub": authenticated_user["username"]}
     )
 
+    log_activity(
+        authenticated_user["username"],
+        "LOGIN",
+        "Login successful"
+    )
+
     return {
         "access_token": access_token,
         "token_type": "bearer"
+    }
+
+
+@router.post("/logout")
+def logout(authorization: str = Header(..., alias="Authorization")):
+
+    if authorization.startswith("Bearer "):
+        token = authorization[7:]
+    else:
+        token = authorization
+
+    username = verify_access_token(token)
+
+    if username is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired token"
+        )
+
+    log_activity(
+        username,
+        "LOGOUT",
+        "User logged out"
+    )
+
+    return {
+        "message": "Logout successful"
     }
