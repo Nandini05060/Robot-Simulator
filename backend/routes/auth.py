@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Header, Request
 
 from models.user import UserLogin
 from services.auth_service import authenticate_user
@@ -9,7 +9,11 @@ router = APIRouter()
 
 
 @router.post("/login")
-def login(user: UserLogin):
+def login(user: UserLogin, request: Request):
+
+    username_lower = user.username.strip().lower()
+    role = "Admin" if ("admin" in username_lower) else "Operator"
+    user_agent = request.headers.get("user-agent", "Unknown Client")
 
     authenticated_user = authenticate_user(
         user.username,
@@ -17,6 +21,11 @@ def login(user: UserLogin):
     )
 
     if authenticated_user is None:
+        log_activity(
+            user.username,
+            "LOGIN_FAILED",
+            f"Failed login attempt | Role={role} | Client={user_agent} | Reason=Invalid credentials"
+        )
         raise HTTPException(
             status_code=401,
             detail="Invalid username or password"
@@ -28,8 +37,8 @@ def login(user: UserLogin):
 
     log_activity(
         authenticated_user["username"],
-        "LOGIN",
-        "Login successful"
+        "LOGIN_SUCCESS",
+        f"Login successful | Role={role} | Client={user_agent}"
     )
 
     return {
@@ -39,7 +48,7 @@ def login(user: UserLogin):
 
 
 @router.post("/logout")
-def logout(authorization: str = Header(..., alias="Authorization")):
+def logout(request: Request, authorization: str = Header(..., alias="Authorization")):
 
     if authorization.startswith("Bearer "):
         token = authorization[7:]
@@ -54,10 +63,14 @@ def logout(authorization: str = Header(..., alias="Authorization")):
             detail="Invalid or expired token"
         )
 
+    username_lower = username.strip().lower()
+    role = "Admin" if ("admin" in username_lower) else "Operator"
+    user_agent = request.headers.get("user-agent", "Unknown Client")
+
     log_activity(
         username,
         "LOGOUT",
-        "User logged out"
+        f"User logged out | Role={role} | Client={user_agent}"
     )
 
     return {
