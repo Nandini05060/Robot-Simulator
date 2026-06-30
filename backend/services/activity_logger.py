@@ -1,13 +1,17 @@
 import logging
 import os
+import sys
 
 # Create logs directory if it doesn't exist
 os.makedirs("logs", exist_ok=True)
 
+file_handler = logging.FileHandler("logs/user_activity.log")
+console_handler = logging.StreamHandler(sys.stdout)
+
 logging.basicConfig(
-    filename="logs/user_activity.log",
     level=logging.INFO,
     format="%(asctime)s | %(message)s",
+    handlers=[file_handler, console_handler]
 )
 
 
