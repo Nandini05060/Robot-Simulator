@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -12,183 +13,246 @@ class _LoginNavigationHelper {
   static bool navigated = false;
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
+class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late AnimationController _rotateController;
   late Animation<double> _fadeAnimation;
-  Timer? _autoTransitionTimer;
+  
+  Timer? _progressTimer;
+  Timer? _messageTimer;
+  double _loadingProgress = 0.0;
+  int _currentMessageIndex = 0;
+
+  final List<String> _bootMessages = [
+    "Initializing AI Core...",
+    "Loading Robot Models...",
+    "Connecting Simulation Engine...",
+    "Loading Navigation Mesh...",
+    "Synchronizing Sensors...",
+    "Calibrating Motors...",
+    "Simulation Ready"
+  ];
 
   @override
   void initState() {
     super.initState();
     _LoginNavigationHelper.navigated = false;
 
-    _controller = AnimationController(
+    _fadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1000),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    _rotateController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 12),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeIn),
     );
 
-    _controller.forward();
+    _fadeController.forward();
+    _rotateController.repeat();
 
-    // Auto-transition fallback after 6 seconds
-    _autoTransitionTimer = Timer(const Duration(seconds: 6), () {
-      _navigateToLogin();
+    // Smooth progress simulation (3.6 seconds total)
+    const int totalDurationMs = 3600;
+    const int stepMs = 30;
+    const double increment = stepMs / totalDurationMs;
+
+    _progressTimer = Timer.periodic(const Duration(milliseconds: stepMs), (timer) {
+      if (mounted) {
+        setState(() {
+          if (_loadingProgress < 1.0) {
+            _loadingProgress += increment;
+          } else {
+            _loadingProgress = 1.0;
+            _progressTimer?.cancel();
+            
+            // Glitch zoom effect delay, then navigate
+            Future.delayed(const Duration(milliseconds: 600), () {
+              _navigateToLogin();
+            });
+          }
+        });
+      }
+    });
+
+    // Message change simulation (every 500ms)
+    _messageTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (mounted) {
+        setState(() {
+          if (_currentMessageIndex < _bootMessages.length - 1) {
+            _currentMessageIndex++;
+          } else {
+            _messageTimer?.cancel();
+          }
+        });
+      }
     });
   }
 
   void _navigateToLogin() {
     if (_LoginNavigationHelper.navigated) return;
     _LoginNavigationHelper.navigated = true;
-    _autoTransitionTimer?.cancel();
+    
+    _progressTimer?.cancel();
+    _messageTimer?.cancel();
+    
     Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
   void dispose() {
-    _controller.dispose();
-    _autoTransitionTimer?.cancel();
+    _fadeController.dispose();
+    _rotateController.dispose();
+    _progressTimer?.cancel();
+    _messageTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    const primaryColor = Color(0xff55E8FF); // Electric Blue
+    const darkSurface = Color(0xff141822); // Obsidian Surface
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: const Color(0xff090A0F), // Dark Space Bg
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _navigateToLogin,
-        child: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Top Logo
-                  FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 24.0),
-                      child: Image.asset(
-                        isDark ? 'assets/logo_light.png' : 'assets/logo_dark.png',
-                        height: 32,
-                        fit: BoxFit.contain,
-                      ),
-                    ),
+        child: Stack(
+          children: [
+            // Full Screen Background Image
+            Positioned.fill(
+              child: Image.asset(
+                'assets/robot_splash.png',
+                fit: BoxFit.cover,
+              ),
+            ),
+            // Dark Radial Overlay Gradient
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment.center,
+                    radius: 1.2,
+                    colors: [
+                      const Color(0xff090A0F).withOpacity(0.35),
+                      const Color(0xff090A0F).withOpacity(0.95),
+                    ],
                   ),
-
-                  // Center Image/Frame
-                  ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Container(
-                        width: 280,
-                        height: 280,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xff3b82f6).withOpacity(isDark ? 0.15 : 0.08),
-                              blurRadius: 40,
-                              spreadRadius: 5,
-                            )
-                          ],
-                          border: Border.all(
-                            color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0),
-                            width: 1.5,
-                          ),
+                ),
+              ),
+            ),
+            // Frosted Glass container wrapping all texts in Center
+            Align(
+              alignment: const Alignment(0.0, 0.65),
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Container(
+                      width: 320,
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+                      decoration: BoxDecoration(
+                        color: darkSurface.withOpacity(0.65),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: primaryColor.withOpacity(0.2),
+                          width: 1.5,
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(26),
-                          child: Image.asset(
-                            'assets/robocore_splash.jpg',
-                            fit: BoxFit.cover,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.55),
+                            blurRadius: 40,
+                            offset: const Offset(0, 16),
                           ),
-                        ),
+                          BoxShadow(
+                            color: primaryColor.withOpacity(0.05),
+                            blurRadius: 20,
+                            spreadRadius: -5,
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-
-                  // Bottom Catcher, Title, Subtitle, and Button
-                  FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 24.0),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
+                          // Top HUD brand header
                           Text(
                             'BLUCURSOR',
-                            style: TextStyle(
-                              fontFamily: 'Outfit',
-                              fontSize: 32,
+                            style: GoogleFonts.outfit(
+                              fontSize: 18,
                               fontWeight: FontWeight.w900,
-                              letterSpacing: 1.5,
-                              color: isDark ? Colors.white : const Color(0xff0f172a),
+                              letterSpacing: 4.0,
+                              color: primaryColor,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 6),
                           Text(
-                            'ENTERPRISE FLEET COMMAND',
+                            'FLEET INTELLIGENCE SYSTEM',
                             style: TextStyle(
-                              color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
-                              fontSize: 12,
+                              fontSize: 9,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 2.0,
+                              color: theme.colorScheme.onBackground.withOpacity(0.5),
                             ),
                           ),
-                          const SizedBox(height: 40),
-                          // Interactive Tap Button
+                          
+                          const SizedBox(height: 36),
+                          
+                          // Booting Log & Status
+                          Text(
+                            _bootMessages[_currentMessageIndex],
+                            style: GoogleFonts.jetBrainsMono(
+                              color: primaryColor,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          // Smooth linear boot progress bar
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                            width: 180,
+                            height: 4.0,
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xff1e293b).withOpacity(0.4) : const Color(0xfff1f5f9),
-                              borderRadius: BorderRadius.circular(30),
+                              color: Colors.white.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(4),
                               border: Border.all(
-                                color: const Color(0xff3b82f6).withOpacity(isDark ? 0.15 : 0.2),
-                                width: 1.5,
+                                color: primaryColor.withOpacity(0.15),
+                                width: 0.5,
                               ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.flash_on,
-                                  color: Color(0xff2563eb),
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'TAP SCREEN TO ENTER PORTAL',
-                                  style: TextStyle(
-                                    color: isDark ? Colors.white : const Color(0xff0f172a),
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1.0,
-                                  ),
-                                ),
-                              ],
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: _loadingProgress,
+                                backgroundColor: Colors.transparent,
+                                valueColor: const AlwaysStoppedAnimation<Color>(primaryColor),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'AI NODE CONNECTED // ACTIVE MODE',
+                            style: TextStyle(
+                              color: theme.colorScheme.onBackground.withOpacity(0.4),
+                              fontSize: 9,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.2,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

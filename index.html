@@ -44,6 +44,8 @@
           <div class="phone-speaker"></div>
           <div class="phone-screen" id="appScreen">
             
+
+
             <!-- Sidebar Drawer Navigation -->
             <div class="drawer-backdrop" id="app-drawer-backdrop" onclick="toggleSidebarDrawer(false)"></div>
             <div class="app-drawer" id="app-side-drawer">
@@ -114,28 +116,31 @@
             </div>
             
             <!-- Screen 1: Splash Screen -->
-            <!-- Screen 1: Splash Screen -->
-            <div id="screen-splash" class="app-screen active sphere-splash-screen" onclick="onSplashClick()">
-              <!-- Top Header with bluCursor Logo -->
-              <div class="sphere-splash-header-logo">
-                <img src="assets/logo_light.png" alt="bluCursor Logo" class="splash-top-logo">
-              </div>
+            <div id="screen-splash" class="app-screen active sphere-splash-screen" style="background: radial-gradient(circle at center, rgba(9, 10, 15, 0.35) 0%, rgba(9, 10, 15, 0.9) 100%), url('assets/robot_splash.png') no-repeat center center / cover !important; display: flex !important; flex-direction: column !important; justify-content: center !important; align-items: center !important; padding: 20px;">
+              <!-- Holographic Grid Background -->
+              <div class="holographic-grid"></div>
+              
+              <!-- Scanning Laser Beam -->
+              <div class="splash-laser-scanner"></div>
 
-              <!-- Main Body -->
-              <div class="sphere-splash-body">
-                <!-- Clean Brand Presentation Frame -->
-                <div class="robocore-splash-frame">
-                  <img src="assets/robocore_splash.jpg" alt="bluCursor Fleet Portal" class="robocore-splash-img">
+              <!-- Frosted Glass container wrapping all texts -->
+              <div class="splash-glass-container" style="background: rgba(20, 24, 34, 0.65); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1.5px solid rgba(85, 232, 255, 0.2); border-radius: 24px; padding: 30px 24px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 16px 40px rgba(0,0,0,0.65), inset 0 0 20px rgba(85, 232, 255, 0.05); z-index: 5; position: relative; top: 130px;">
+                <!-- Top Brand Header -->
+                <div class="splash-hud-header" style="margin-bottom: 24px; position: relative; animation: none;">
+                  <div class="splash-hud-title" style="font-size: 19px; font-weight: 900; letter-spacing: 3px; color: var(--app-primary); text-shadow: 0 0 8px var(--app-primary);">BLUCURSOR</div>
+                  <div class="splash-hud-subtitle" style="font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: var(--app-text-muted); margin-top: 5px;">FLEET INTELLIGENCE SYSTEM</div>
                 </div>
 
-                <!-- Title & Tagline -->
-                <div class="sphere-splash-title">bluCursor</div>
-                <div class="sphere-splash-subtitle">Enterprise Fleet Command</div>
+                <!-- Booting Log & Status -->
+                <div class="splash-boot-console" style="margin-top: 10px;">
+                  <div class="splash-boot-text" id="splash-loading-text" style="font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--app-primary); text-shadow: 0 0 5px var(--app-primary); margin-bottom: 12px;">Initializing AI Core...</div>
+                  
+                  <!-- Futuristic Boot Progress Bar -->
+                  <div class="splash-progress-container" style="width: 100%; height: 4px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; overflow: hidden; margin-bottom: 20px; border: 0.5px solid rgba(85,232,255,0.15);">
+                    <div class="splash-progress-bar" id="splash-progress-bar-fill" style="height: 100%; width: 0%; background: var(--app-primary); box-shadow: 0 0 8px var(--app-primary); transition: width 0.08s;"></div>
+                  </div>
 
-                <!-- Action Prompt -->
-                <div class="sphere-splash-tap-prompt">
-                  <span class="pulse-icon"><i class="icon-zap"></i></span>
-                  <span class="pulse-text">TAP SCREEN TO ENTER PORTAL</span>
+                  <div style="font-size: 9px; font-weight: 700; color: var(--app-text-muted); letter-spacing: 1.2px;">AI NODE CONNECTED // ACTIVE MODE</div>
                 </div>
               </div>
             </div>
@@ -182,6 +187,209 @@
               </div>
             </div>
 
+            <!-- Screen 9: Biometric Scanning Screen -->
+            <div id="screen-biometric" class="app-screen">
+              <!-- Holographic Grid Background -->
+              <div class="holographic-grid-scan"></div>
+              
+              <!-- Scanning Laser Beam -->
+              <div class="scan-laser-beam"></div>
+
+              <!-- Center Facial/Fingerprint Scanner HUD -->
+              <div class="biometric-scanner-frame">
+                <!-- Circular HUD arcs -->
+                <div class="hud-circle-outer"></div>
+                <div class="hud-circle-inner"></div>
+                
+                <!-- Biometric Fingerprint -->
+                <div class="biometric-face-grid">
+                  <svg viewBox="0 0 24 24" width="70" height="70" stroke="#55E8FF" stroke-width="1.2" fill="none" class="scanning-fingerprint" filter="url(#neon-blue)">
+                    <path d="M12 2C6.48 2 2 6.48 2 12c0 4.14 2.5 7.69 6 9.22" />
+                    <path d="M12 6c-3.31 0-6 2.69-6 6 0 1.25.38 2.4 1.03 3.36" />
+                    <path d="M12 10c-1.1 0-2 .9-2 2 0 1.66 1.34 3 3 3s3-1.34 3-3" />
+                    <path d="M12 14c-1.66 0-3-1.34-3-3 0-.55-.45-1-1-1s-1 .45-1 1c0 2.76 2.24 5 5 5s5-2.24 5-5c0-4.42-3.58-8-8-8" />
+                    <path d="M12 18c-3.87 0-7-3.13-7-7 0-.55-.45-1-1-1s-1 .45-1 1c0 4.97 4.03 9 9 9s9-4.03 9-9c0-6.63-5.37-12-12-12" />
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Scanning status logs -->
+              <div class="biometric-boot-console">
+                <div class="biometric-boot-text" id="biometric-loading-text">INITIALIZING BIO-LINK...</div>
+                <div class="biometric-progress-container">
+                  <div class="biometric-progress-bar" id="biometric-progress-bar-fill"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Screen 10: Operator Greeting Screen -->
+            <div id="screen-greeting" class="app-screen greeting-screen" onclick="showScreen('dashboard')">
+              <div class="holographic-grid"></div>
+              <div class="background-radial-glow"></div>
+
+              <div class="greeting-scroll-wrapper">
+                <div class="greeting-content-premium">
+                  <!-- 1. Top Header -->
+                  <div class="system-status-badge">[ SYS_OPERATIONAL ]</div>
+                  <div class="greeting-header-group">
+                    <span class="greeting-greeting-label" id="greeting-text-prefix">GOOD MORNING,</span>
+                    <h1 class="greeting-name-label" id="greeting-operator-name">Operator Nandini <span class="emerald-dot"></span></h1>
+                    <span class="greeting-subtitle-label"><i class="icon-monitor"></i> FLEET CONTROL CENTER <i class="icon-monitor"></i></span>
+                  </div>
+
+                  <!-- 2. Main HUD Center Layout (3 Columns) -->
+                  <div class="hud-main-container">
+                    
+                    <!-- Left HUD Card -->
+                    <div class="hud-side-card left-card">
+                      <div class="hud-card-header">
+                        <span class="lbl">AI CORE</span>
+                        <span class="val green-text">ONLINE</span>
+                      </div>
+                      <div class="waveform-box">
+                        <canvas id="waveform-canvas" width="70" height="30"></canvas>
+                      </div>
+                      <div class="hud-card-footer">
+                        <span class="lbl">SYS HEALTH</span>
+                        <span class="val blue-text">99.8%</span>
+                      </div>
+                    </div>
+
+                    <!-- Center Hero Robot Viewport -->
+                    <div class="robot-hero-viewport">
+                      <!-- Background glowing halo -->
+                      <div class="bg-holo-halo"></div>
+                      
+                      <!-- Minimal Vector Coordinate Rings -->
+                      <div class="holographic-floor-rings">
+                        <div class="vector-crosshair"></div>
+                        <div class="floor-ring outer-ring"></div>
+                        <div class="floor-ring inner-ring"></div>
+                      </div>
+
+                      <!-- Robot container with Floating animation -->
+                      <div class="floating-robot-container">
+                        <img id="greeting-robot-img" src="assets/robot_hermes.png" alt="Simulated Robot" class="greeting-robot">
+                        <div class="robot-laser-line-cyan"></div>
+                      </div>
+                      
+                      <!-- Soft Projection Platform Glow -->
+                      <div class="neon-platform-glow"></div>
+                    </div>
+
+                    <!-- Right HUD Card -->
+                    <div class="hud-side-card right-card">
+                      <div class="hud-card-header">
+                        <span class="lbl">FLEET STATUS</span>
+                        <span class="val green-text">CONNECTED</span>
+                      </div>
+                      <div class="fleet-count-display">
+                        <span class="count-num">12</span>
+                        <span class="count-lbl">ROBOTS</span>
+                      </div>
+                      <div class="hud-card-footer">
+                        <span class="lbl">NETWORK</span>
+                        <span class="val blue-text" style="display: flex; align-items: center; gap: 4px;">
+                          STABLE
+                          <span class="network-bars">
+                            <span class="bar bar1"></span>
+                            <span class="bar bar2"></span>
+                            <span class="bar bar3"></span>
+                            <span class="bar bar4"></span>
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- 3. Status Line -->
+                  <div class="system-status-indicator-line">
+                    <span class="status-bracket">[</span>
+                    <span class="status-text">> SYSTEM DIAGNOSTICS: SECURE</span>
+                    <span class="status-bracket">]</span>
+                  </div>
+
+                  <!-- 4. Metrics Row -->
+                  <div class="hud-metrics-grid">
+                    <div class="metric-glass-box">
+                      <div class="metric-header">
+                        <i class="icon-monitor"></i>
+                        <span>Robots Online</span>
+                      </div>
+                      <span class="metric-value">12</span>
+                    </div>
+                    <div class="metric-glass-box">
+                      <div class="metric-header">
+                        <i class="icon-battery-charging"></i>
+                        <span>Battery Health</span>
+                      </div>
+                      <span class="metric-value">97%</span>
+                    </div>
+                    <div class="metric-glass-box">
+                      <div class="metric-header">
+                        <i class="icon-package"></i>
+                        <span>Today's Deliveries</span>
+                      </div>
+                      <span class="metric-value">48</span>
+                    </div>
+                    <div class="metric-glass-box">
+                      <div class="metric-header">
+                        <i class="icon-cpu"></i>
+                        <span>CPU Usage</span>
+                      </div>
+                      <span class="metric-value">21%</span>
+                    </div>
+                  </div>
+
+                  <!-- 5. Console Card -->
+                  <div class="hud-console-card">
+                    <div class="console-left">
+                      <canvas id="vector-map-canvas" width="64" height="56"></canvas>
+                    </div>
+                    <div class="console-right">
+                      <div class="console-timeline">
+                        <div class="timeline-line"></div>
+                        <div class="console-line-node active" id="log-node-1">
+                          <span class="node-dot"></span>
+                          <span class="node-text">Initializing AI Core...</span>
+                        </div>
+                        <div class="console-line-node" id="log-node-2">
+                          <span class="node-dot"></span>
+                          <span class="node-text">Loading Fleet Data...</span>
+                        </div>
+                        <div class="console-line-node" id="log-node-3">
+                          <span class="node-dot"></span>
+                          <span class="node-text">Connecting Sensors...</span>
+                        </div>
+                        <div class="console-line-node" id="log-node-4">
+                          <span class="node-dot"></span>
+                          <span class="node-text">Calibration in Progress...</span>
+                        </div>
+                        <div class="console-line-node" id="log-node-5">
+                          <span class="node-dot"></span>
+                          <span class="node-text">Simulation Ready</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 6. Footer Continue -->
+                  <div class="greeting-footer-premium">
+                    <h3 class="footer-title">INITIALIZE CONTROL SYSTEM</h3>
+                    <p class="footer-subtitle">TAP ANYWHERE TO CONTINUE</p>
+                    <div class="double-chevron-pulse">
+                      <svg viewBox="0 0 24 24" width="20" height="20" stroke="#00A2FF" stroke-width="2.5" fill="none">
+                        <polyline points="7 13 12 18 17 13"></polyline>
+                        <polyline points="7 6 12 11 17 6"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
             <!-- Screen 3: Home Dashboard Screen -->
             <div id="screen-dashboard" class="app-screen">
               <div class="app-header" style="height: 56px; display: flex; justify-content: space-between; align-items: center; padding: 0 16px; border-bottom: 1px solid var(--app-border);">
@@ -210,119 +418,162 @@
               
               <div class="app-scrollable-content fade-in-element" style="padding: 0;">
 
+                <!-- Command Center Hero Section -->
+                <div class="command-hero-section">
+                  <div class="hero-grid-overlay"></div>
+                  <h1>Good Morning,<br>Operator <span style="color: var(--app-primary); font-size: 26px; line-height: 1; vertical-align: middle; filter: drop-shadow(0 0 5px var(--app-primary));">&bull;</span></h1>
+                  <p>Monitor, control, and simulate autonomous robots in <span class="highlight-neon">real time.</span></p>
+                  
+                  <!-- HUD corner decorative brackets -->
+                  <div class="hero-bracket top-left"></div>
+                  <div class="hero-bracket top-right"></div>
+                  <div class="hero-bracket bottom-left"></div>
+                  <div class="hero-bracket bottom-right"></div>
+                </div>
+
                 <!-- bluCursor Status Header -->
-                <div class="blucursor-about-card" style="margin: 16px 16px 0 16px; padding: 16px; border-radius: 20px; position: relative; overflow: hidden; background: var(--app-surface); border: 1px solid var(--app-border);">
+                <div class="intro-card" style="padding: 16px;">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                      <img src="assets/logo_dark.png" alt="bluCursor" class="logo-img" style="height: 18px; display: block;">
-                      <span style="font-size: 15px; font-weight: 900; color: var(--app-text);">bluCursor</span>
+                      <img src="assets/logo_dark.png" alt="bluCursor" class="logo-img" style="height: 18px; display: block; filter: drop-shadow(0 0 5px rgba(85,232,255,0.4));">
+                      <span style="font-size: 15px; font-weight: 900; color: var(--app-text); letter-spacing: 0.5px;">bluCursor</span>
                     </div>
-                    <span style="font-size: 9px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.15); padding: 3px 8px; border-radius: 10px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">
-                      <span style="width: 5px; height: 5px; background: #10b981; border-radius: 50%; display: inline-block;"></span> FLEET SYSTEM NOMINAL
+                    <span style="font-size: 9px; font-weight: 800; color: var(--app-primary); background: rgba(85, 232, 255, 0.08); border: 1px solid rgba(85, 232, 255, 0.15); padding: 3px 8px; border-radius: 10px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;">
+                      <span class="ping-dot" style="width: 5px; height: 5px; background: var(--app-primary); border-radius: 50%; display: inline-block;"></span> FLEET SYSTEM NOMINAL
                     </span>
                   </div>
-                  <div style="font-size: 10px; font-weight: 900; color: var(--app-text-muted); margin-bottom: 8px; letter-spacing: 0.8px;">SYSTEM ALERTS & NOTIFICATIONS</div>
+                  <div style="font-size: 10px; font-weight: 900; color: var(--app-text-muted); margin-bottom: 8px; letter-spacing: 0.8px; text-transform: uppercase;">SYSTEM ALERTS & NOTIFICATIONS</div>
                   <div class="alert-list" style="display: flex; flex-direction: column; gap: 6px;">
                     <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--app-text);">
                       <span style="display: flex; align-items: center; gap: 6px; color: var(--app-warning);"><i class="icon-alert-triangle" style="font-size: 12px;"></i> <span style="color: var(--app-text);">Failed simulation on Node-B</span></span>
                       <span style="font-size: 10px; color: var(--app-text-muted);">12m ago</span>
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--app-text);">
-                      <span style="display: flex; align-items: center; gap: 6px; color: var(--app-success);"><i class="icon-check-circle" style="font-size: 12px;"></i> <span style="color: var(--app-text);">Batch render #402 complete</span></span>
+                      <span style="display: flex; align-items: center; gap: 6px; color: var(--app-primary);"><i class="icon-check-circle" style="font-size: 12px;"></i> <span style="color: var(--app-text);">Batch render #402 complete</span></span>
                       <span style="font-size: 10px; color: var(--app-text-muted);">1h ago</span>
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--app-text);">
-                      <span style="display: flex; align-items: center; gap: 6px; color: var(--app-secondary);"><i class="icon-info" style="font-size: 12px;"></i> <span style="color: var(--app-text);">System Update: v2.0 Enterprise is live</span></span>
+                      <span style="display: flex; align-items: center; gap: 6px; color: var(--app-text-muted);"><i class="icon-info" style="font-size: 12px;"></i> <span style="color: var(--app-text);">System Update: v2.0 Enterprise is live</span></span>
                       <span style="font-size: 10px; color: var(--app-text-muted);">1d ago</span>
                     </div>
+                  </div>
                 </div>
 
                 <!-- Company Profile Card -->
-                <div class="blucursor-profile-card" style="margin: 16px 16px 0 16px; border-radius: 20px; overflow: hidden; background: var(--app-surface); border: 1px solid var(--app-border); box-shadow: var(--app-shadow);">
-                  <!-- Banner Image -->
-                  <div style="height: 120px; width: 100%; background: url('assets/blucursor_banner.png') no-repeat center center/cover; position: relative;">
-                    <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent, rgba(19, 25, 38, 0.85) 70%, var(--app-surface));"></div>
-                    <div style="position: absolute; bottom: 12px; left: 16px; font-size: 18px; font-weight: 900; color: var(--app-text);">bluCursor Infotech</div>
+                <div class="intro-card">
+                  <!-- Banner Image with Holographic Radar overlay -->
+                  <div class="intro-banner">
+                    <div class="intro-banner-overlay-grid"></div>
+                    <div class="intro-banner-radar"></div>
+                    <div class="intro-title-group">
+                      <h2>bluCursor Infotech</h2>
+                      <p>IT Outsourcing & Digital Transformation</p>
+                    </div>
                   </div>
                   
                   <!-- Tabs -->
-                  <div style="display: flex; padding: 0 16px; gap: 8px; margin-top: 8px;">
-                    <button class="intro-tab-btn active" onclick="switchIntroTab(0)" id="tab-intro-0" style="flex: 1; padding: 8px 0; border: 1px solid transparent; background: transparent; color: var(--app-text-muted); font-size: 11px; font-weight: 700; border-radius: 8px; cursor: pointer; text-align: center;">Overview</button>
-                    <button class="intro-tab-btn" onclick="switchIntroTab(1)" id="tab-intro-1" style="flex: 1; padding: 8px 0; border: 1px solid transparent; background: transparent; color: var(--app-text-muted); font-size: 11px; font-weight: 700; border-radius: 8px; cursor: pointer; text-align: center;">Services</button>
-                    <button class="intro-tab-btn" onclick="switchIntroTab(2)" id="tab-intro-2" style="flex: 1; padding: 8px 0; border: 1px solid transparent; background: transparent; color: var(--app-text-muted); font-size: 11px; font-weight: 700; border-radius: 8px; cursor: pointer; text-align: center;">Tech Stack</button>
+                  <div class="intro-tab-list">
+                    <button class="intro-tab-btn active" onclick="switchIntroTab(0)" id="tab-intro-0">Overview</button>
+                    <button class="intro-tab-btn" onclick="switchIntroTab(1)" id="tab-intro-1">Services</button>
+                    <button class="intro-tab-btn" onclick="switchIntroTab(2)" id="tab-intro-2">Tech Stack</button>
                   </div>
                   
-                  <hr style="margin: 12px 16px; border: none; border-top: 1px solid var(--app-border);">
+                  <div class="intro-divider"></div>
                   
                   <!-- Tab Contents -->
-                  <div style="padding: 0 16px 16px 16px; font-size: 12px;">
+                  <div class="intro-body">
                     <!-- Overview Tab Content -->
                     <div id="intro-content-0" class="intro-tab-content">
-                      <p style="margin: 0; color: var(--app-text-muted); line-height: 1.5;">bluCursor Infotech is an IT outsourcing, digital transformation, and software development company based in Indore, India. Established in 2013, we deliver customized technology solutions across the digital value chain.</p>
-                      <div style="font-size: 10px; font-weight: 900; color: var(--app-text-muted); margin: 16px 0 8px 0; letter-spacing: 0.8px; text-transform: uppercase;">Our Philosophy Pillars</div>
-                      <div style="display: flex; gap: 8px; justify-content: space-between;">
-                        <div style="flex: 1; padding: 8px; border-radius: 12px; background: rgba(37,99,235,0.06); border: 1px solid rgba(37,99,235,0.15); text-align: center;">
-                          <div style="color: var(--app-accent); font-weight: 700; font-size: 11.5px;">🛡️ Passion</div>
-                          <div style="font-size: 9px; color: var(--app-text-muted); margin-top: 2px;">Tech & Solving</div>
+                      <p style="margin: 0; color: var(--app-text-muted); line-height: 1.5; font-size: 11.5px;">bluCursor Infotech is an IT outsourcing, digital transformation, and software development company based in Indore, India. Established in 2013, we deliver customized technology solutions across the digital value chain.</p>
+                      
+                      <div style="font-size: 9px; font-weight: 900; color: var(--app-text-muted); margin: 16px 0 8px 0; letter-spacing: 0.8px; text-transform: uppercase;">Our Philosophy Pillars</div>
+                      
+                      <div class="intro-philosophy-grid">
+                        <div class="intro-pill">
+                          <i class="icon-shield"></i>
+                          <span>Passion</span>
+                          <small>Tech & Solving</small>
                         </div>
-                        <div style="flex: 1; padding: 8px; border-radius: 12px; background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.15); text-align: center;">
-                          <div style="color: var(--app-success); font-weight: 700; font-size: 11.5px;">⚡ Power</div>
-                          <div style="font-size: 9px; color: var(--app-text-muted); margin-top: 2px;">Cost-effective</div>
+                        <div class="intro-pill">
+                          <i class="icon-zap"></i>
+                          <span>Power</span>
+                          <small>Cost-effective</small>
                         </div>
-                        <div style="flex: 1; padding: 8px; border-radius: 12px; background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15); text-align: center;">
-                          <div style="color: #f59e0b; font-weight: 700; font-size: 11.5px;">🏆 Pride</div>
-                          <div style="font-size: 9px; color: var(--app-text-muted); margin-top: 2px;">Client Growth</div>
+                        <div class="intro-pill">
+                          <i class="icon-award"></i>
+                          <span>Pride</span>
+                          <small>Client Growth</small>
                         </div>
                       </div>
                     </div>
                     
                     <!-- Services Tab Content -->
                     <div id="intro-content-1" class="intro-tab-content" style="display: none;">
-                      <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div>
-                          <div style="font-weight: 700; color: var(--app-text);">📱 Web & Mobile Development</div>
-                          <div style="color: var(--app-text-muted); font-size: 11px; margin-top: 2px;">Responsive web interfaces and dynamic mobile apps (85% mobile / 95% web focus).</div>
+                      <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div class="intro-service-item">
+                          <div class="intro-service-icon"><i class="icon-smartphone"></i></div>
+                          <div class="intro-service-details">
+                            <h5>Web & Mobile Development</h5>
+                            <p>Responsive web interfaces and dynamic mobile apps.</p>
+                          </div>
                         </div>
-                        <div>
-                          <div style="font-weight: 700; color: var(--app-text);">🤖 AI & Machine Learning</div>
-                          <div style="color: var(--app-text-muted); font-size: 11px; margin-top: 2px;">Custom ML models, natural language processing, and predictive analytics.</div>
+                        <div class="intro-service-item">
+                          <div class="intro-service-icon"><i class="icon-cpu"></i></div>
+                          <div class="intro-service-details">
+                            <h5>AI & Machine Learning</h5>
+                            <p>Custom ML models, NLP, and predictive analytics.</p>
+                          </div>
                         </div>
-                        <div>
-                          <div style="font-weight: 700; color: var(--app-text);">🎨 UI/UX Design</div>
-                          <div style="color: var(--app-text-muted); font-size: 11px; margin-top: 2px;">Optimized, user-centric, and high-conversion digital experiences.</div>
+                        <div class="intro-service-item">
+                          <div class="intro-service-icon"><i class="icon-layout"></i></div>
+                          <div class="intro-service-details">
+                            <h5>UI/UX Design</h5>
+                            <p>Optimized, user-centric, and high-conversion experiences.</p>
+                          </div>
                         </div>
-                        <div>
-                          <div style="font-weight: 700; color: var(--app-text);">☁️ Cloud & DevOps</div>
-                          <div style="color: var(--app-text-muted); font-size: 11px; margin-top: 2px;">Scalable architecture on AWS & Microsoft Azure with CI/CD automation.</div>
+                        <div class="intro-service-item">
+                          <div class="intro-service-icon"><i class="icon-cloud"></i></div>
+                          <div class="intro-service-details">
+                            <h5>Cloud & DevOps</h5>
+                            <p>Scalable architecture on AWS & Azure with CI/CD.</p>
+                          </div>
                         </div>
-                        <div>
-                          <div style="font-weight: 700; color: var(--app-text);">🤝 Salesforce Solutions</div>
-                          <div style="color: var(--app-text-muted); font-size: 11px; margin-top: 2px;">Preferred Salesforce partner for migration, integration, and development.</div>
+                        <div class="intro-service-item">
+                          <div class="intro-service-icon"><i class="icon-users"></i></div>
+                          <div class="intro-service-details">
+                            <h5>Salesforce Solutions</h5>
+                            <p>Salesforce partner for migration and custom integrations.</p>
+                          </div>
                         </div>
                       </div>
                     </div>
                     
                     <!-- Tech Stack Tab Content -->
                     <div id="intro-content-2" class="intro-tab-content" style="display: none;">
-                      <p style="margin: 0 0 10px 0; color: var(--app-text-muted); line-height: 1.4;">Leveraging a robust, enterprise-grade technology stack for custom solutions.</p>
-                      <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
-                        <span class="tech-tag">React</span>
-                        <span class="tech-tag">Angular</span>
-                        <span class="tech-tag">Node.js</span>
-                        <span class="tech-tag">AWS (Amazon Web Services)</span>
-                        <span class="tech-tag">Microsoft Azure</span>
-                        <span class="tech-tag">GenAI Integrations</span>
-                        <span class="tech-tag">Large Language Models (LLMs)</span>
-                        <span class="tech-tag">Computer Vision</span>
-                        <span class="tech-tag">IoT Ecosystems</span>
+                      <p style="margin: 0 0 10px 0; color: var(--app-text-muted); line-height: 1.4; font-size: 11px;">Leveraging a robust, enterprise-grade technology stack for custom solutions.</p>
+                      <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+                        <span class="intro-tech-tag">React</span>
+                        <span class="intro-tech-tag">Angular</span>
+                        <span class="intro-tech-tag">Node.js</span>
+                        <span class="intro-tech-tag">AWS (Amazon Web Services)</span>
+                        <span class="intro-tech-tag">Microsoft Azure</span>
+                        <span class="intro-tech-tag">GenAI Integrations</span>
+                        <span class="intro-tech-tag">Large Language Models (LLMs)</span>
+                        <span class="intro-tech-tag">Computer Vision</span>
+                        <span class="intro-tech-tag">IoT Ecosystems</span>
                       </div>
+                    </div>
+                    
+                    <!-- High UI Live Telemetry Ticker -->
+                    <div class="intro-telemetry-bar">
+                      <span><span class="ping-dot"></span> NODE STATUS: SYNCED</span>
+                      <span>RTT: 12ms | UPTIME: 99.98%</span>
                     </div>
                   </div>
                 </div>
 
                 <!-- Getting Started (Quick Start Actions) -->
                 <div style="padding: 0 16px; margin-top: 16px;">
-                  <h5 class="section-title" style="margin: 0 0 10px 0; font-size: 11px; font-weight: 800; letter-spacing: 0.8px; color: var(--app-text-muted); text-transform: uppercase;">Getting Started</h5>
                   
                   <!-- Action 1: Launch Patrol -->
                   <div class="category-card-premium" onclick="showScreen('patrolling')" style="padding: 16px; border-radius: 16px; background: var(--app-surface); border: 1px solid var(--app-border); box-shadow: var(--app-shadow); margin-bottom: 10px; cursor: pointer; display: flex; align-items: flex-start; gap: 14px;">
@@ -596,6 +847,50 @@
                     </div>
                   </div>
                   
+                  <!-- Registered Robots Summary Stats -->
+                  <div class="robots-summary-stats-bar">
+                    <div class="summary-stat-box count-all">
+                      <div class="stat-inner">
+                        <div class="stat-title">Total Robots</div>
+                        <div class="stat-num-row">
+                          <span class="stat-num">5</span>
+                          <span class="stat-sub">+1 new</span>
+                        </div>
+                      </div>
+                      <div class="stat-box-icon"><i class="icon-cpu"></i></div>
+                    </div>
+                    <div class="summary-stat-box count-active">
+                      <div class="stat-inner">
+                        <div class="stat-title">Active Robots</div>
+                        <div class="stat-num-row">
+                          <span class="stat-num">3</span>
+                          <span class="stat-percent">60%</span>
+                        </div>
+                      </div>
+                      <div class="stat-box-circle stroke-active"></div>
+                    </div>
+                    <div class="summary-stat-box count-idle">
+                      <div class="stat-inner">
+                        <div class="stat-title">Idle / Standby</div>
+                        <div class="stat-num-row">
+                          <span class="stat-num">1</span>
+                          <span class="stat-percent">20%</span>
+                        </div>
+                      </div>
+                      <div class="stat-box-circle stroke-idle"></div>
+                    </div>
+                    <div class="summary-stat-box count-offline">
+                      <div class="stat-inner">
+                        <div class="stat-title">Offline</div>
+                        <div class="stat-num-row">
+                          <span class="stat-num">1</span>
+                          <span class="stat-percent">20%</span>
+                        </div>
+                      </div>
+                      <div class="stat-box-circle stroke-offline"></div>
+                    </div>
+                  </div>
+                  
                   <!-- Grid/Cards view -->
                   <div class="list-container" id="delivery-maps-list" style="display: flex; flex-direction: column; gap: 12px;"></div>
                   
@@ -708,6 +1003,50 @@
                       <button class="view-toggle-btn" id="patrol-toggle-table" onclick="toggleModuleView('patrol', 'table')">
                         <i class="icon-list" style="font-size: 11px;"></i> Table
                       </button>
+                    </div>
+                  </div>
+                  
+                  <!-- Registered Patrol Summary Stats -->
+                  <div class="robots-summary-stats-bar">
+                    <div class="summary-stat-box count-all">
+                      <div class="stat-inner">
+                        <div class="stat-title">Total Patrol</div>
+                        <div class="stat-num-row">
+                          <span class="stat-num">5</span>
+                          <span class="stat-sub">+1 new</span>
+                        </div>
+                      </div>
+                      <div class="stat-box-icon"><i class="icon-shield"></i></div>
+                    </div>
+                    <div class="summary-stat-box count-active">
+                      <div class="stat-inner">
+                        <div class="stat-title">Active Patrol</div>
+                        <div class="stat-num-row">
+                          <span class="stat-num">4</span>
+                          <span class="stat-percent">80%</span>
+                        </div>
+                      </div>
+                      <div class="stat-box-circle stroke-active"></div>
+                    </div>
+                    <div class="summary-stat-box count-idle">
+                      <div class="stat-inner">
+                        <div class="stat-title">Idle / Standby</div>
+                        <div class="stat-num-row">
+                          <span class="stat-num">1</span>
+                          <span class="stat-percent">20%</span>
+                        </div>
+                      </div>
+                      <div class="stat-box-circle stroke-idle"></div>
+                    </div>
+                    <div class="summary-stat-box count-offline">
+                      <div class="stat-inner">
+                        <div class="stat-title">Offline</div>
+                        <div class="stat-num-row">
+                          <span class="stat-num">0</span>
+                          <span class="stat-percent">0%</span>
+                        </div>
+                      </div>
+                      <div class="stat-box-circle stroke-offline"></div>
                     </div>
                   </div>
                   
@@ -911,10 +1250,10 @@
                       <div class="dial-container">
                         <svg width="50" height="50" viewBox="0 0 36 36" style="transform: rotate(0deg); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);" id="heading-compass-svg">
                           <circle cx="18" cy="18" r="15.9155" class="dial-track" />
-                          <line x1="18" y1="5" x2="18" y2="31" stroke="rgba(139, 92, 246, 0.15)" stroke-width="1" />
-                          <line x1="5" y1="18" x2="31" y2="18" stroke="rgba(139, 92, 246, 0.15)" stroke-width="1" />
-                          <polygon points="18,6 21.5,18 14.5,18" fill="#8B5CF6" />
-                          <polygon points="18,30 21.5,18 14.5,18" fill="rgba(139, 92, 246, 0.3)" />
+                          <line x1="18" y1="5" x2="18" y2="31" stroke="rgba(85, 232, 255, 0.15)" stroke-width="1" />
+                          <line x1="5" y1="18" x2="31" y2="18" stroke="rgba(85, 232, 255, 0.15)" stroke-width="1" />
+                          <polygon points="18,6 21.5,18 14.5,18" fill="#55E8FF" />
+                          <polygon points="18,30 21.5,18 14.5,18" fill="rgba(85, 232, 255, 0.3)" />
                         </svg>
                         <span id="monitor-direction-short" class="dial-val-centered">NE</span>
                       </div>
@@ -1164,6 +1503,28 @@
               </div>
             </div>
 
+            <!-- Robot Split Transition Overlay -->
+            <div id="robot-transition-overlay" class="transition-overlay">
+              <div class="split-door left-door"></div>
+              <div class="split-door right-door"></div>
+              <div class="transition-content">
+                <div class="transition-card">
+                  <div class="transition-grid"></div>
+                  <div class="transition-title-group">
+                    <h2 id="trans-robot-name">RB-001 CONNECTING</h2>
+                    <p>SYNCHRONIZING TELEMETRY STREAM</p>
+                  </div>
+                  <div class="transition-render-box">
+                    <img id="trans-robot-img" src="assets/robot_hermes.png" alt="Loading robot">
+                    <div class="transition-laser-sweep"></div>
+                  </div>
+                  <div class="transition-progress-container">
+                    <div class="transition-progress-bar" id="trans-progress-fill"></div>
+                  </div>
+                  <div class="transition-status-text">INITIALIZING QUANTUM DUPLEX LINK</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1288,6 +1649,7 @@
           <button class="code-tab" data-file="robot_model" onclick="switchCodeFile('robot_model')">robot.dart (Model)</button>
           <button class="code-tab" data-file="splash" onclick="switchCodeFile('splash')">splash_screen.dart</button>
           <button class="code-tab" data-file="login" onclick="switchCodeFile('login')">login_screen.dart</button>
+          <button class="code-tab" data-file="greeting" onclick="switchCodeFile('greeting')">greeting_screen.dart</button>
           <button class="code-tab" data-file="shell" onclick="switchCodeFile('shell')">main_navigation_shell.dart</button>
           <button class="code-tab" data-file="dashboard" onclick="switchCodeFile('dashboard')">dashboard_screen.dart</button>
           <button class="code-tab" data-file="delivery" onclick="switchCodeFile('delivery')">delivery_cart_screen.dart</button>
@@ -1312,10 +1674,46 @@
   <div class="dialog-overlay" id="aboutDialog">
     <div class="dialog-box">
       <h3>bluCursor Fleet Portal</h3>
-      <p class="dialog-version">Version 1.0.0+1</p>
+      <p class="dialog-version">Version 1.0.0+2</p>
       <p class="dialog-text">This mock console simulates bluCursor's mobile application and real-time operations console. Developed by bluCursor Infotech, it integrates telemetry monitors, diagnostics logs, and manual D-Pad overrides under a clean corporate design standard.</p>
       <p class="dialog-copyright">© 2026 bluCursor Infotech Pvt Ltd. All rights reserved.</p>
       <button class="btn btn-primary" onclick="closeAboutInfo()">Close</button>
+    </div>
+  </div>
+
+  <!-- Floating Jarvis AI Assistant Orb -->
+  <div class="jarvis-orb-container" id="jarvisOrb" onclick="toggleJarvisAssistant(true)">
+    <div class="jarvis-orb-glow"></div>
+    <div class="jarvis-orb-core"></div>
+    <div class="jarvis-pulse-ring"></div>
+  </div>
+
+  <!-- Jarvis Expandable Panel -->
+  <div class="jarvis-assistant-panel" id="jarvisPanel">
+    <div class="jarvis-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="jarvis-mini-orb"></div>
+        <span class="jarvis-title">JARVIS v4.0</span>
+      </div>
+      <button class="jarvis-close-btn" onclick="toggleJarvisAssistant(false)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: block;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="jarvis-content">
+      <div class="jarvis-speech-wave">
+        <span class="wave-bar bar-1"></span>
+        <span class="wave-bar bar-2"></span>
+        <span class="wave-bar bar-3"></span>
+        <span class="wave-bar bar-4"></span>
+        <span class="wave-bar bar-5"></span>
+      </div>
+      <div class="jarvis-dialog-box">
+        <span class="jarvis-label">SYSTEM INTEL:</span>
+        <p class="jarvis-text" id="jarvisText">Awaiting Operator activation...</p>
+      </div>
+    </div>
+    <div class="jarvis-footer">
+      <span class="jarvis-status">AI CORE LINKED // 98.6% NOMINAL</span>
     </div>
   </div>
 

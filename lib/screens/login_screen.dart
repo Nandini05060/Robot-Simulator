@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -16,6 +17,9 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _rememberMe = true;
   bool _showPassword = false;
   bool _isLoading = false;
+  bool _isBiometricScanning = false;
+  String _biometricStatus = 'INITIALIZING BIO-LINK...';
+  double _biometricProgress = 0.0;
 
   void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
@@ -34,7 +38,37 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       if (success) {
-        Navigator.pushReplacementNamed(context, '/dashboard');
+        setState(() {
+          _isBiometricScanning = true;
+          _biometricStatus = "ESTABLISHING SECURE CONNECTION...";
+          _biometricProgress = 0.05;
+        });
+
+        // Sequence of biometric log details
+        const logs = [
+          "INITIALIZING BIO-LINK MONITOR...",
+          "SCANNING RETINAL PROFILE...",
+          "BIOMETRICS MATCHED: OPERATOR CERTIFIED",
+          "SYNCING NEURAL ROUTER...",
+          "SYSTEM ONLINE. FLEET BEACON NOMINAL"
+        ];
+
+        for (int i = 0; i < logs.length; i++) {
+          Future.delayed(Duration(milliseconds: 500 + i * 500), () {
+            if (mounted && _isBiometricScanning) {
+              setState(() {
+                _biometricStatus = logs[i];
+                _biometricProgress = (i + 1) / logs.length;
+              });
+            }
+          });
+        }
+
+        Future.delayed(const Duration(milliseconds: 3000), () {
+          if (mounted) {
+            Navigator.pushReplacementNamed(context, '/greeting');
+          }
+        });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -57,24 +91,152 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    const primaryColor = Color(0xff55E8FF); // Electric Blue
+    const accentColor = Color(0xff00D2FF);  // Neon Blue Accent
+    const darkSurface = Color(0xff141822); // Obsidian Card
+    const darkBg = Color(0xff090A0F);      // Dark Space Bg
+
+    if (_isBiometricScanning) {
+      return Scaffold(
+        backgroundColor: darkBg,
+        body: Stack(
+          children: [
+            // Grid Background Overlay
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: const Alignment(0, -0.5),
+                    radius: 1.2,
+                    colors: [
+                      primaryColor.withOpacity(0.08),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 50),
+                  
+                  // Scanning Rings
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 190,
+                        height: 190,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: primaryColor.withOpacity(0.25),
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 160,
+                        height: 160,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: primaryColor.withOpacity(0.1),
+                            width: 1.0,
+                          ),
+                        ),
+                      ),
+                      const Icon(
+                        Icons.fingerprint_outlined,
+                        size: 76,
+                        color: primaryColor,
+                      ),
+                      SizedBox(
+                        width: 175,
+                        height: 175,
+                        child: CircularProgressIndicator(
+                          value: _biometricProgress,
+                          color: primaryColor,
+                          backgroundColor: Colors.transparent,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 50),
+                  
+                  // Progress details
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          _biometricStatus,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: primaryColor,
+                            letterSpacing: 0.5,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          height: 3.5,
+                          width: 170,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: primaryColor.withOpacity(0.15),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: 170 * _biometricProgress,
+                              height: 3.5,
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [Color(0xff00a3ff), primaryColor],
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
+      backgroundColor: darkBg,
       body: Stack(
         children: [
-          // Background Image
-          Positioned.fill(
-            child: Image.asset(
-              'assets/login_bg.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          // Subtle overlay for readability
+          // Cyberpunk Grid Background Overlay
           Positioned.fill(
             child: Container(
-              color: isDark 
-                  ? Colors.black.withOpacity(0.4) 
-                  : Colors.white.withOpacity(0.15),
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: const Alignment(0, -0.5),
+                  radius: 1.2,
+                  colors: [
+                    primaryColor.withOpacity(0.06),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
             ),
           ),
           
@@ -82,50 +244,53 @@ class _LoginScreenState extends State<LoginScreen> {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Header
+                    // Header Brand
                     Column(
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xff131926) : Colors.white,
+                            color: darkSurface,
                             borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xff2563eb).withOpacity(0.05),
-                                blurRadius: 15,
-                                offset: const Offset(0, 5),
-                              )
-                            ],
                             border: Border.all(
-                              color: isDark ? const Color(0xff1e293b) : const Color(0xffcbd5e1),
+                              color: primaryColor.withOpacity(0.2),
                               width: 1.2,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: primaryColor.withOpacity(0.05),
+                                blurRadius: 15,
+                                spreadRadius: 1,
+                              )
+                            ],
                           ),
                           child: Image.asset(
-                            isDark ? 'assets/logo_light.png' : 'assets/logo_dark.png',
-                            height: 28,
+                            'assets/logo_light.png',
+                            height: 24,
                             fit: BoxFit.contain,
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 28),
                         Text(
                           'Secure Operator Login',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
+                          style: GoogleFonts.outfit(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: -0.2,
                           ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           'bluCursor Fleet Portal Access',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
+                          style: TextStyle(
+                            color: theme.colorScheme.onBackground.withOpacity(0.5),
+                            fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -137,19 +302,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(24),
                       child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                         child: Container(
                           padding: const EdgeInsets.all(28.0),
                           decoration: BoxDecoration(
-                            color: isDark 
-                                ? const Color(0xff131926).withOpacity(0.4) 
-                                : Colors.white.withOpacity(0.75),
+                            color: darkSurface.withOpacity(0.65),
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(
-                              color: isDark 
-                                  ? const Color(0xff1e293b).withOpacity(0.4) 
-                                  : const Color(0xffcbd5e1).withOpacity(0.8),
-                              width: 1.5,
+                              color: primaryColor.withOpacity(0.18),
+                              width: 1.2,
                             ),
                           ),
                           child: Form(
@@ -159,22 +320,21 @@ class _LoginScreenState extends State<LoginScreen> {
                               children: [
                                 // Email field
                                 Text(
-                                  'EMAIL ADDRESS',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
-                                    letterSpacing: 1.0,
+                                  'OPERATOR EMAIL',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w900,
+                                    color: primaryColor,
+                                    letterSpacing: 1.2,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
                                 TextFormField(
                                   controller: _emailController,
                                   keyboardType: TextInputType.emailAddress,
-                                  decoration: InputDecoration(
-                                    prefixIcon: const Icon(Icons.email_outlined, color: Color(0xff2563eb)),
+                                  decoration: const InputDecoration(
+                                    prefixIcon: Icon(Icons.email_outlined, color: primaryColor, size: 20),
                                     hintText: 'operator@blucursor.com',
-                                    fillColor: isDark ? const Color(0xff090d16).withOpacity(0.3) : Colors.white.withOpacity(0.5),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -190,12 +350,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 
                                 // Password field
                                 Text(
-                                  'PASSWORD',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
-                                    letterSpacing: 1.0,
+                                  'AI CORE CREDENTIAL',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w900,
+                                    color: primaryColor,
+                                    letterSpacing: 1.2,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -203,11 +363,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   controller: _passwordController,
                                   obscureText: !_showPassword,
                                   decoration: InputDecoration(
-                                    prefixIcon: const Icon(Icons.lock_outline, color: Color(0xff2563eb)),
+                                    prefixIcon: const Icon(Icons.lock_outline, color: primaryColor, size: 20),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _showPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                                        color: const Color(0xff64748b),
+                                        color: theme.colorScheme.onBackground.withOpacity(0.5),
+                                        size: 20,
                                       ),
                                       onPressed: () {
                                         setState(() {
@@ -216,7 +377,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                       },
                                     ),
                                     hintText: '••••••••',
-                                    fillColor: isDark ? const Color(0xff090d16).withOpacity(0.3) : Colors.white.withOpacity(0.5),
                                   ),
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -228,7 +388,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     return null;
                                   },
                                 ),
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 18),
                                 
                                 // Features (Remember Me)
                                 Row(
@@ -238,8 +398,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                       width: 24,
                                       child: Checkbox(
                                         value: _rememberMe,
-                                        activeColor: const Color(0xff2563eb),
+                                        activeColor: accentColor,
+                                        checkColor: darkBg,
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                        side: BorderSide(color: primaryColor.withOpacity(0.3), width: 1.5),
                                         onChanged: (value) {
                                           setState(() {
                                             _rememberMe = value ?? true;
@@ -252,7 +414,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       'Remember active session',
                                       style: TextStyle(
                                         fontSize: 13,
-                                        color: isDark ? const Color(0xffcbd5e1) : const Color(0xff475569),
+                                        color: theme.colorScheme.onBackground.withOpacity(0.7),
                                       ),
                                     ),
                                   ],
@@ -263,41 +425,43 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ElevatedButton(
                                   onPressed: _isLoading ? null : _handleLogin,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xff2563eb),
-                                    foregroundColor: Colors.white,
+                                    backgroundColor: accentColor,
+                                    foregroundColor: darkBg,
                                     elevation: 0,
                                     padding: const EdgeInsets.symmetric(vertical: 16),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(14),
                                     ),
                                   ),
                                   child: _isLoading
-                                      ? Row(
+                                      ? const Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
-                                          children: const [
+                                          children: [
                                             SizedBox(
                                               height: 18,
                                               width: 18,
                                               child: CircularProgressIndicator(
-                                                color: Colors.white,
+                                                color: darkBg,
                                                 strokeWidth: 2,
                                               ),
                                             ),
                                             SizedBox(width: 12),
                                             Text(
-                                              'Connecting to Render server...',
+                                              'CONNECTING TO SERVER...',
                                               style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
+                                                fontWeight: FontWeight.w900,
+                                                fontSize: 13,
+                                                letterSpacing: 0.8,
                                               ),
                                             ),
                                           ],
                                         )
-                                      : const Text(
-                                          'Authenticate Operator',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
+                                      : Text(
+                                          'AUTHENTICATE OPERATOR',
+                                          style: GoogleFonts.outfit(
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 13.5,
+                                            letterSpacing: 1.0,
                                           ),
                                         ),
                                 ),
@@ -307,13 +471,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 28),
                     Text(
                       'Authorized Personnel Only • IP Logger Active',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? const Color(0xff475569) : const Color(0xff94a3b8),
+                        fontSize: 11.5,
+                        color: theme.colorScheme.onBackground.withOpacity(0.35),
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.5,
                       ),
@@ -322,10 +486,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       'Admin? Use admin@blucursor.com / admin2024',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 11,
-                        color: const Color(0xff14b8a6), // Teal accent color matching HTML portal
-                        fontWeight: FontWeight.w600,
+                        color: accentColor,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
