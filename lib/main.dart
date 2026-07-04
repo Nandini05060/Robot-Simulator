@@ -7,6 +7,7 @@ import 'screens/main_navigation_shell.dart';
 import 'screens/greeting_screen.dart';
 import 'screens/control_panel_screen.dart';
 import 'screens/real_time_viz_screen.dart';
+import 'screens/robot_loading_screen.dart';
 import 'models/robot.dart';
 
 void main() {
@@ -58,6 +59,7 @@ class _BluCursorFleetAppState extends State<BluCursorFleetApp> {
         '/login': (context) => const LoginScreen(),
         '/greeting': (context) => const GreetingScreen(),
         '/dashboard': (context) => const MainNavigationShell(),
+        '/robot_loading': (context) => const RobotLoadingScreen(),
         '/real_time_viz': (context) => const RealTimeVizScreen(),
       },
     );
@@ -67,17 +69,19 @@ class _BluCursorFleetAppState extends State<BluCursorFleetApp> {
 class SplitDoorsRoute extends PageRouteBuilder {
   final Widget page;
   final Robot robot;
+  final bool showLoading;
 
-  SplitDoorsRoute({required this.page, required this.robot})
+  SplitDoorsRoute({required this.page, required this.robot, this.showLoading = true})
       : super(
           pageBuilder: (context, animation, secondaryAnimation) => page,
-          transitionDuration: const Duration(milliseconds: 2200), // 1.4s load + 0.8s split
+          transitionDuration: Duration(milliseconds: showLoading ? 2200 : 800), // 800ms split duration if loading is skipped
           reverseTransitionDuration: const Duration(milliseconds: 600),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return _SplitDoorsTransition(
               animation: animation,
               child: child,
               robot: robot,
+              showLoading: showLoading,
             );
           },
         );
@@ -87,12 +91,14 @@ class _SplitDoorsTransition extends StatefulWidget {
   final Animation<double> animation;
   final Widget child;
   final Robot robot;
+  final bool showLoading;
 
   const _SplitDoorsTransition({
     Key? key,
     required this.animation,
     required this.child,
     required this.robot,
+    this.showLoading = true,
   }) : super(key: key);
 
   @override
@@ -128,12 +134,17 @@ class _SplitDoorsTransitionState extends State<_SplitDoorsTransition> with Singl
     double progress = 0.0;
     double splitProgress = 0.0;
     
-    if (value < 0.64) {
-      progress = value / 0.64;
-      splitProgress = 0.0;
+    if (widget.showLoading) {
+      if (value < 0.64) {
+        progress = value / 0.64;
+        splitProgress = 0.0;
+      } else {
+        progress = 1.0;
+        splitProgress = Curves.easeInOutCubic.transform((value - 0.64) / 0.36);
+      }
     } else {
       progress = 1.0;
-      splitProgress = Curves.easeInOutCubic.transform((value - 0.64) / 0.36);
+      splitProgress = Curves.easeInOutCubic.transform(value);
     }
 
     final size = MediaQuery.of(context).size;
@@ -151,21 +162,41 @@ class _SplitDoorsTransitionState extends State<_SplitDoorsTransition> with Singl
             child: SizedBox(
               width: size.width / 2,
               height: size.height,
-              child: ClipRect(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: 0.5,
-                  child: Container(
-                    color: const Color(0xff0A0E17),
-                    child: Center(
-                      child: Container(
-                        width: 1,
-                        height: double.infinity,
-                        color: Colors.white.withOpacity(0.015),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: ClipRect(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: 0.5,
+                        child: Container(
+                          width: size.width,
+                          height: size.height,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: const AssetImage('assets/login_bg_new.jpg'),
+                              fit: BoxFit.cover,
+                              colorFilter: ColorFilter.mode(
+                                const Color(0xff090A0F).withOpacity(0.75),
+                                BlendMode.srcOver,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  // Seam line
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 1.5,
+                      color: const Color(0xff00A2FF).withOpacity(0.8),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -178,21 +209,41 @@ class _SplitDoorsTransitionState extends State<_SplitDoorsTransition> with Singl
               child: SizedBox(
                 width: size.width / 2,
                 height: size.height,
-                child: ClipRect(
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    widthFactor: 0.5,
-                    child: Container(
-                      color: const Color(0xff0A0E17),
-                      child: Center(
-                        child: Container(
-                          width: 1,
-                          height: double.infinity,
-                          color: Colors.white.withOpacity(0.015),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: ClipRect(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          widthFactor: 0.5,
+                          child: Container(
+                            width: size.width,
+                            height: size.height,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: const AssetImage('assets/login_bg_new.jpg'),
+                                fit: BoxFit.cover,
+                                colorFilter: ColorFilter.mode(
+                                  const Color(0xff090A0F).withOpacity(0.75),
+                                  BlendMode.srcOver,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                    // Seam line
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 1.5,
+                        color: const Color(0xff00A2FF).withOpacity(0.8),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -244,8 +295,8 @@ class _SplitDoorsTransitionState extends State<_SplitDoorsTransition> with Singl
                       
                       // Robot Render Container
                       Container(
-                        width: 110,
-                        height: 110,
+                        width: 160,
+                        height: 160,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: const Color(0xff00A2FF).withOpacity(0.03),
@@ -256,7 +307,7 @@ class _SplitDoorsTransitionState extends State<_SplitDoorsTransition> with Singl
                           children: [
                             Image.asset(
                               widget.robot.imagePath,
-                              width: 75,
+                              width: 115,
                             ),
                             // Laser Sweep Scan Line
                             AnimatedBuilder(

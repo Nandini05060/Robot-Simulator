@@ -365,114 +365,180 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
                   height: 240,
                   child: Stack(
                     children: [
+                      // Circular High-Tech Controller Base
                       Positioned.fill(
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: isDark ? const Color(0xff131926) : Colors.white,
-                            border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffcbd5e1), width: 3),
+                            color: const Color(0xff0b0f19),
+                            border: Border.all(color: const Color(0xff55E8FF).withOpacity(0.25), width: 1.5),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 10,
+                                color: const Color(0xff55E8FF).withOpacity(0.08),
+                                blurRadius: 16,
                                 spreadRadius: 2,
+                              ),
+                            ],
+                            gradient: const RadialGradient(
+                              center: Alignment.center,
+                              radius: 0.85,
+                              colors: [
+                                Color(0xff131a2c),
+                                Color(0xff090c14),
+                              ],
+                            ),
+                          ),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Crosshair lines
+                              Container(
+                                width: 1.2,
+                                height: 220,
+                                color: const Color(0xff55E8FF).withOpacity(0.1),
+                              ),
+                              Container(
+                                width: 220,
+                                height: 1.2,
+                                color: const Color(0xff55E8FF).withOpacity(0.1),
                               ),
                             ],
                           ),
                         ),
                       ),
                       
+                      // Top Button (Forward)
                       Align(
                         alignment: Alignment.topCenter,
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
+                          padding: const EdgeInsets.only(top: 12.0),
                           child: InkWell(
                             onTap: _canControl ? _moveForward : null,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(24),
                             child: Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: _canControl ? const Color(0xff2563eb) : const Color(0xff94a3b8),
+                                color: _canControl ? const Color(0xff55E8FF).withOpacity(0.12) : const Color(0xff1e293b),
+                                border: Border.all(
+                                  color: _canControl ? const Color(0xff55E8FF).withOpacity(0.35) : const Color(0xff334155),
+                                  width: 1.2,
+                                ),
                               ),
-                              child: const Icon(Icons.arrow_upward, color: Colors.white, size: 28),
+                              child: Icon(
+                                Icons.keyboard_arrow_up_rounded,
+                                color: _canControl ? const Color(0xff55E8FF) : const Color(0xff64748b),
+                                size: 26,
+                              ),
                             ),
                           ),
                         ),
                       ),
                       
+                      // Left Button (Rotate Left)
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
+                          padding: const EdgeInsets.only(left: 12.0),
                           child: InkWell(
                             onTap: _canControl ? _turnLeft : null,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(24),
                             child: Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: _canControl ? const Color(0xff2563eb) : const Color(0xff94a3b8),
+                                color: _canControl ? const Color(0xff55E8FF).withOpacity(0.12) : const Color(0xff1e293b),
+                                border: Border.all(
+                                  color: _canControl ? const Color(0xff55E8FF).withOpacity(0.35) : const Color(0xff334155),
+                                  width: 1.2,
+                                ),
                               ),
-                              child: const Icon(Icons.rotate_left, color: Colors.white, size: 28),
+                              child: Icon(
+                                Icons.keyboard_arrow_left_rounded,
+                                color: _canControl ? const Color(0xff55E8FF) : const Color(0xff64748b),
+                                size: 26,
+                              ),
                             ),
                           ),
                         ),
                       ),
                       
+                      // Right Button (Rotate Right)
                       Align(
                         alignment: Alignment.centerRight,
                         child: Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
+                          padding: const EdgeInsets.only(right: 12.0),
                           child: InkWell(
                             onTap: _canControl ? _turnRight : null,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(24),
                             child: Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: _canControl ? const Color(0xff2563eb) : const Color(0xff94a3b8),
+                                color: _canControl ? const Color(0xff55E8FF).withOpacity(0.12) : const Color(0xff1e293b),
+                                border: Border.all(
+                                  color: _canControl ? const Color(0xff55E8FF).withOpacity(0.35) : const Color(0xff334155),
+                                  width: 1.2,
+                                ),
                               ),
-                              child: const Icon(Icons.rotate_right, color: Colors.white, size: 28),
+                              child: Icon(
+                                Icons.keyboard_arrow_right_rounded,
+                                color: _canControl ? const Color(0xff55E8FF) : const Color(0xff64748b),
+                                size: 26,
+                              ),
                             ),
                           ),
                         ),
                       ),
                       
+                      // Bottom Button (Rotate 180)
                       Align(
                         alignment: Alignment.bottomCenter,
                         child: Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
+                          padding: const EdgeInsets.only(bottom: 12.0),
                           child: InkWell(
                             onTap: _canControl ? _rotate180 : null,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(24),
                             child: Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: _canControl ? const Color(0xff3b82f6) : const Color(0xffcbd5e1),
+                                color: _canControl ? const Color(0xff55E8FF).withOpacity(0.12) : const Color(0xff1e293b),
+                                border: Border.all(
+                                  color: _canControl ? const Color(0xff55E8FF).withOpacity(0.35) : const Color(0xff334155),
+                                  width: 1.2,
+                                ),
                               ),
-                              child: const Icon(Icons.loop, color: Colors.white, size: 28),
+                              child: Icon(
+                                Icons.loop_rounded,
+                                color: _canControl ? const Color(0xff55E8FF) : const Color(0xff64748b),
+                                size: 26,
+                              ),
                             ),
                           ),
                         ),
                       ),
                       
+                      // Center Button (E-STOP)
                       Align(
                         alignment: Alignment.center,
                         child: InkWell(
                           onTap: _isEStopped ? _resetEmergencyStop : _emergencyStop,
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(34),
                           child: Container(
                             width: 68,
                             height: 68,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: _isEStopped ? const Color(0xff22c55e) : Colors.red,
+                              color: _isEStopped ? const Color(0xff065f46) : const Color(0xff991b1b),
+                              border: Border.all(
+                                color: _isEStopped ? const Color(0xff34d399) : const Color(0xfff87171),
+                                width: 1.5,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: _isEStopped ? Colors.greenAccent : Colors.redAccent,
-                                  blurRadius: 10,
+                                  color: _isEStopped ? const Color(0xff34d399).withOpacity(0.3) : const Color(0xfff87171).withOpacity(0.3),
+                                  blurRadius: 12,
                                   spreadRadius: 1,
                                 ),
                               ],

@@ -148,10 +148,22 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      const Icon(
-                        Icons.fingerprint_outlined,
-                        size: 76,
-                        color: primaryColor,
+                      // Stylized Botriq Logo Icon Scan Target
+                      Container(
+                        width: 96,
+                        height: 96,
+                        alignment: Alignment.center,
+                        child: ClipRect(
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: 0.32,
+                            child: Image.asset(
+                              'assets/botriq_logo.png',
+                              color: primaryColor,
+                              fit: BoxFit.fitHeight,
+                            ),
+                          ),
+                        ),
                       ),
                       SizedBox(
                         width: 175,
@@ -224,6 +236,28 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: darkBg,
       body: Stack(
         children: [
+          // Cyberpunk Background Image
+          Positioned.fill(
+            child: Image.asset(
+              'assets/login_bg_new.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
+          // Dark overlay to ensure readability
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xff090A0F).withOpacity(0.75),
+                    const Color(0xff090A0F).withOpacity(0.85),
+                  ],
+                ),
+              ),
+            ),
+          ),
           // Cyberpunk Grid Background Overlay
           Positioned.fill(
             child: Container(
@@ -271,7 +305,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           child: Image.asset(
                             'assets/logo_light.png',
-                            height: 24,
+                            height: 36,
                             fit: BoxFit.contain,
                           ),
                         ),

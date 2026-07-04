@@ -7532,9 +7532,20 @@ body {
   50% { transform: scale(1.04); opacity: 1; }
 }
 
-.scanning-fingerprint {
-  stroke: #55E8FF;
-  filter: drop-shadow(0 0 8px #55E8FF);
+.botriq-logo-scan-container {
+  width: 90px;
+  height: 90px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  filter: drop-shadow(0 0 8px rgba(85, 232, 255, 0.8));
+}
+
+.botriq-logo-scan-img {
+  height: 75px;
+  width: auto;
+  object-fit: contain;
 }
 
 .biometric-boot-console {
@@ -7595,10 +7606,11 @@ body {
 
 /* 7. Form Inputs & Login Redesign */
 #screen-login {
-  background-color: #090A0F !important;
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(85, 232, 255, 0.08) 0%, transparent 45%),
-    radial-gradient(circle at 90% 80%, rgba(85, 232, 255, 0.04) 0%, transparent 40%) !important;
+    linear-gradient(rgba(9, 10, 15, 0.75), rgba(9, 10, 15, 0.85)),
+    url('assets/login_bg_new.jpg') !important;
+  background-size: cover !important;
+  background-position: center !important;
   position: absolute !important;
 }
 
@@ -8967,7 +8979,7 @@ body {
    SCREEN 10: OPERATOR GREETING SCREEN (REFINED COMMAND CENTER)
    ========================================================================== */
 .greeting-screen {
-  background: #0A0E17 !important;
+  background: linear-gradient(rgba(10, 14, 23, 0.78), rgba(10, 14, 23, 0.78)), url('assets/microchip_robot.png') no-repeat center center / cover !important;
   position: absolute;
   overflow: hidden;
   display: flex;
@@ -9048,6 +9060,7 @@ body {
   letter-spacing: 3px;
   display: block;
   margin-bottom: 2px;
+  animation: floatTextLabel 6s ease-in-out infinite;
 }
 
 .greeting-name-label {
@@ -9058,6 +9071,23 @@ body {
   letter-spacing: -0.5px;
   line-height: 1.1;
   margin: 0;
+  animation: floatTextName 8s ease-in-out infinite;
+}
+
+@keyframes floatTextLabel {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-2px) translateX(1px); }
+}
+
+@keyframes floatTextName {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    text-shadow: 0 0 8px rgba(85, 232, 255, 0);
+  }
+  50% {
+    transform: translateY(-3px) translateX(-1px);
+    text-shadow: 0 0 12px rgba(85, 232, 255, 0.4);
+  }
 }
 
 .emerald-dot {
@@ -9245,8 +9275,8 @@ body {
 
 /* Robot Hero Viewport */
 .robot-hero-viewport {
-  width: 140px;
-  height: 185px;
+  width: 280px;
+  height: 380px;
   position: relative;
   display: flex;
   justify-content: center;
@@ -9256,8 +9286,8 @@ body {
 
 .bg-holo-halo {
   position: absolute;
-  width: 140px;
-  height: 140px;
+  width: 280px;
+  height: 280px;
   background: radial-gradient(circle, rgba(0, 162, 255, 0.06) 0%, transparent 65%);
   border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: 50%;
@@ -9273,9 +9303,9 @@ body {
 /* Minimal Vector Target Floor Rings */
 .holographic-floor-rings {
   position: absolute;
-  bottom: 12px;
-  width: 130px;
-  height: 130px;
+  bottom: 24px;
+  width: 260px;
+  height: 260px;
   transform: rotateX(75deg);
   transform-style: preserve-3d;
   pointer-events: none;
@@ -9301,14 +9331,14 @@ body {
 }
 
 .outer-ring {
-  width: 130px;
-  height: 130px;
+  width: 260px;
+  height: 260px;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .inner-ring {
-  width: 90px;
-  height: 90px;
+  width: 180px;
+  height: 180px;
   border: 1.2px dashed rgba(0, 162, 255, 0.35);
   animation: spinFloorRingCWRefined 10s infinite linear;
 }
@@ -9330,9 +9360,12 @@ body {
 }
 
 .robot-hero-viewport .greeting-robot {
-  width: 100px;
-  height: auto;
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 10px rgba(0, 162, 255, 0.12));
+  width: 220px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1.5px solid rgba(0, 162, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 162, 255, 0.15), 0 8px 16px rgba(0, 0, 0, 0.6);
   z-index: 10;
 }
 
@@ -9359,9 +9392,9 @@ body {
 
 .neon-platform-glow {
   position: absolute;
-  bottom: 22px;
-  width: 80px;
-  height: 10px;
+  bottom: 34px;
+  width: 160px;
+  height: 16px;
   background: radial-gradient(ellipse at center, rgba(0, 162, 255, 0.22) 0%, rgba(0, 162, 255, 0) 70%);
   border-radius: 50%;
   z-index: 3;
@@ -9640,19 +9673,24 @@ body {
   top: 0;
   width: 50%;
   height: 100%;
-  background: #0A0E17;
+  background-image: linear-gradient(rgba(9, 10, 15, 0.75), rgba(9, 10, 15, 0.75)), url('assets/login_bg_new.jpg');
+  background-size: 200% 100%;
   transition: transform 0.6s cubic-bezier(0.85, 0, 0.15, 1);
   z-index: 1;
 }
 
 .left-door {
   left: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.02);
+  background-position: left center;
+  border-right: 1.5px solid rgba(0, 162, 255, 0.8);
+  box-shadow: -1px 0 10px rgba(0, 162, 255, 0.2);
 }
 
 .right-door {
   right: 0;
-  border-left: 1px solid rgba(255, 255, 255, 0.02);
+  background-position: right center;
+  border-left: 1.5px solid rgba(0, 162, 255, 0.8);
+  box-shadow: 1px 0 10px rgba(0, 162, 255, 0.2);
 }
 
 .transition-overlay.separating .left-door {
@@ -9722,8 +9760,8 @@ body {
 }
 
 .transition-render-box {
-  width: 110px;
-  height: 110px;
+  width: 160px;
+  height: 160px;
   margin: 20px auto;
   position: relative;
   display: flex;
@@ -9735,7 +9773,7 @@ body {
 }
 
 .transition-render-box img {
-  width: 75px;
+  width: 115px;
   height: auto;
   filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)) drop-shadow(0 0 6px rgba(0, 162, 255, 0.1));
 }

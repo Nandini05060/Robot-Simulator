@@ -231,7 +231,6 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
 
   void _triggerManualMove(double dx, double dy, String dirName) {
     if (_status == 'E-STOPPED' || !_robot!.isOnline) return;
-    if (dy > 0) return; // Disable backward movement
 
     if (_autoNavActive) {
       _stopAutoNavigation();
@@ -240,6 +239,7 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
     if (ApiService().isConnected) {
       String command = "forward";
       if (dx == 0 && dy < 0) command = "forward";
+      else if (dx == 0 && dy > 0) command = "backward";
       else if (dx < 0 && dy == 0) command = "rotate_left";
       else if (dx > 0 && dy == 0) command = "rotate_right";
 
@@ -743,65 +743,165 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
                           // Joystick D-Pad Layout
                           Expanded(
                             flex: 3,
-                            child: Column(
-                              children: [
-                                IconButton(
-                                  onPressed: () => _triggerManualMove(0, -0.8, 'Forward'),
-                                  icon: const Icon(Icons.arrow_upward),
-                                  color: const Color(0xff2563eb),
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    IconButton(
-                                      onPressed: () => _triggerManualMove(-0.8, 0, 'Left'),
-                                      icon: const Icon(Icons.arrow_back),
-                                      color: const Color(0xff2563eb),
+                            child: Center(
+                              child: Container(
+                                width: 140,
+                                height: 140,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: const Color(0xff0b0f19),
+                                  border: Border.all(color: const Color(0xff55E8FF).withOpacity(0.25), width: 1.5),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xff55E8FF).withOpacity(0.08),
+                                      blurRadius: 12,
+                                      spreadRadius: 2,
                                     ),
-                                    const SizedBox(width: 24),
-                                    IconButton(
-                                      onPressed: () => _triggerManualMove(0.8, 0, 'Right'),
-                                      icon: const Icon(Icons.arrow_forward),
-                                      color: const Color(0xff2563eb),
+                                  ],
+                                  gradient: const RadialGradient(
+                                    center: Alignment.center,
+                                    radius: 0.85,
+                                    colors: [
+                                      Color(0xff131a2c),
+                                      Color(0xff090c14),
+                                    ],
+                                  ),
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    // Crosshair lines
+                                    Container(
+                                      width: 1.2,
+                                      height: 120,
+                                      color: const Color(0xff55E8FF).withOpacity(0.1),
+                                    ),
+                                    Container(
+                                      width: 120,
+                                      height: 1.2,
+                                      color: const Color(0xff55E8FF).withOpacity(0.1),
+                                    ),
+                                    // Central glowing joystick nub
+                                    Container(
+                                      width: 36,
+                                      height: 36,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: const Color(0xff0e1320),
+                                        border: Border.all(color: const Color(0xff55E8FF).withOpacity(0.4), width: 1.2),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: const Color(0xff55E8FF).withOpacity(0.15),
+                                            blurRadius: 6,
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Center(
+                                        child: Icon(Icons.circle, size: 8, color: Color(0xff55E8FF)),
+                                      ),
+                                    ),
+                                    // D-Pad Buttons
+                                    Positioned(
+                                      top: 0,
+                                      left: 46,
+                                      child: Material(
+                                        type: MaterialType.transparency,
+                                        child: IconButton(
+                                          onPressed: () => _triggerManualMove(0, -0.8, 'Forward'),
+                                          icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 28),
+                                          color: const Color(0xff55E8FF),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints.tightFor(width: 48, height: 48),
+                                          splashRadius: 24,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      left: 46,
+                                      child: Material(
+                                        type: MaterialType.transparency,
+                                        child: IconButton(
+                                          onPressed: () => _triggerManualMove(0, 0.8, 'Backward'),
+                                          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 28),
+                                          color: const Color(0xff55E8FF),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints.tightFor(width: 48, height: 48),
+                                          splashRadius: 24,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      left: 0,
+                                      top: 46,
+                                      child: Material(
+                                        type: MaterialType.transparency,
+                                        child: IconButton(
+                                          onPressed: () => _triggerManualMove(-0.8, 0, 'Left'),
+                                          icon: const Icon(Icons.keyboard_arrow_left_rounded, size: 28),
+                                          color: const Color(0xff55E8FF),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints.tightFor(width: 48, height: 48),
+                                          splashRadius: 24,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      right: 0,
+                                      top: 46,
+                                      child: Material(
+                                        type: MaterialType.transparency,
+                                        child: IconButton(
+                                          onPressed: () => _triggerManualMove(0.8, 0, 'Right'),
+                                          icon: const Icon(Icons.keyboard_arrow_right_rounded, size: 28),
+                                          color: const Color(0xff55E8FF),
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints.tightFor(width: 48, height: 48),
+                                          splashRadius: 24,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
-                                IconButton(
-                                  onPressed: () => _triggerManualMove(0, 0.8, 'Backward'),
-                                  icon: const Icon(Icons.arrow_downward),
-                                  color: const Color(0xff2563eb),
-                                ),
-                              ],
+                              ),
                             ),
                           ),
                           // Quick Action Buttons
                           Expanded(
                             flex: 4,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                ElevatedButton.icon(
-                                  onPressed: _rotate180,
-                                  icon: const Icon(Icons.cached, size: 18),
-                                  label: const Text('Rotate 180°'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xff2563eb),
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 12.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  OutlinedButton.icon(
+                                    onPressed: _rotate180,
+                                    icon: const Icon(Icons.cached, size: 16),
+                                    label: const Text('Rotate 180°', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: const Color(0xff55E8FF),
+                                      side: BorderSide(color: const Color(0xff55E8FF).withOpacity(0.35)),
+                                      backgroundColor: const Color(0xff0f172a).withOpacity(0.65),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 10),
-                                ElevatedButton.icon(
-                                  onPressed: _emergencyStop,
-                                  icon: const Icon(Icons.warning, size: 18),
-                                  label: const Text('EMERGENCY STOP'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red[800],
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                  const SizedBox(height: 12),
+                                  ElevatedButton.icon(
+                                    onPressed: _emergencyStop,
+                                    icon: const Icon(Icons.warning_amber_rounded, size: 16),
+                                    label: const Text('EMERGENCY STOP', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xff991b1b),
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      elevation: 4,
+                                      shadowColor: Colors.red.withOpacity(0.3),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -1329,14 +1429,16 @@ List<Offset> _astarIsolate(Map<String, double> params) {
   final startPt = findClosestFree(math.Point(start.dx.round().clamp(0, 24), start.dy.round().clamp(0, 19)));
   final goalPt = findClosestFree(math.Point(goal.dx.round().clamp(0, 24), goal.dy.round().clamp(0, 19)));
 
-  // BFS search
+  // A* Search
   final openSet = <math.Point<int>>[startPt];
   final cameFrom = <math.Point<int>, math.Point<int>>{};
-  final gScore = <math.Point<int>, int>{startPt: 0};
-  final fScore = <math.Point<int>, int>{startPt: (startPt.x - goalPt.x).abs() + (startPt.y - goalPt.y).abs()};
+  final gScore = <math.Point<int>, double>{startPt: 0.0};
+  final fScore = <math.Point<int>, double>{
+    startPt: math.sqrt(math.pow(startPt.x - goalPt.x, 2) + math.pow(startPt.y - goalPt.y, 2))
+  };
 
   while (openSet.isNotEmpty) {
-    openSet.sort((a, b) => (fScore[a] ?? 999999).compareTo(fScore[b] ?? 999999));
+    openSet.sort((a, b) => (fScore[a] ?? 999999.0).compareTo(fScore[b] ?? 999999.0));
     final current = openSet.removeAt(0);
 
     if (current == goalPt) {
@@ -1350,14 +1452,27 @@ List<Offset> _astarIsolate(Map<String, double> params) {
       return path;
     }
 
-    for (final dir in [const math.Point(-1, 0), const math.Point(1, 0), const math.Point(0, -1), const math.Point(0, 1)]) {
+    final directions = [
+      const math.Point(-1, 0), const math.Point(1, 0), const math.Point(0, -1), const math.Point(0, 1),
+      const math.Point(-1, -1), const math.Point(1, 1), const math.Point(-1, 1), const math.Point(1, -1)
+    ];
+
+    for (final dir in directions) {
       final neighbor = math.Point(current.x + dir.x, current.y + dir.y);
       if (neighbor.x >= 0 && neighbor.x < 25 && neighbor.y >= 0 && neighbor.y < 20 && grid[neighbor.x][neighbor.y] == 0) {
-        final tentativeG = (gScore[current] ?? 999999) + 1;
-        if (tentativeG < (gScore[neighbor] ?? 999999)) {
+        // Prevent corner cutting
+        if (dir.x != 0 && dir.y != 0) {
+          if (grid[current.x + dir.x][current.y] != 0 || grid[current.x][current.y + dir.y] != 0) {
+            continue;
+          }
+        }
+        final double moveCost = (dir.x != 0 && dir.y != 0) ? 1.414 : 1.0;
+        final tentativeG = (gScore[current] ?? 999999.0) + moveCost;
+        if (tentativeG < (gScore[neighbor] ?? 999999.0)) {
           cameFrom[neighbor] = current;
           gScore[neighbor] = tentativeG;
-          fScore[neighbor] = tentativeG + (neighbor.x - goalPt.x).abs() + (neighbor.y - goalPt.y).abs();
+          final double hCost = math.sqrt(math.pow(neighbor.x - goalPt.x, 2) + math.pow(neighbor.y - goalPt.y, 2));
+          fScore[neighbor] = tentativeG + hCost;
           if (!openSet.contains(neighbor)) {
             openSet.add(neighbor);
           }

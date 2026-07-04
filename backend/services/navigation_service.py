@@ -86,7 +86,7 @@ def astar(start: Tuple[float, float], goal: Tuple[float, float]) -> List[Tuple[f
     
     queue = []
     # (f_score, g_score, current, path)
-    heapq.heappush(queue, (0, 0, start_grid, [start_grid]))
+    heapq.heappush(queue, (0.0, 0.0, start_grid, [start_grid]))
     visited = set()
     
     while queue:
@@ -100,13 +100,18 @@ def astar(start: Tuple[float, float], goal: Tuple[float, float]) -> List[Tuple[f
         visited.add(current)
         
         cx, cy = current
-        # 4-directional moves (up, down, left, right)
-        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+        # 8-directional moves (up, down, left, right, diagonals)
+        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1), (-1, 1), (1, -1)]:
             nx, ny = cx + dx, cy + dy
             if 0 <= nx < 25 and 0 <= ny < 20 and grid[nx][ny] == 0:
+                # Prevent cutting corners
+                if dx != 0 and dy != 0:
+                    if grid[cx + dx][cy] != 0 or grid[cx][cy + dy] != 0:
+                        continue
                 neighbor = (nx, ny)
-                g_cost = g + 1
-                h_cost = abs(nx - goal_grid[0]) + abs(ny - goal_grid[1])
+                move_cost = 1.414 if (dx != 0 and dy != 0) else 1.0
+                g_cost = g + move_cost
+                h_cost = ((nx - goal_grid[0])**2 + (ny - goal_grid[1])**2)**0.5
                 f_cost = g_cost + h_cost
                 heapq.heappush(queue, (f_cost, g_cost, neighbor, path + [neighbor]))
                 

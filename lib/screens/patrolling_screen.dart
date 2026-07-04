@@ -390,7 +390,7 @@ class PatrollingScreen extends StatelessWidget {
                               final activeRobot = robot ?? patrolRobots[0];
                               Navigator.pushNamed(
                                 context,
-                                '/real_time_viz',
+                                '/robot_loading',
                                 arguments: activeRobot,
                               );
                             },

@@ -91,7 +91,7 @@ class _RobotSelectionScreenState extends State<RobotSelectionScreen> {
 
                 return GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, '/control_panel', arguments: robot);
+                    Navigator.pushNamed(context, '/robot_loading', arguments: robot);
                   },
                   child: Card(
                     color: isDark ? const Color(0xff131926) : Colors.white,

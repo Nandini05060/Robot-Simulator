@@ -16,11 +16,14 @@ class _GreetingScreenState extends State<GreetingScreen> with TickerProviderStat
   late AnimationController _floatController;
   late AnimationController _waveController;
   late AnimationController _crawlerController;
+  late AnimationController _textMoveController;
   
   late Animation<double> _spinAnimation;
   late Animation<double> _floatAnimation;
   late Animation<double> _waveAnimation;
   late Animation<double> _crawlerAnimation;
+  late Animation<double> _textTranslateX;
+  late Animation<double> _textTranslateY;
 
   int _activeLogIndex = 0;
   Timer? _logTimer;
@@ -67,6 +70,18 @@ class _GreetingScreenState extends State<GreetingScreen> with TickerProviderStat
     )..repeat();
     _crawlerAnimation = Tween<double>(begin: 0.0, end: 3.0).animate(_crawlerController);
 
+    // Text swaying animation
+    _textMoveController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 6),
+    )..repeat(reverse: true);
+    _textTranslateY = Tween<double>(begin: -3.0, end: 3.0).animate(
+      CurvedAnimation(parent: _textMoveController, curve: Curves.easeInOut),
+    );
+    _textTranslateX = Tween<double>(begin: -2.0, end: 2.0).animate(
+      CurvedAnimation(parent: _textMoveController, curve: Curves.easeInOut),
+    );
+
     // Timeline loading sequencer
     _logTimer = Timer.periodic(const Duration(milliseconds: 1200), (timer) {
       if (mounted) {
@@ -87,6 +102,7 @@ class _GreetingScreenState extends State<GreetingScreen> with TickerProviderStat
     _floatController.dispose();
     _waveController.dispose();
     _crawlerController.dispose();
+    _textMoveController.dispose();
     _logTimer?.cancel();
     super.dispose();
   }
@@ -113,6 +129,21 @@ class _GreetingScreenState extends State<GreetingScreen> with TickerProviderStat
         },
         child: Stack(
           children: [
+            // Background Image
+            Positioned.fill(
+              child: Image.asset(
+                'assets/microchip_robot.png',
+                fit: BoxFit.cover,
+              ),
+            ),
+            
+            // Dark overlay for legibility
+            Positioned.fill(
+              child: Container(
+                color: const Color(0xff0A0E17).withOpacity(0.78),
+              ),
+            ),
+
             // Coordinate Grid overlay (Blueprint / Coordinates)
             Positioned.fill(
               child: CustomPaint(
@@ -178,34 +209,47 @@ class _GreetingScreenState extends State<GreetingScreen> with TickerProviderStat
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 12),
-                                // Welcome Labels
-                                Text(
-                                  _getGreeting(),
-                                  style: GoogleFonts.outfit(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    color: const Color(0xff64748B),
-                                    letterSpacing: 3,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      operatorName,
-                                      style: GoogleFonts.outfit(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.white,
-                                        letterSpacing: -0.5,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    const _PulsingEmeraldDot(),
-                                  ],
-                                ),
+                                 const SizedBox(height: 12),
+                                 // Welcome Labels & Name with sway animation
+                                 AnimatedBuilder(
+                                   animation: _textMoveController,
+                                   builder: (context, child) {
+                                     return Transform.translate(
+                                       offset: Offset(_textTranslateX.value, _textTranslateY.value),
+                                       child: child,
+                                     );
+                                   },
+                                   child: Column(
+                                     children: [
+                                       Text(
+                                         _getGreeting(),
+                                         style: GoogleFonts.outfit(
+                                           fontSize: 10,
+                                           fontWeight: FontWeight.w700,
+                                           color: const Color(0xff64748B),
+                                           letterSpacing: 3,
+                                         ),
+                                       ),
+                                       const SizedBox(height: 2),
+                                       Row(
+                                         mainAxisAlignment: MainAxisAlignment.center,
+                                         children: [
+                                           Text(
+                                             operatorName,
+                                             style: GoogleFonts.outfit(
+                                               fontSize: 24,
+                                               fontWeight: FontWeight.w800,
+                                               color: Colors.white,
+                                               letterSpacing: -0.5,
+                                             ),
+                                           ),
+                                           const SizedBox(width: 6),
+                                           const _PulsingEmeraldDot(),
+                                         ],
+                                       ),
+                                     ],
+                                   ),
+                                 ),
                                 const SizedBox(height: 6),
                                 // Subtitle
                                 Row(
@@ -232,226 +276,101 @@ class _GreetingScreenState extends State<GreetingScreen> with TickerProviderStat
                             const SizedBox(height: 20),
 
                             // 2. Main HUD Column / Row Center
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                
-                                // Left Card
-                                _buildGlassCard(
-                                  width: 82,
-                                  height: 100,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      _buildCardHeader('AI CORE', 'ONLINE', const Color(0xff10B981)),
-                                      SizedBox(
-                                        height: 30,
-                                        width: 70,
-                                        child: CustomPaint(
-                                          painter: _WaveformPainterRefined(_waveAnimation),
-                                        ),
-                                      ),
-                                      _buildCardFooter('SYS HEALTH', '99.8%'),
-                                    ],
-                                  ),
-                                ),
-
-                                // Center Hero Robot Viewport
-                                SizedBox(
-                                  width: 140,
-                                  height: 185,
-                                  child: Stack(
+                            SizedBox(
+                              width: 280,
+                              height: 380,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // Minimal Coordinate rings (spin & perspective) scaled up
+                                  Transform(
                                     alignment: Alignment.center,
-                                    children: [
-                                      // Minimal Coordinate rings (spin & perspective)
-                                      Transform(
-                                        alignment: Alignment.center,
-                                        transform: Matrix4.identity()
-                                          ..setEntry(3, 2, 0.0015)
-                                          ..rotateX(1.3),
-                                        child: AnimatedBuilder(
-                                          animation: _spinAnimation,
-                                          builder: (context, child) {
-                                            return CustomPaint(
-                                              size: const Size(130, 130),
-                                              painter: _MinimalCoordinateRingsPainter(_spinAnimation.value),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                      
-                                      // Glowing Platform Shadow Underneath (Refined)
-                                      Positioned(
-                                        bottom: 22,
-                                        child: AnimatedBuilder(
-                                          animation: _floatController,
-                                          builder: (context, child) {
-                                            final scale = 1.0 - (_floatAnimation.value / -32.0);
-                                            return Container(
-                                              width: 80 * scale,
-                                              height: 10 * scale,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                gradient: RadialGradient(
-                                                  colors: [
-                                                    const Color(0xff00A2FF).withOpacity(0.22 * scale),
-                                                    Colors.transparent,
-                                                  ],
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-
-                                      // Floating Robot Image
-                                      AnimatedBuilder(
-                                        animation: _floatAnimation,
-                                        builder: (context, child) {
-                                          return Transform.translate(
-                                            offset: Offset(0, _floatAnimation.value - 12),
-                                            child: Stack(
-                                              alignment: Alignment.center,
-                                              children: [
-                                                Image.asset(
-                                                  'assets/robot_hermes.png',
-                                                  width: 100,
-                                                ),
-                                                // Sweeping Laser Scan Line (Refined)
-                                                const Positioned.fill(
-                                                  child: _LaserSweepEffectRefined(),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-                                // Right Card
-                                _buildGlassCard(
-                                  width: 82,
-                                  height: 100,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      _buildCardHeader('FLEET STATUS', 'CONNECTED', const Color(0xff10B981)),
-                                      Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '12',
-                                            style: GoogleFonts.outfit(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w800,
-                                              color: Colors.white,
-                                              height: 1,
-                                            ),
-                                          ),
-                                          Text(
-                                            'ROBOTS',
-                                            style: GoogleFonts.outfit(
-                                              fontSize: 6.5,
-                                              fontWeight: FontWeight.w700,
-                                              color: const Color(0xff64748B),
-                                              letterSpacing: 0.5,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      _buildCardFooterWithNetworkBars('NETWORK', 'STABLE'),
-                                    ],
-                                  ),
-                                ),
-
-                              ],
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // 3. Status Line
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('[', style: GoogleFonts.jetBrainsMono(color: const Color(0xffffffff).withOpacity(0.08), fontSize: 9.5, fontWeight: FontWeight.bold)),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    '> SYSTEM DIAGNOSTICS: SECURE',
-                                    style: GoogleFonts.jetBrainsMono(
-                                      color: const Color(0xff64748B),
-                                      fontSize: 8.5,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 2),
-                                  Text(']', style: GoogleFonts.jetBrainsMono(color: const Color(0xffffffff).withOpacity(0.08), fontSize: 9.5, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 14),
-
-                            // 4. Metrics Grid
-                            GridView.count(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              crossAxisCount: 4,
-                              crossAxisSpacing: 6,
-                              childAspectRatio: 1.1,
-                              children: [
-                                _buildMetricBox(Icons.monitor, 'Robots Online', '12'),
-                                _buildMetricBox(Icons.battery_charging_full, 'Battery Health', '97%'),
-                                _buildMetricBox(Icons.local_shipping, "Deliveries", '48'),
-                                _buildMetricBox(Icons.memory, 'CPU Usage', '21%'),
-                              ],
-                            ),
-
-                            const SizedBox(height: 14),
-
-                            // 5. Console Card (Mini Vector map path tracking)
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xff131926).withOpacity(0.55),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: const Color(0xffffffff).withOpacity(0.05)),
-                              ),
-                              child: Row(
-                                children: [
-                                  // Left Vector Coordinate Map
-                                  Container(
-                                    width: 64,
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(4),
-                                      border: Border.all(color: Colors.white.withOpacity(0.02)),
-                                    ),
+                                    transform: Matrix4.identity()
+                                      ..setEntry(3, 2, 0.0015)
+                                      ..rotateX(1.3),
                                     child: AnimatedBuilder(
-                                      animation: _crawlerAnimation,
+                                      animation: _spinAnimation,
                                       builder: (context, child) {
                                         return CustomPaint(
-                                          painter: _MiniVectorMapPainter(_crawlerAnimation.value),
+                                          size: const Size(260, 260),
+                                          painter: _MinimalCoordinateRingsPainter(_spinAnimation.value),
                                         );
                                       },
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
-                                  // Right Timeline Logs
-                                  Expanded(
-                                    child: _buildConsoleTimeline(),
+                                  
+                                  // Glowing Platform Shadow Underneath (Refined) scaled up
+                                  Positioned(
+                                    bottom: 34,
+                                    child: AnimatedBuilder(
+                                      animation: _floatController,
+                                      builder: (context, child) {
+                                        final scale = 1.0 - (_floatAnimation.value / -32.0);
+                                        return Container(
+                                          width: 160 * scale,
+                                          height: 16 * scale,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: RadialGradient(
+                                              colors: [
+                                                const Color(0xff00A2FF).withOpacity(0.22 * scale),
+                                                Colors.transparent,
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+
+                                  // Floating Robot Image (Scaled up & Circuit board robot)
+                                  AnimatedBuilder(
+                                    animation: _floatAnimation,
+                                    builder: (context, child) {
+                                      return Transform.translate(
+                                        offset: Offset(0, _floatAnimation.value - 12),
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(16),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(16),
+                                                  border: Border.all(
+                                                    color: const Color(0xff00A2FF).withOpacity(0.3),
+                                                    width: 1.5,
+                                                  ),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: const Color(0xff00A2FF).withOpacity(0.15),
+                                                      blurRadius: 20,
+                                                      spreadRadius: 2,
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Image.asset(
+                                                  'assets/robot_splash.png',
+                                                  width: 220,
+                                                  height: 300,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            ),
+                                            // Sweeping Laser Scan Line (Refined)
+                                            const Positioned.fill(
+                                              child: _LaserSweepEffectRefined(),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),
                             ),
 
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 30),
 
                             // 6. Footer prompt
                             Column(

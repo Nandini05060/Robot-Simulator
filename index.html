@@ -203,13 +203,9 @@
                 
                 <!-- Biometric Fingerprint -->
                 <div class="biometric-face-grid">
-                  <svg viewBox="0 0 24 24" width="70" height="70" stroke="#55E8FF" stroke-width="1.2" fill="none" class="scanning-fingerprint" filter="url(#neon-blue)">
-                    <path d="M12 2C6.48 2 2 6.48 2 12c0 4.14 2.5 7.69 6 9.22" />
-                    <path d="M12 6c-3.31 0-6 2.69-6 6 0 1.25.38 2.4 1.03 3.36" />
-                    <path d="M12 10c-1.1 0-2 .9-2 2 0 1.66 1.34 3 3 3s3-1.34 3-3" />
-                    <path d="M12 14c-1.66 0-3-1.34-3-3 0-.55-.45-1-1-1s-1 .45-1 1c0 2.76 2.24 5 5 5s5-2.24 5-5c0-4.42-3.58-8-8-8" />
-                    <path d="M12 18c-3.87 0-7-3.13-7-7 0-.55-.45-1-1-1s-1 .45-1 1c0 4.97 4.03 9 9 9s9-4.03 9-9c0-6.63-5.37-12-12-12" />
-                  </svg>
+                  <div class="botriq-logo-scan-container">
+                    <img src="assets/botriq_logo.png" class="botriq-logo-scan-img" alt="Botriq Logo">
+                  </div>
                 </div>
               </div>
 
@@ -237,24 +233,9 @@
                     <span class="greeting-subtitle-label"><i class="icon-monitor"></i> FLEET CONTROL CENTER <i class="icon-monitor"></i></span>
                   </div>
 
-                  <!-- 2. Main HUD Center Layout (3 Columns) -->
-                  <div class="hud-main-container">
+                  <!-- 2. Main HUD Center Layout (Centered Viewport) -->
+                  <div class="hud-main-container" style="justify-content: center; margin-top: 30px; margin-bottom: 30px;">
                     
-                    <!-- Left HUD Card -->
-                    <div class="hud-side-card left-card">
-                      <div class="hud-card-header">
-                        <span class="lbl">AI CORE</span>
-                        <span class="val green-text">ONLINE</span>
-                      </div>
-                      <div class="waveform-box">
-                        <canvas id="waveform-canvas" width="70" height="30"></canvas>
-                      </div>
-                      <div class="hud-card-footer">
-                        <span class="lbl">SYS HEALTH</span>
-                        <span class="val blue-text">99.8%</span>
-                      </div>
-                    </div>
-
                     <!-- Center Hero Robot Viewport -->
                     <div class="robot-hero-viewport">
                       <!-- Background glowing halo -->
@@ -269,7 +250,7 @@
 
                       <!-- Robot container with Floating animation -->
                       <div class="floating-robot-container">
-                        <img id="greeting-robot-img" src="assets/robot_hermes.png" alt="Simulated Robot" class="greeting-robot">
+                        <img id="greeting-robot-img" src="assets/robot_splash.png" alt="Simulated Robot" class="greeting-robot">
                         <div class="robot-laser-line-cyan"></div>
                       </div>
                       
@@ -277,101 +258,6 @@
                       <div class="neon-platform-glow"></div>
                     </div>
 
-                    <!-- Right HUD Card -->
-                    <div class="hud-side-card right-card">
-                      <div class="hud-card-header">
-                        <span class="lbl">FLEET STATUS</span>
-                        <span class="val green-text">CONNECTED</span>
-                      </div>
-                      <div class="fleet-count-display">
-                        <span class="count-num">12</span>
-                        <span class="count-lbl">ROBOTS</span>
-                      </div>
-                      <div class="hud-card-footer">
-                        <span class="lbl">NETWORK</span>
-                        <span class="val blue-text" style="display: flex; align-items: center; gap: 4px;">
-                          STABLE
-                          <span class="network-bars">
-                            <span class="bar bar1"></span>
-                            <span class="bar bar2"></span>
-                            <span class="bar bar3"></span>
-                            <span class="bar bar4"></span>
-                          </span>
-                        </span>
-                      </div>
-                    </div>
-
-                  </div>
-
-                  <!-- 3. Status Line -->
-                  <div class="system-status-indicator-line">
-                    <span class="status-bracket">[</span>
-                    <span class="status-text">> SYSTEM DIAGNOSTICS: SECURE</span>
-                    <span class="status-bracket">]</span>
-                  </div>
-
-                  <!-- 4. Metrics Row -->
-                  <div class="hud-metrics-grid">
-                    <div class="metric-glass-box">
-                      <div class="metric-header">
-                        <i class="icon-monitor"></i>
-                        <span>Robots Online</span>
-                      </div>
-                      <span class="metric-value">12</span>
-                    </div>
-                    <div class="metric-glass-box">
-                      <div class="metric-header">
-                        <i class="icon-battery-charging"></i>
-                        <span>Battery Health</span>
-                      </div>
-                      <span class="metric-value">97%</span>
-                    </div>
-                    <div class="metric-glass-box">
-                      <div class="metric-header">
-                        <i class="icon-package"></i>
-                        <span>Today's Deliveries</span>
-                      </div>
-                      <span class="metric-value">48</span>
-                    </div>
-                    <div class="metric-glass-box">
-                      <div class="metric-header">
-                        <i class="icon-cpu"></i>
-                        <span>CPU Usage</span>
-                      </div>
-                      <span class="metric-value">21%</span>
-                    </div>
-                  </div>
-
-                  <!-- 5. Console Card -->
-                  <div class="hud-console-card">
-                    <div class="console-left">
-                      <canvas id="vector-map-canvas" width="64" height="56"></canvas>
-                    </div>
-                    <div class="console-right">
-                      <div class="console-timeline">
-                        <div class="timeline-line"></div>
-                        <div class="console-line-node active" id="log-node-1">
-                          <span class="node-dot"></span>
-                          <span class="node-text">Initializing AI Core...</span>
-                        </div>
-                        <div class="console-line-node" id="log-node-2">
-                          <span class="node-dot"></span>
-                          <span class="node-text">Loading Fleet Data...</span>
-                        </div>
-                        <div class="console-line-node" id="log-node-3">
-                          <span class="node-dot"></span>
-                          <span class="node-text">Connecting Sensors...</span>
-                        </div>
-                        <div class="console-line-node" id="log-node-4">
-                          <span class="node-dot"></span>
-                          <span class="node-text">Calibration in Progress...</span>
-                        </div>
-                        <div class="console-line-node" id="log-node-5">
-                          <span class="node-dot"></span>
-                          <span class="node-text">Simulation Ready</span>
-                        </div>
-                      </div>
-                    </div>
                   </div>
 
                   <!-- 6. Footer Continue -->
