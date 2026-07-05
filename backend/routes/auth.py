@@ -4,6 +4,7 @@ from models.user import UserLogin
 from services.auth_service import authenticate_user
 from services.activity_logger import log_activity
 from core.jwt_handler import create_access_token, verify_access_token
+from core.logger import logger
 
 router = APIRouter()
 
@@ -39,6 +40,10 @@ def login(user: UserLogin, request: Request):
         authenticated_user["username"],
         "LOGIN_SUCCESS",
         f"Login successful | Role={role} | Client={user_agent}"
+    )
+
+    logger.info(
+        f"User logged in: {authenticated_user['username']}"
     )
 
     return {

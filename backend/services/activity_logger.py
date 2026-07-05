@@ -5,17 +5,23 @@ import sys
 # Create logs directory if it doesn't exist
 os.makedirs("logs", exist_ok=True)
 
-file_handler = logging.FileHandler("logs/user_activity.log")
-console_handler = logging.StreamHandler(sys.stdout)
+# Create a dedicated logger for activity logging
+activity_logger = logging.getLogger("activity")
+activity_logger.setLevel(logging.INFO)
+activity_logger.propagate = False  # Avoid duplicates in root logger
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(message)s",
-    handlers=[file_handler, console_handler]
-)
+# Ensure handlers are only added once
+if not activity_logger.handlers:
+    file_handler = logging.FileHandler("logs/user_activity.log")
+    file_handler.setFormatter(logging.Formatter("%(asctime)s | %(message)s"))
+    activity_logger.addHandler(file_handler)
+
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(logging.Formatter("%(asctime)s | %(message)s"))
+    activity_logger.addHandler(console_handler)
 
 
 def log_activity(username: str, action: str, details: str = ""):
-    logging.info(
+    activity_logger.info(
         f"User={username} | Action={action} | {details}"
     )

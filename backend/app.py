@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.robots import router as robot_router
@@ -27,6 +28,20 @@ def home():
     return {
         "message": "Robot Simulator Backend Running"
     }
+
+
+@app.get("/logs")
+def get_logs(limit: int = 100):
+    log_file_path = "logs/user_activity.log"
+    if not os.path.exists(log_file_path):
+        return {"logs": []}
+    try:
+        with open(log_file_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+        return {"logs": [line.strip() for line in lines[-limit:]]}
+    except Exception as e:
+        return {"error": str(e)}
+
 
 app.include_router(robot_router)
 
