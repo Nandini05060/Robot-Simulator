@@ -45,54 +45,29 @@ def move_robot(robot_id: Union[int, str], command: str):
             "message": "Battery depleted"
         }
 
-    if command == "rotate_left":
-        rotate_robot(robot, "left")
-        robot.battery = max(0, robot.battery - 1)
-
-        return {
-            "success": True,
-            "robot": robot
-        }
-
-    if command == "rotate_right":
-        rotate_robot(robot, "right")
-        robot.battery = max(0, robot.battery - 1)
-
-        return {
-            "success": True,
-            "robot": robot
-        }
-
     new_x = robot.x
     new_y = robot.y
 
     if command == "forward":
+        robot.direction = "North"
+        robot.angle = 0
+        new_y -= robot.speed
 
-        if robot.direction == "North":
-            new_y -= robot.speed
+    elif command in ["left", "rotate_left"]:
+        robot.direction = "West"
+        robot.angle = 270
+        new_x -= robot.speed
 
-        elif robot.direction == "South":
-            new_y += robot.speed
-
-        elif robot.direction == "East":
-            new_x += robot.speed
-
-        elif robot.direction == "West":
-            new_x -= robot.speed
+    elif command in ["right", "rotate_right"]:
+        robot.direction = "East"
+        robot.angle = 90
+        new_x += robot.speed
 
     elif command == "backward":
-
-        if robot.direction == "North":
-            new_y += robot.speed
-
-        elif robot.direction == "South":
-            new_y -= robot.speed
-
-        elif robot.direction == "East":
-            new_x -= robot.speed
-
-        elif robot.direction == "West":
-            new_x += robot.speed
+        return {
+            "success": False,
+            "message": "Backward movement is disabled"
+        }
 
     if new_x < 0 or new_x >= MAP_WIDTH:
         return {"success": False, "message": "Boundary reached"}

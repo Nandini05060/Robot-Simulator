@@ -177,7 +177,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     radius: 16,
                     backgroundColor: isAdmin ? const Color(0xff8b5cf6) : const Color(0xff2563eb),
                     child: Text(
-                      isAdmin ? 'AM' : 'JD',
+                      isAdmin ? 'AM' : 'ON',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
@@ -191,7 +191,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        isAdmin ? 'Dr. Aryan Mehta' : 'John Doe',
+                        isAdmin ? 'Dr. Aryan Mehta' : 'Operator Nandini',
                         style: TextStyle(
                           color: isDark ? Colors.white : const Color(0xff0f172a),
                           fontSize: 13,
@@ -382,16 +382,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
               // 1. Persistent Top Navigation & Global Status Header
               Container(
                 margin: const EdgeInsets.only(top: 12),
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xff131926) : Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0)),
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDark
+                        ? [const Color(0xff111827), const Color(0xff090d16)]
+                        : [Colors.white, const Color(0xfff8fafc)],
+                  ),
+                  border: Border.all(
+                    color: isDark
+                        ? const Color(0xff00A2FF).withOpacity(0.12)
+                        : const Color(0xff2563eb).withOpacity(0.1),
+                    width: 1.2,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.02),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      color: isDark
+                          ? const Color(0xff00A2FF).withOpacity(0.04)
+                          : Colors.black.withOpacity(0.02),
+                      blurRadius: 16,
+                      spreadRadius: 1,
                     )
                   ],
                 ),
@@ -800,13 +813,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xff131926) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0)),
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [const Color(0xff111827), const Color(0xff090d16)]
+                : [Colors.white, const Color(0xfff8fafc)],
+          ),
+          border: Border.all(
+            color: isDark
+                ? color.withOpacity(0.15)
+                : color.withOpacity(0.08),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isDark
+                  ? color.withOpacity(0.03)
+                  : Colors.black.withOpacity(0.01),
+              blurRadius: 12,
+              spreadRadius: 1,
+            )
+          ],
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1160,19 +1193,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xff131926) : Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0)),
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [const Color(0xff111827), const Color(0xff090d16)]
+              : [Colors.white, const Color(0xfff8fafc)],
+        ),
+        border: Border.all(
+          color: isDark
+              ? const Color(0xff00A2FF).withOpacity(0.1)
+              : const Color(0xff2563eb).withOpacity(0.08),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: isDark
+                ? const Color(0xff00A2FF).withOpacity(0.03)
+                : Colors.black.withOpacity(0.02),
+            blurRadius: 16,
+            spreadRadius: 1,
           )
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

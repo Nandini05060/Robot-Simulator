@@ -323,45 +323,92 @@ class _GreetingScreenState extends State<GreetingScreen> with TickerProviderStat
                                     ),
                                   ),
 
-                                  // Floating Robot Image (Scaled up & Circuit board robot)
+                                  // Futuristic Console Boot Timeline Screen
                                   AnimatedBuilder(
                                     animation: _floatAnimation,
                                     builder: (context, child) {
                                       return Transform.translate(
                                         offset: Offset(0, _floatAnimation.value - 12),
-                                        child: Stack(
-                                          alignment: Alignment.center,
-                                          children: [
-                                            ClipRRect(
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(16),
+                                          child: Container(
+                                            width: 240,
+                                            height: 200,
+                                            padding: const EdgeInsets.all(20),
+                                            decoration: BoxDecoration(
                                               borderRadius: BorderRadius.circular(16),
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(16),
-                                                  border: Border.all(
-                                                    color: const Color(0xff00A2FF).withOpacity(0.3),
-                                                    width: 1.5,
+                                              color: const Color(0xff09111e).withOpacity(0.45),
+                                              border: Border.all(
+                                                color: const Color(0xff00A2FF).withOpacity(0.2),
+                                                width: 1.2,
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: const Color(0xff00A2FF).withOpacity(0.08),
+                                                  blurRadius: 16,
+                                                  spreadRadius: 1,
+                                                ),
+                                              ],
+                                            ),
+                                            child: Stack(
+                                              children: [
+                                                Positioned.fill(
+                                                  child: CustomPaint(
+                                                    painter: _TerminalGridPainter(),
                                                   ),
-                                                  boxShadow: [
-                                                    BoxShadow(
+                                                ),
+                                                Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Text(
+                                                          "SYSTEM BOOT SEQUENCE",
+                                                          style: GoogleFonts.outfit(
+                                                            fontSize: 8,
+                                                            fontWeight: FontWeight.w900,
+                                                            color: const Color(0xff00A2FF),
+                                                            letterSpacing: 1.2,
+                                                          ),
+                                                        ),
+                                                        Row(
+                                                          children: [
+                                                            Container(
+                                                              width: 4,
+                                                              height: 4,
+                                                              decoration: const BoxDecoration(
+                                                                color: Colors.redAccent,
+                                                                shape: BoxShape.circle,
+                                                              ),
+                                                            ),
+                                                            const SizedBox(width: 4),
+                                                            Container(
+                                                              width: 4,
+                                                              height: 4,
+                                                              decoration: const BoxDecoration(
+                                                                color: Colors.greenAccent,
+                                                                shape: BoxShape.circle,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        )
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 4),
+                                                    Container(
+                                                      height: 1,
                                                       color: const Color(0xff00A2FF).withOpacity(0.15),
-                                                      blurRadius: 20,
-                                                      spreadRadius: 2,
+                                                    ),
+                                                    const SizedBox(height: 12),
+                                                    Expanded(
+                                                      child: _buildConsoleTimeline(),
                                                     ),
                                                   ],
                                                 ),
-                                                child: Image.asset(
-                                                  'assets/robot_splash.png',
-                                                  width: 220,
-                                                  height: 300,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
+                                              ],
                                             ),
-                                            // Sweeping Laser Scan Line (Refined)
-                                            const Positioned.fill(
-                                              child: _LaserSweepEffectRefined(),
-                                            ),
-                                          ],
+                                          ),
                                         ),
                                       );
                                     },
@@ -1133,4 +1180,24 @@ class _NetworkBar extends StatelessWidget {
       ),
     );
   }
+}
+
+class _TerminalGridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xff00A2FF).withOpacity(0.04)
+      ..strokeWidth = 0.5;
+
+    const step = 10.0;
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
