@@ -1066,22 +1066,22 @@
                         <div class="controller-base"></div>
                         <button class="dpad-btn dpad-up"
                           onmousedown="startDpadHold('Move Forward', 0, -1)" onmouseup="stopDpadHold()" onmouseleave="stopDpadHold()"
-                          ontouchstart="startDpadHold('Move Forward', 0, -1)" ontouchend="stopDpadHold()">
+                          ontouchstart="event.preventDefault(); startDpadHold('Move Forward', 0, -1)" ontouchend="event.preventDefault(); stopDpadHold()">
                           <i class="icon-arrow-up"></i>
                         </button>
                         <button class="dpad-btn dpad-left"
                           onmousedown="startDpadHold('Move Left', -1, 0)" onmouseup="stopDpadHold()" onmouseleave="stopDpadHold()"
-                          ontouchstart="startDpadHold('Move Left', -1, 0)" ontouchend="stopDpadHold()">
+                          ontouchstart="event.preventDefault(); startDpadHold('Move Left', -1, 0)" ontouchend="event.preventDefault(); stopDpadHold()">
                           <i class="icon-arrow-left"></i>
                         </button>
                         <button class="dpad-btn dpad-right"
                           onmousedown="startDpadHold('Move Right', 1, 0)" onmouseup="stopDpadHold()" onmouseleave="stopDpadHold()"
-                          ontouchstart="startDpadHold('Move Right', 1, 0)" ontouchend="stopDpadHold()">
+                          ontouchstart="event.preventDefault(); startDpadHold('Move Right', 1, 0)" ontouchend="event.preventDefault(); stopDpadHold()">
                           <i class="icon-arrow-right"></i>
                         </button>
-                        <button class="dpad-btn dpad-down" style="pointer-events: none; opacity: 0.15; cursor: not-allowed;"
+                        <button class="dpad-btn dpad-down"
                           onmousedown="startDpadHold('Move Backward', 0, 1)" onmouseup="stopDpadHold()" onmouseleave="stopDpadHold()"
-                          ontouchstart="startDpadHold('Move Backward', 0, 1)" ontouchend="stopDpadHold()">
+                          ontouchstart="event.preventDefault(); startDpadHold('Move Backward', 0, 1)" ontouchend="event.preventDefault(); stopDpadHold()">
                           <i class="icon-arrow-down"></i>
                         </button>
                         <button class="dpad-center" onclick="emergencyStopRobot()">

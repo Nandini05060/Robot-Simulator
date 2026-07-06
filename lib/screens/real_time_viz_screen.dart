@@ -79,7 +79,7 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
         _currentY = 4.0;
       }
 
-      if (_robot!.isOnline) {
+      if (_robot!.isOnline && !ApiService().isConnected) {
         _currentX = _navigationPath[0].x;
         _currentY = _navigationPath[0].y;
         _currentPathIndex = 0;
@@ -719,10 +719,12 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
                                   if (_status == 'E-STOPPED') {
                                     _status = 'Online';
                                   }
-                                  _speed = 0.8;
-                                  _updateRobotState();
-                                  _logAction('CMD: Resume Autonomous Navigation');
                                 });
+                                if (_startX != null && _destX != null) {
+                                  _startAutoNavigation();
+                                }
+                                _updateRobotState();
+                                _logAction('CMD: Resume Autonomous Navigation');
                               },
                               icon: const Icon(Icons.play_arrow, size: 16, color: Color(0xff2563eb)),
                               label: const Text(

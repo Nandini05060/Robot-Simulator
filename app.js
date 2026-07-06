@@ -3098,9 +3098,13 @@ function updateRobotAndTrailDOM() {
   const svgTrail = document.querySelector('#viz-trail-svg polyline');
   if (!mapRobot) return;
 
-  const parts = activeRobot.position.split(', ');
-  const x = parseFloat(parts[0]);
-  const y = parseFloat(parts[1]);
+  const parts = activeRobot.position.split(/,\s*/);
+  let x = parseFloat(parts[0]);
+  let y = parseFloat(parts[1]);
+  if (isNaN(x) || isNaN(y)) {
+    x = 12.5;
+    y = 10.0;
+  }
   const angle = activeRobot.angle;
 
   const coords = getPixelOffset(x, y);
@@ -3147,9 +3151,13 @@ function startRealtimeSimulation() {
   if (resumeContainer) resumeContainer.style.display = 'none';
 
   // Parse initial position
-  const parts = activeRobot.position.split(', ');
-  const startX = parseFloat(parts[0]);
-  const startY = parseFloat(parts[1]);
+  const parts = activeRobot.position.split(/,\s*/);
+  let startX = parseFloat(parts[0]);
+  let startY = parseFloat(parts[1]);
+  if (isNaN(startX) || isNaN(startY)) {
+    startX = 12.5;
+    startY = 10.0;
+  }
   realtimeTrail.push([startX, startY]);
 
   // If WebSocket is connected, let backend handle telemetry
@@ -3183,9 +3191,13 @@ function startRealtimeSimulation() {
 
     // Stopped automatic movement - position and angle do not update automatically.
     // They only update when manual D-pad buttons are pressed or held.
-    const parts = activeRobot.position.split(', ');
-    const x = parseFloat(parts[0]);
-    const y = parseFloat(parts[1]);
+    const parts = activeRobot.position.split(/,\s*/);
+    let x = parseFloat(parts[0]);
+    let y = parseFloat(parts[1]);
+    if (isNaN(x) || isNaN(y)) {
+      x = 12.5;
+      y = 10.0;
+    }
     const angle = activeRobot.angle;
     const pt = [x, y, angle];
     
@@ -3276,9 +3288,15 @@ function sendRemoteCmd(cmdName, dx, dy) {
   document.getElementById('hud-tracking-title').innerText = `Manual Override: ${activeRobot.name}`;
 
   // Calculate new position
-  let parts = activeRobot.position.split(', ');
-  let x = parseFloat(parts[0]) + dx * 0.8;
-  let y = parseFloat(parts[1]) + dy * 0.8;
+  let parts = activeRobot.position.split(/,\s*/);
+  let x = parseFloat(parts[0]);
+  let y = parseFloat(parts[1]);
+  if (isNaN(x) || isNaN(y)) {
+    x = 12.5;
+    y = 10.0;
+  }
+  x = x + dx * 0.8;
+  y = y + dy * 0.8;
   
   let deg = activeRobot.angle;
   if (dx > 0) deg = 90;
@@ -3419,6 +3437,10 @@ function resumeAutoNav() {
   if (resumeContainer) resumeContainer.style.display = 'none';
 
   document.getElementById('hud-tracking-title').innerText = `Active Tracking: ${activeRobot.name}`;
+
+  if (webStartX !== null && webDestX !== null && !webAutoNavActive) {
+    toggleWebAutoNav();
+  }
 
   showToastNotification("Resumed autonomous navigation.");
 
@@ -3617,6 +3639,7 @@ let dpadHoldInterval = null;
 let currentSpeedMultiplier = 1.0;
 
 function startDpadHold(cmdName, dx, dy) {
+  stopDpadHold(); // Clear any existing timers first!
   // First immediate trigger
   sendRemoteCmd(cmdName, dx * currentSpeedMultiplier, dy * currentSpeedMultiplier);
   
@@ -3998,6 +4021,9 @@ for (let x = 0; x < 5; x++) {
 
 function findWebClosestFree(pt) {
   let [x, y] = pt;
+  x = Math.max(0, Math.min(24, x));
+  y = Math.max(0, Math.min(19, y));
+  pt = [x, y];
   if (webGrid[x][y] === 0) return pt;
   
   const queue = [pt];
@@ -4026,8 +4052,14 @@ function findWebClosestFree(pt) {
 }
 
 function webAstar(start, goal) {
-  const start_grid = findWebClosestFree([Math.round(start[0]), Math.round(start[1])]);
-  const goal_grid = findWebClosestFree([Math.round(goal[0]), Math.round(goal[1])]);
+  const start_grid = findWebClosestFree([
+    Math.max(0, Math.min(24, Math.round(start[0]))),
+    Math.max(0, Math.min(19, Math.round(start[1])))
+  ]);
+  const goal_grid = findWebClosestFree([
+    Math.max(0, Math.min(24, Math.round(goal[0]))),
+    Math.max(0, Math.min(19, Math.round(goal[1])))
+  ]);
   
   const queue = [{ f: 0, g: 0, current: start_grid, path: [start_grid] }];
   const visited = new Set();
@@ -4156,9 +4188,13 @@ function toggleWebAutoNav() {
       return;
     }
     
-    const parts = activeRobot.position.split(', ');
+    const parts = activeRobot.position.split(/,\s*/);
     let cx = parseFloat(parts[0]);
     let cy = parseFloat(parts[1]);
+    if (isNaN(cx) || isNaN(cy)) {
+      cx = 12.5;
+      cy = 10.0;
+    }
     
     const target = path[pathIndex];
     const tx = target[0];
