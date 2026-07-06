@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/api_service.dart';
@@ -10,7 +11,7 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController(text: 'operator@blucursor.com');
   final _passwordController = TextEditingController(text: 'password123');
@@ -20,6 +21,16 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isBiometricScanning = false;
   String _biometricStatus = 'INITIALIZING BIO-LINK...';
   double _biometricProgress = 0.0;
+  late AnimationController _rotationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _rotationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 30),
+    )..repeat();
+  }
 
   void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
@@ -85,6 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _rotationController.dispose();
     super.dispose();
   }
 
@@ -243,7 +255,7 @@ class _LoginScreenState extends State<LoginScreen> {
               fit: BoxFit.cover,
             ),
           ),
-          // Dark overlay to ensure readability
+          // Dark overlay to ensure readability (opacity lowered for visibility)
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -251,8 +263,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0xff090A0F).withOpacity(0.75),
-                    const Color(0xff090A0F).withOpacity(0.85),
+                    const Color(0xff090A0F).withOpacity(0.45),
+                    const Color(0xff090A0F).withOpacity(0.55),
                   ],
                 ),
               ),
@@ -269,6 +281,34 @@ class _LoginScreenState extends State<LoginScreen> {
                     primaryColor.withOpacity(0.06),
                     Colors.transparent,
                   ],
+                ),
+              ),
+            ),
+          ),
+          // Rotating Background Circle & HUD
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.1,
+            left: -100,
+            right: -100,
+            child: Center(
+              child: RotationTransition(
+                turns: _rotationController,
+                child: SizedBox(
+                  width: 420,
+                  height: 420,
+                  child: CustomPaint(
+                    painter: LoginHudPainter(),
+                    child: Center(
+                      child: Opacity(
+                        opacity: 0.15,
+                        child: Image.asset(
+                          'assets/ai_sphere.png',
+                          width: 300,
+                          height: 300,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -332,15 +372,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 32),
                     
-                    // Glassmorphic Card Container
+                    // Glassmorphic Card Container (more translucent with enhanced blur)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(24),
                       child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                        filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                         child: Container(
                           padding: const EdgeInsets.all(28.0),
                           decoration: BoxDecoration(
-                            color: darkSurface.withOpacity(0.65),
+                            color: darkSurface.withOpacity(0.35),
                             borderRadius: BorderRadius.circular(24),
                             border: Border.all(
                               color: primaryColor.withOpacity(0.18),
@@ -535,4 +575,47 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+}
+
+class LoginHudPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final paint = Paint()
+      ..color = const Color(0xff55E8FF).withOpacity(0.15)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    // Outer ring
+    canvas.drawCircle(center, size.width / 2 - 10, paint);
+    
+    // Middle ring
+    canvas.drawCircle(
+      center,
+      size.width / 2 - 35,
+      paint..color = const Color(0xff55E8FF).withOpacity(0.08),
+    );
+
+    // Inner ring (dashed-like ticks)
+    final tickPaint = Paint()
+      ..color = const Color(0xff55E8FF).withOpacity(0.25)
+      ..strokeWidth = 2.0;
+    
+    final radius = size.width / 2 - 10;
+    for (int i = 0; i < 360; i += 30) {
+      final double angle = i * math.pi / 180;
+      final start = Offset(
+        center.dx + (radius - 12) * math.cos(angle),
+        center.dy + (radius - 12) * math.sin(angle),
+      );
+      final end = Offset(
+        center.dx + radius * math.cos(angle),
+        center.dy + radius * math.sin(angle),
+      );
+      canvas.drawLine(start, end, tickPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

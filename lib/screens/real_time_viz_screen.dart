@@ -71,7 +71,7 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
 
       // Parse coordinates from robot position (e.g. "12.4, 8.2")
       try {
-        final parts = _robot!.position.split(', ');
+        final parts = _robot!.position.split(RegExp(r',\s*'));
         _currentX = double.parse(parts[0]);
         _currentY = double.parse(parts[1]);
       } catch (e) {
@@ -112,7 +112,7 @@ class _RealTimeVizScreenState extends State<RealTimeVizScreen> {
   void _onTelemetryUpdated() {
     if (_robot == null) return;
     final updated = sampleRobots.firstWhere((r) => r.id == _robot!.id, orElse: () => _robot!);
-    final coords = updated.position.split(', ');
+    final coords = updated.position.split(RegExp(r',\s*'));
     final newX = double.tryParse(coords[0]) ?? _currentX;
     final newY = double.tryParse(coords[1]) ?? _currentY;
 

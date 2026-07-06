@@ -4,6 +4,9 @@ import 'package:http/http.dart' as http;
 import 'main_navigation_shell.dart';
 import '../services/api_service.dart';
 
+import 'dart:math' as math;
+import '../models/robot.dart';
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
 
@@ -11,16 +14,44 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends State<DashboardScreen> with TickerProviderStateMixin {
   int _activeIntroTab = 0;
   int _totalRobots = 5;
   int _onlineRobots = 4;
   double _averageBattery = 100.0;
+  late AnimationController _fadeController;
+  late AnimationController _radarController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
     _loadDashboardData();
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _radarController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
+    );
+    _slideAnimation = Tween<Offset>(begin: const Offset(0.0, 0.08), end: Offset.zero).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic),
+    );
+
+    _fadeController.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    _radarController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDashboardData() async {
@@ -374,11 +405,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
               // 1. Persistent Top Navigation & Global Status Header
               Container(
                 margin: const EdgeInsets.only(top: 12),
@@ -480,6 +515,64 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 16),
+              
+              // New Premium Telemetry Scanner
+              const Text(
+                'LIVE TELEMETRY SCANNER',
+                style: TextStyle(
+                  color: Color(0xff64748b),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xff131926) : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffcbd5e1)),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        height: 160,
+                        width: double.infinity,
+                        child: AnimatedBuilder(
+                          animation: _radarController,
+                          builder: (context, child) {
+                            return CustomPaint(
+                              painter: RadarScannerPainter(
+                                angle: _radarController.value * 2 * math.pi,
+                                isDark: isDark,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Container(
+                        height: 160,
+                        alignment: Alignment.center,
+                        child: Text(
+                          'SCANNING CORE CHANNELS...',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            color: (isDark ? const Color(0xff00D2FF) : const Color(0xff2563eb)).withOpacity(0.55),
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildQuickCommandCenter(),
               const SizedBox(height: 16),
               _buildCompanyIntroCard(),
               const SizedBox(height: 16),
@@ -588,6 +681,101 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
                 ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Live Fleet Registry with images and status
+              const Text(
+                'ACTIVE FLEET REGISTRY',
+                style: TextStyle(
+                  color: Color(0xff64748b),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                ),
+              ),
+              const SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: sampleRobots.length,
+                itemBuilder: (context, index) {
+                  final robot = sampleRobots[index];
+                  final isOnline = robot.isOnline;
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    color: isDark ? const Color(0xff131926) : Colors.white,
+                    child: ListTile(
+                      leading: Container(
+                        width: 44,
+                        height: 44,
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: isDark ? const Color(0xff090d16) : const Color(0xfff1f5f9),
+                        ),
+                        child: Image.asset(
+                          robot.imagePath,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.smart_toy, color: Colors.blue),
+                        ),
+                      ),
+                      title: Row(
+                        children: [
+                          Text(robot.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          const SizedBox(width: 8),
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isOnline ? const Color(0xff10b981) : Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      subtitle: Text(
+                        '${robot.modelType}\nActivity: ${robot.lastActivity}',
+                        style: TextStyle(fontSize: 10, color: isDark ? const Color(0xff94a3b8) : const Color(0xff64748b)),
+                      ),
+                      isThreeLine: true,
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                robot.batteryLevel > 20 ? Icons.battery_std_rounded : Icons.battery_alert_rounded,
+                                size: 14,
+                                color: robot.batteryLevel > 50 ? const Color(0xff10b981) : (robot.batteryLevel > 20 ? Colors.amber : Colors.red),
+                              ),
+                              const SizedBox(width: 4),
+                              Text('${robot.batteryLevel}%', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: isOnline ? const Color(0xff10b981).withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              isOnline ? 'ONLINE' : 'OFFLINE',
+                              style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                                color: isOnline ? const Color(0xff10b981) : Colors.grey,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 20),
 
@@ -746,6 +934,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 30),
             ],
           ),
+        ),
+        ),
         ),
       ),
     );
@@ -1403,4 +1593,147 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+  Widget _buildQuickCommandCenter() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xff131926) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffcbd5e1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.bolt, color: Colors.amber, size: 18),
+              const SizedBox(width: 8),
+              const Text(
+                'QUICK COMMAND CENTER',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+              ),
+            ],
+          ),
+          const Divider(height: 20, color: Color(0xff1e293b)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Button 1: Broadcast Alert
+              ElevatedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('ALERT BROADCAST SENT TO ALL FLEET UNITS'),
+                      backgroundColor: Colors.amber,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber.withOpacity(0.1),
+                  foregroundColor: Colors.amber,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                icon: const Icon(Icons.campaign_outlined, size: 16),
+                label: const Text('Broadcast Alert', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+              ),
+              // Button 2: Emergency Stop All
+              ElevatedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('EMERGENCY STANDBY ISSUED FOR ALL ACTIVE FLEET'),
+                      backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.withOpacity(0.1),
+                  foregroundColor: Colors.redAccent,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                icon: const Icon(Icons.dangerous_outlined, size: 16),
+                label: const Text('All Stop', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class RadarScannerPainter extends CustomPainter {
+  final double angle;
+  final bool isDark;
+
+  RadarScannerPainter({required this.angle, required this.isDark});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) / 2 - 10;
+
+    final paintGrid = Paint()
+      ..color = isDark ? const Color(0xff00D2FF).withOpacity(0.08) : const Color(0xff2563eb).withOpacity(0.06)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    final paintGreen = Paint()
+      ..color = const Color(0xff10b981)
+      ..style = PaintingStyle.fill;
+
+    // Draw concentric circles
+    canvas.drawCircle(center, radius, paintGrid);
+    canvas.drawCircle(center, radius * 0.66, paintGrid);
+    canvas.drawCircle(center, radius * 0.33, paintGrid);
+
+    // Draw crosshair axes
+    canvas.drawLine(Offset(center.dx - radius, center.dy), Offset(center.dx + radius, center.dy), paintGrid);
+    canvas.drawLine(Offset(center.dx, center.dy - radius), Offset(center.dx, center.dy + radius), paintGrid);
+
+    // Draw radar sweep (gradient cone)
+    final sweepPaint = Paint()
+      ..shader = SweepGradient(
+        colors: [
+          Colors.transparent,
+          (isDark ? const Color(0xff00D2FF) : const Color(0xff2563eb)).withOpacity(0.2),
+        ],
+        stops: const [0.75, 1.0],
+        transform: GradientRotation(angle),
+      ).createShader(Rect.fromCircle(center: center, radius: radius))
+      ..style = PaintingStyle.fill;
+
+    canvas.drawCircle(center, radius, sweepPaint);
+
+    // Draw mock robot blips (glowing dots)
+    canvas.drawCircle(Offset(center.dx + radius * 0.4, center.dy - radius * 0.3), 4, paintGreen);
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.4, center.dy - radius * 0.3),
+      10,
+      Paint()
+        ..color = const Color(0xff10b981).withOpacity(0.2)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+
+    canvas.drawCircle(Offset(center.dx - radius * 0.5, center.dy + radius * 0.2), 3, paintGreen);
+
+    canvas.drawCircle(Offset(center.dx + radius * 0.2, center.dy + radius * 0.6), 4, paintGreen);
+    canvas.drawCircle(
+      Offset(center.dx + radius * 0.2, center.dy + radius * 0.6),
+      8,
+      Paint()
+        ..color = const Color(0xff10b981).withOpacity(0.2)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.0,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant RadarScannerPainter oldDelegate) => oldDelegate.angle != angle;
 }

@@ -149,7 +149,7 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
     if (!_initialized) {
       final argRobot = ModalRoute.of(context)?.settings.arguments as Robot?;
       _robot = argRobot ?? sampleRobots[0];
-      final coords = _robot.position.split(', ');
+      final coords = _robot.position.split(RegExp(r',\s*'));
       _posX = double.tryParse(coords[0]) ?? 10.0;
       _posY = double.tryParse(coords[1]) ?? 10.0;
       _angle = _robot.angle;
@@ -172,7 +172,7 @@ class _ControlPanelScreenState extends State<ControlPanelScreen> {
 
   void _onTelemetryUpdated() {
     final updated = sampleRobots.firstWhere((r) => r.id == _robot.id, orElse: () => _robot);
-    final coords = updated.position.split(', ');
+    final coords = updated.position.split(RegExp(r',\s*'));
     final newX = double.tryParse(coords[0]) ?? _posX;
     final newY = double.tryParse(coords[1]) ?? _posY;
     
