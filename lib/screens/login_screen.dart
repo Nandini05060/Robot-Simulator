@@ -351,7 +351,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         ),
                         const SizedBox(height: 28),
                         Text(
-                          'Secure Operator Login',
+                          'Login Page',
                           style: GoogleFonts.outfit(
                             fontSize: 22,
                             fontWeight: FontWeight.w900,

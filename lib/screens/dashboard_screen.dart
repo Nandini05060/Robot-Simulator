@@ -5,7 +5,7 @@ import 'main_navigation_shell.dart';
 import '../services/api_service.dart';
 
 import 'dart:math' as math;
-import '../models/robot.dart';
+import '../widgets/animated_tap_scale.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -15,7 +15,6 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> with TickerProviderStateMixin {
-  int _activeIntroTab = 0;
   int _totalRobots = 5;
   int _onlineRobots = 4;
   double _averageBattery = 100.0;
@@ -452,15 +451,6 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                         Row(
                           children: [
                             Image.asset(isDark ? 'assets/logo_light.png' : 'assets/logo_dark.png', height: 18),
-                            const SizedBox(width: 8),
-                            Text(
-                              'bluCursor',
-                              style: TextStyle(
-                                color: isDark ? Colors.white : const Color(0xff0f172a),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
                           ],
                         ),
                         Container(
@@ -515,99 +505,31 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                   ],
                 ),
               ),
+              if (isAdmin) ...[
+                const SizedBox(height: 16),
+                _buildQuickCommandCenter(),
+              ],
               const SizedBox(height: 16),
-              
-              // New Premium Telemetry Scanner
-              const Text(
-                'LIVE TELEMETRY SCANNER',
-                style: TextStyle(
-                  color: Color(0xff64748b),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xff131926) : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffcbd5e1)),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      SizedBox(
-                        height: 160,
-                        width: double.infinity,
-                        child: AnimatedBuilder(
-                          animation: _radarController,
-                          builder: (context, child) {
-                            return CustomPaint(
-                              painter: RadarScannerPainter(
-                                angle: _radarController.value * 2 * math.pi,
-                                isDark: isDark,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      Container(
-                        height: 160,
-                        alignment: Alignment.center,
-                        child: Text(
-                          'SCANNING CORE CHANNELS...',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            color: (isDark ? const Color(0xff00D2FF) : const Color(0xff2563eb)).withOpacity(0.55),
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                      ),
-                    ],
+              Row(
+                children: [
+                  _buildMiniSimulationButton(
+                    header: 'AI PATROLLING',
+                    title: 'Anomaly Analysis',
+                    footer: 'Anomaly Area',
+                    color: const Color(0xff2563eb),
+                    mapImagePath: 'assets/map_3.png',
+                    onTap: () => MainNavigationShell.of(context).setTab(2),
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildQuickCommandCenter(),
-              const SizedBox(height: 16),
-              _buildCompanyIntroCard(),
-              const SizedBox(height: 16),
-
-              // 2. Quick Start Actions (Getting Started)
-              const Text(
-                'GETTING STARTED',
-                style: TextStyle(
-                  color: Color(0xff64748b),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const SizedBox(height: 10),
-              // Button 1: Patrol Simulation
-              _buildQuickStartButton(
-                context,
-                icon: Icons.shield_outlined,
-                title: 'Launch Patrol Simulation',
-                subtitle: 'Test Security & Coverage',
-                desc: 'Simulate guard routes, test camera blind spots, and optimize fleet battery life for continuous area surveillance.',
-                color: const Color(0xff2563eb),
-                onTap: () => MainNavigationShell.of(context).setTab(2),
-              ),
-              const SizedBox(height: 10),
-              // Button 2: Delivery Simulation
-              _buildQuickStartButton(
-                context,
-                icon: Icons.local_shipping_outlined,
-                title: 'Launch Delivery Simulation',
-                subtitle: 'Optimize Logistics & Routing',
-                desc: 'Run A-to-B delivery scenarios, test obstacle avoidance in crowded aisles, and measure package throughput.',
-                color: const Color(0xff10b981),
-                onTap: () => MainNavigationShell.of(context).setTab(1),
+                  const SizedBox(width: 12),
+                  _buildMiniSimulationButton(
+                    header: 'AI DELIVERY',
+                    title: 'Route Optimisation',
+                    footer: 'Critical Medical Supplies',
+                    color: const Color(0xff10b981),
+                    mapImagePath: 'assets/map_4.png',
+                    onTap: () => MainNavigationShell.of(context).setTab(1),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
 
@@ -684,99 +606,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
               ),
               const SizedBox(height: 20),
               
-              // Live Fleet Registry with images and status
-              const Text(
-                'ACTIVE FLEET REGISTRY',
-                style: TextStyle(
-                  color: Color(0xff64748b),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const SizedBox(height: 10),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: sampleRobots.length,
-                itemBuilder: (context, index) {
-                  final robot = sampleRobots[index];
-                  final isOnline = robot.isOnline;
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    color: isDark ? const Color(0xff131926) : Colors.white,
-                    child: ListTile(
-                      leading: Container(
-                        width: 44,
-                        height: 44,
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: isDark ? const Color(0xff090d16) : const Color(0xfff1f5f9),
-                        ),
-                        child: Image.asset(
-                          robot.imagePath,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.smart_toy, color: Colors.blue),
-                        ),
-                      ),
-                      title: Row(
-                        children: [
-                          Text(robot.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isOnline ? const Color(0xff10b981) : Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                      subtitle: Text(
-                        '${robot.modelType}\nActivity: ${robot.lastActivity}',
-                        style: TextStyle(fontSize: 10, color: isDark ? const Color(0xff94a3b8) : const Color(0xff64748b)),
-                      ),
-                      isThreeLine: true,
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                robot.batteryLevel > 20 ? Icons.battery_std_rounded : Icons.battery_alert_rounded,
-                                size: 14,
-                                color: robot.batteryLevel > 50 ? const Color(0xff10b981) : (robot.batteryLevel > 20 ? Colors.amber : Colors.red),
-                              ),
-                              const SizedBox(width: 4),
-                              Text('${robot.batteryLevel}%', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: isOnline ? const Color(0xff10b981).withOpacity(0.1) : Colors.grey.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              isOnline ? 'ONLINE' : 'OFFLINE',
-                              style: TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.bold,
-                                color: isOnline ? const Color(0xff10b981) : Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+              _buildFAQSection(),
               const SizedBox(height: 20),
 
               // 4. System Health
@@ -943,27 +773,6 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
 );
 }
 
-  Widget _buildBadgeTag(String label, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.1)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 9, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(color: color, fontSize: 8.5, fontWeight: FontWeight.w800),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildHeaderAlertItem(IconData icon, String text, String time, Color iconColor) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -992,95 +801,262 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
     );
   }
 
-  Widget _buildQuickStartButton(BuildContext context, {
-    required IconData icon,
+  Widget _buildMiniSimulationButton({
+    required String header,
     required String title,
-    required String subtitle,
-    required String desc,
+    required String footer,
     required Color color,
+    required String mapImagePath,
     required VoidCallback onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? [const Color(0xff111827), const Color(0xff090d16)]
-                : [Colors.white, const Color(0xfff8fafc)],
-          ),
-          border: Border.all(
-            color: isDark
-                ? color.withOpacity(0.15)
-                : color.withOpacity(0.08),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? color.withOpacity(0.03)
-                  : Colors.black.withOpacity(0.01),
-              blurRadius: 12,
-              spreadRadius: 1,
-            )
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: color.withOpacity(0.2)),
-              ),
-              child: Icon(icon, color: color, size: 24),
+    return Expanded(
+      child: AnimatedTapScale(
+        onTap: onTap,
+        child: Container(
+          height: 180,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark
+                  ? [const Color(0xff111827), const Color(0xff090d16)]
+                  : [Colors.white, const Color(0xfff8fafc)],
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: isDark ? Colors.white : const Color(0xff0f172a),
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
+            border: Border.all(
+              color: isDark ? color.withOpacity(0.3) : color.withOpacity(0.2),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: isDark ? color.withOpacity(0.06) : Colors.black.withOpacity(0.02),
+                blurRadius: 12,
+                spreadRadius: 1,
+              )
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 12, right: 12, top: 10, bottom: 6),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        header,
+                        style: TextStyle(
+                          color: color,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: isDark ? Colors.white : const Color(0xff0f172a),
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.bold,
+                          height: 1.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ),
+                Expanded(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.asset(
+                        mapImagePath,
+                        fit: BoxFit.cover,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              (isDark ? const Color(0xff090d16) : Colors.white).withOpacity(0.1),
+                              isDark ? const Color(0xff090d16) : Colors.white,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    desc,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          footer,
+                          style: TextStyle(
+                            color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFAQSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'FREQUENTLY ASKED QUESTIONS',
+          style: TextStyle(
+            color: Color(0xff64748b),
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xff131926) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffcbd5e1)),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Column(
+              children: [
+                _buildFAQTile(
+                  'How do I view the Live Telemetry Map?',
+                  'Navigate to the Delivery or Patrol tabs to view real-time telemetry feeds, speed/battery meters, active path lines, and interactive robot tracking on the map.',
+                  const Color(0xff3b82f6),
+                  imageAssetPath: 'assets/map_5.png',
+                ),
+                const Divider(height: 1, color: Color(0xff1e293b)),
+                _buildFAQTile(
+                  'What is the Patrol & Surveillance Simulation?',
+                  'This feature allows you to configure guard routes, run security patrol schedules, test camera blind spots, and monitor robot safety parameters in a simulated environment.',
+                  const Color(0xff8b5cf6),
+                  imageAssetPath: 'assets/robot_ares.png',
+                ),
+                const Divider(height: 1, color: Color(0xff1e293b)),
+                _buildFAQTile(
+                  'What is the Logistics & Delivery Simulation?',
+                  'This feature lets you simulate dispatcher tasks, coordinate A-to-B delivery navigation, test obstacle avoidance, and track cargo items in real-time.',
+                  const Color(0xff10b981),
+                  imageAssetPath: 'assets/robot_hermes.png',
+                ),
+                const Divider(height: 1, color: Color(0xff1e293b)),
+                _buildFAQTile(
+                  'Can I manually override and pilot a robot?',
+                  'Yes. You can manually pilot any online robot unit using the tactile touch joystick controller, steering commands, and instant log stream available in the control panel.',
+                  const Color(0xfff59e0b),
+                  imageAssetPath: 'assets/microchip_robot.png',
+                ),
+                const Divider(height: 1, color: Color(0xff1e293b)),
+                _buildFAQTile(
+                  'How does Clearance & Access Management work?',
+                  'You can switch between Clearance Lvl 3 (Operator) and Clearance Lvl 5 (Admin) modes in Settings to access administrative command tools and quick controls.',
+                  const Color(0xffec4899),
+                  imageAssetPath: 'assets/botriq_logo.png',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFAQTile(String question, String answer, Color color, {String? imageAssetPath}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        leading: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.08),
+            shape: BoxShape.circle,
+            border: Border.all(color: color.withOpacity(0.2)),
+          ),
+          child: Icon(Icons.help_outline, color: color, size: 18),
+        ),
+        title: Text(
+          question,
+          style: TextStyle(
+            color: isDark ? Colors.white : const Color(0xff0f172a),
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        iconColor: color,
+        collapsedIconColor: const Color(0xff64748b),
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 48, right: 16, bottom: 16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    answer,
                     style: TextStyle(
                       color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
-                      fontSize: 11,
+                      fontSize: 11.5,
                       height: 1.4,
                     ),
                   ),
+                ),
+                if (imageAssetPath != null) ...[
+                  const SizedBox(width: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      color: isDark ? Colors.black.withOpacity(0.2) : const Color(0xfff1f5f9),
+                      padding: const EdgeInsets.all(4),
+                      child: Image.asset(
+                        imageAssetPath,
+                        height: 50,
+                        width: 50,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
                 ],
-              ),
+              ],
             ),
-            const SizedBox(width: 8),
-            const Icon(Icons.chevron_right, color: Color(0xff64748b), size: 20),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1170,429 +1146,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
     );
   }
 
-  Widget _buildQuickActionCard(String label, IconData icon, VoidCallback onTap) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xff131926) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0)),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: isDark ? Colors.white : const Color(0xff2563eb), size: 20),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: TextStyle(color: isDark ? Colors.white : const Color(0xff0f172a), fontSize: 10, fontWeight: FontWeight.w500),
-              textAlign: TextAlign.center,
-            )
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildFeatureCard(String title, String imagePath, String desc) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xff131926) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: const Color(0xff2563eb).withOpacity(0.06),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xff2563eb).withOpacity(0.25)),
-            ),
-            child: Image.asset(imagePath, height: 26, width: 26, fit: BoxFit.contain),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            title,
-            style: TextStyle(color: isDark ? Colors.white : const Color(0xff0f172a), fontSize: 11.5, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            desc,
-            style: TextStyle(color: isDark ? const Color(0xff64748b) : const Color(0xff475569), fontSize: 9.5),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFleetCategoryCard(String title, String desc, String badgeText, String imagePath, int tabIndex) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return InkWell(
-      onTap: () {
-        MainNavigationShell.of(context).setTab(tabIndex);
-      },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xff131926) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isDark ? const Color(0xff1e293b) : const Color(0xffe2e8f0)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: const Color(0xff2563eb).withOpacity(0.06),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xff2563eb).withOpacity(0.2)),
-              ),
-              child: Image.asset(imagePath, height: 40, width: 40, fit: BoxFit.contain),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(color: isDark ? Colors.white : const Color(0xff0f172a), fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    desc,
-                    style: TextStyle(color: isDark ? const Color(0xff64748b) : const Color(0xff475569), fontSize: 11),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: const Color(0xff2563eb).withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      badgeText,
-                      style: const TextStyle(color: Color(0xff3b82f6), fontSize: 9.5, fontWeight: FontWeight.bold),
-                    ),
-                  )
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: Color(0xff3b82f6), size: 20)
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompanyIntroCard() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    Widget tabContent;
-    if (_activeIntroTab == 0) {
-      tabContent = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'bluCursor Infotech is an IT outsourcing, digital transformation, and software development company based in Indore, India. Established in 2013, we deliver customized technology solutions across the digital value chain.',
-            style: TextStyle(
-              color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
-              fontSize: 12.5,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'OUR PHILOSOPHY PILLARS',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-              color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
-              letterSpacing: 0.8,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildPillarBadge('🛡️ Passion', 'Tech & Solving', const Color(0xff2563eb)),
-              _buildPillarBadge('⚡ Power', 'Cost-effective', const Color(0xff10b981)),
-              _buildPillarBadge('🏆 Pride', 'Client Growth', const Color(0xfff59e0b)),
-            ],
-          ),
-        ],
-      );
-    } else if (_activeIntroTab == 1) {
-      tabContent = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildServiceRow('📱 Web & Mobile Development', 'Responsive web interfaces and dynamic mobile apps (85% mobile / 95% web focus).'),
-          const SizedBox(height: 10),
-          _buildServiceRow('🤖 AI & Machine Learning', 'Custom ML models, natural language processing, and predictive analytics.'),
-          const SizedBox(height: 10),
-          _buildServiceRow('🎨 UI/UX Design', 'Optimized, user-centric, and high-conversion digital experiences.'),
-          const SizedBox(height: 10),
-          _buildServiceRow('☁️ Cloud & DevOps', 'Scalable architecture on AWS & Microsoft Azure with CI/CD automation.'),
-          const SizedBox(height: 10),
-          _buildServiceRow('🤝 Salesforce Solutions', 'Preferred Salesforce partner for migration, integration, and development.'),
-        ],
-      );
-    } else {
-      tabContent = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Leveraging a robust, enterprise-grade technology stack for custom solutions.',
-            style: TextStyle(
-              color: isDark ? const Color(0xff94a3b8) : const Color(0xff475569),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildTechTag('React'),
-              _buildTechTag('Angular'),
-              _buildTechTag('Node.js'),
-              _buildTechTag('AWS (Amazon Web Services)'),
-              _buildTechTag('Microsoft Azure'),
-              _buildTechTag('GenAI Integrations'),
-              _buildTechTag('Large Language Models (LLMs)'),
-              _buildTechTag('Computer Vision'),
-              _buildTechTag('IoT Ecosystems'),
-            ],
-          ),
-        ],
-      );
-    }
-
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [const Color(0xff111827), const Color(0xff090d16)]
-              : [Colors.white, const Color(0xfff8fafc)],
-        ),
-        border: Border.all(
-          color: isDark
-              ? const Color(0xff00A2FF).withOpacity(0.1)
-              : const Color(0xff2563eb).withOpacity(0.08),
-          width: 1.2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: isDark
-                ? const Color(0xff00A2FF).withOpacity(0.03)
-                : Colors.black.withOpacity(0.02),
-            blurRadius: 16,
-            spreadRadius: 1,
-          )
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 120,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/blucursor_banner.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      (isDark ? const Color(0xff131926) : Colors.white).withOpacity(0.85),
-                      isDark ? const Color(0xff131926) : Colors.white,
-                    ],
-                  ),
-                ),
-                padding: const EdgeInsets.all(16),
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  'bluCursor Infotech',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : const Color(0xff0f172a),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  _buildTabButton(0, 'Overview'),
-                  const SizedBox(width: 8),
-                  _buildTabButton(1, 'Services'),
-                  const SizedBox(width: 8),
-                  _buildTabButton(2, 'Tech Stack'),
-                ],
-              ),
-            ),
-            const Divider(height: 20, indent: 16, endIndent: 16),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: AnimatedSize(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOut,
-                child: tabContent,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabButton(int index, String title) {
-    final isSelected = _activeIntroTab == index;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return Expanded(
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _activeIntroTab = index;
-          });
-        },
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected 
-                ? const Color(0xff2563eb).withOpacity(isDark ? 0.15 : 0.08) 
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: isSelected 
-                  ? const Color(0xff2563eb).withOpacity(0.3) 
-                  : Colors.transparent,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: isSelected 
-                  ? const Color(0xff2563eb) 
-                  : (isDark ? const Color(0xff94a3b8) : const Color(0xff64748b)),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPillarBadge(String title, String subtitle, Color color) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            style: TextStyle(
-              color: isDark ? const Color(0xff94a3b8) : const Color(0xff64748b),
-              fontSize: 9,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildServiceRow(String title, String desc) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: isDark ? Colors.white : const Color(0xff0f172a),
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                desc,
-                style: TextStyle(
-                  color: isDark ? const Color(0xff94a3b8) : const Color(0xff64748b),
-                  fontSize: 11,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTechTag(String name) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xff1e293b) : const Color(0xfff1f5f9),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: isDark ? const Color(0xff334155) : const Color(0xffe2e8f0)),
-      ),
-      child: Text(
-        name,
-        style: TextStyle(
-          color: isDark ? const Color(0xffe2e8f0) : const Color(0xff475569),
-          fontSize: 10.5,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
   Widget _buildQuickCommandCenter() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(

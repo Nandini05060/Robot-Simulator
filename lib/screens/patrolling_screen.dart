@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/robot.dart';
+import '../widgets/smooth_entrance_transition.dart';
+import '../widgets/animated_tap_scale.dart';
 
 class PatrollingScreen extends StatelessWidget {
   const PatrollingScreen({Key? key}) : super(key: key);
@@ -58,9 +60,10 @@ class PatrollingScreen extends StatelessWidget {
         backgroundColor: isDark ? const Color(0xff0e111a) : Colors.white,
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+      body: SmoothEntranceTransition(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Module Title
@@ -373,20 +376,8 @@ class PatrollingScreen extends StatelessWidget {
                         // 3. Action Buttons Panel
                         SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryBlue,
-                              foregroundColor: Colors.black,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
-                            icon: const Icon(Icons.map_outlined, size: 16),
-                            label: Text(
-                              'View Details',
-                              style: GoogleFonts.outfit(fontWeight: FontWeight.w700, fontSize: 13.5),
-                            ),
-                            onPressed: () {
+                          child: AnimatedTapScale(
+                            onTap: () {
                               final activeRobot = robot ?? patrolRobots[0];
                               Navigator.pushNamed(
                                 context,
@@ -394,6 +385,28 @@ class PatrollingScreen extends StatelessWidget {
                                 arguments: activeRobot,
                               );
                             },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              decoration: BoxDecoration(
+                                color: primaryBlue,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(Icons.map_outlined, size: 16, color: Colors.black),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'View Details',
+                                    style: GoogleFonts.outfit(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -405,8 +418,9 @@ class PatrollingScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildStatBox(String title, String num, String sub, IconData icon, bool isDark, Color accentColor) {
     return Container(

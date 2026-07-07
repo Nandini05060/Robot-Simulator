@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/api_service.dart';
+import '../widgets/smooth_entrance_transition.dart';
+import '../widgets/animated_tap_scale.dart';
 
 
 class _MainSettingsScreenState extends State<SettingsScreen> {
@@ -66,11 +68,12 @@ class _MainSettingsScreenState extends State<SettingsScreen> {
         elevation: 0,
         backgroundColor: isDark ? const Color(0xff131926) : Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+      body: SmoothEntranceTransition(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
             // Role switcher toggle for testing
             Card(
               color: const Color(0xff2563eb).withOpacity(0.06),
@@ -345,45 +348,72 @@ class _MainSettingsScreenState extends State<SettingsScreen> {
                       )
                     else ...[
                       // Admin controls
-                      ElevatedButton.icon(
-                        onPressed: () => _showActionDialog(
+                      AnimatedTapScale(
+                        onTap: () => _showActionDialog(
                           'Activate Operator Account',
                           'Search directory and activate operator profiles. Target account credentials will be initialized.',
                         ),
-                        icon: const Icon(Icons.check_circle_outline),
-                        label: const Text('Activate Operator Account'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xff10b981),
-                          foregroundColor: Colors.white,
+                        child: Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xff10b981),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.check_circle_outline, color: Colors.white, size: 16),
+                              SizedBox(width: 8),
+                              Text('Activate Operator Account', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12.5)),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        onPressed: () => _showActionDialog(
+                      AnimatedTapScale(
+                        onTap: () => _showActionDialog(
                           'Deactivate Operator Account',
                           'Select an operator to deactivate. Session links and tokens will be permanently revoked.',
                         ),
-                        icon: const Icon(Icons.block),
-                        label: const Text('Deactivate Operator Account'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xffef4444),
-                          foregroundColor: Colors.white,
+                        child: Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xffef4444),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.block, color: Colors.white, size: 16),
+                              SizedBox(width: 8),
+                              Text('Deactivate Operator Account', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12.5)),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        onPressed: () => _showActionDialog(
+                      AnimatedTapScale(
+                        onTap: () => _showActionDialog(
                           'Manage Platform Users',
                           'Opening operator database directory... displaying 24 active operators.',
                         ),
-                        icon: const Icon(Icons.people_outline),
-                        label: const Text('Manage Platform Users'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xff2563eb),
-                          foregroundColor: Colors.white,
+                        child: Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xff2563eb),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.people_outline, color: Colors.white, size: 16),
+                              SizedBox(width: 8),
+                              Text('Manage Platform Users', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12.5)),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -394,41 +424,58 @@ class _MainSettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 24),
 
             if (!_isAdminMode) ...[
-              OutlinedButton.icon(
-                onPressed: () => _showActionDialog(
+              AnimatedTapScale(
+                onTap: () => _showActionDialog(
                   'Edit Profile',
                   'Profile configurations are locked by Enterprise Single Sign-On (SSO).',
                 ),
-                icon: const Icon(Icons.edit_outlined),
-                label: const Text('Edit Profile'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xff2563eb),
-                  side: const BorderSide(color: Color(0xff2563eb)),
+                child: Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xff2563eb), width: 1.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.edit_outlined, color: Color(0xff2563eb), size: 18),
+                      SizedBox(width: 8),
+                      Text('Edit Profile', style: TextStyle(color: Color(0xff2563eb), fontWeight: FontWeight.bold, fontSize: 13.5)),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
             ],
 
             // Logout Button
-            ElevatedButton.icon(
-              onPressed: _showLogoutDialog,
-              icon: const Icon(Icons.logout),
-              label: const Text('Terminate Session'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red[800],
-                foregroundColor: Colors.white,
+            AnimatedTapScale(
+              onTap: _showLogoutDialog,
+              child: Container(
+                width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                  color: Colors.red[800],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.logout, color: Colors.white, size: 18),
+                    SizedBox(width: 8),
+                    Text('Terminate Session', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5)),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),
           ],
         ),
       ),
-    );
-  },
+    ),
+  );
+},
 );
 }
 

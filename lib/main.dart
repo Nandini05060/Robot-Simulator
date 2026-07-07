@@ -52,15 +52,50 @@ class _BluCursorFleetAppState extends State<BluCursorFleetApp> {
             robot: robot,
           );
         }
+        
+        WidgetBuilder? builder;
+        switch (settings.name) {
+          case '/splash':
+            builder = (context) => const SplashScreen();
+            break;
+          case '/login':
+            builder = (context) => const LoginScreen();
+            break;
+          case '/greeting':
+            builder = (context) => const GreetingScreen();
+            break;
+          case '/dashboard':
+            builder = (context) => const MainNavigationShell();
+            break;
+          case '/robot_loading':
+            builder = (context) => const RobotLoadingScreen();
+            break;
+          case '/real_time_viz':
+            builder = (context) => const RealTimeVizScreen();
+            break;
+        }
+
+        if (builder != null) {
+          return PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => builder!(context),
+            settings: settings,
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.06, 0.0),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+                  child: child,
+                ),
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 400),
+            reverseTransitionDuration: const Duration(milliseconds: 300),
+          );
+        }
         return null;
-      },
-      routes: {
-        '/splash': (context) => const SplashScreen(),
-        '/login': (context) => const LoginScreen(),
-        '/greeting': (context) => const GreetingScreen(),
-        '/dashboard': (context) => const MainNavigationShell(),
-        '/robot_loading': (context) => const RobotLoadingScreen(),
-        '/real_time_viz': (context) => const RealTimeVizScreen(),
       },
     );
   }

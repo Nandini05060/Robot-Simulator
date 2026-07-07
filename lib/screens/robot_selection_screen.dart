@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/robot.dart';
+import '../widgets/smooth_entrance_transition.dart';
+import '../widgets/animated_tap_scale.dart';
 
 class RobotSelectionScreen extends StatefulWidget {
   const RobotSelectionScreen({Key? key}) : super(key: key);
@@ -27,8 +29,9 @@ class _RobotSelectionScreenState extends State<RobotSelectionScreen> {
         title: const Text('Fleet Commander'),
         centerTitle: false,
       ),
-      body: Column(
-        children: [
+      body: SmoothEntranceTransition(
+        child: Column(
+          children: [
           // Search & Metrics Header
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -89,7 +92,7 @@ class _RobotSelectionScreenState extends State<RobotSelectionScreen> {
                 final robot = filtered[index];
                 final bool isOnline = robot.isOnline;
 
-                return GestureDetector(
+                return AnimatedTapScale(
                   onTap: () {
                     Navigator.pushNamed(context, '/robot_loading', arguments: robot);
                   },
@@ -187,6 +190,7 @@ class _RobotSelectionScreenState extends State<RobotSelectionScreen> {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
