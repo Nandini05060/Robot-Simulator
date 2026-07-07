@@ -512,22 +512,36 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
               const SizedBox(height: 16),
               Row(
                 children: [
-                  _buildMiniSimulationButton(
-                    header: 'AI PATROLLING',
-                    title: 'Anomaly Analysis',
-                    footer: 'Anomaly Area',
-                    color: const Color(0xff2563eb),
-                    mapImagePath: 'assets/map_3.png',
-                    onTap: () => MainNavigationShell.of(context).setTab(2),
+                  Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 1.0,
+                      child: AnimatedTapScale(
+                        onTap: () => MainNavigationShell.of(context).setTab(2),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.asset(
+                            'assets/patrolling_widget.png',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 12),
-                  _buildMiniSimulationButton(
-                    header: 'AI DELIVERY',
-                    title: 'Route Optimisation',
-                    footer: 'Critical Medical Supplies',
-                    color: const Color(0xff10b981),
-                    mapImagePath: 'assets/map_4.png',
-                    onTap: () => MainNavigationShell.of(context).setTab(1),
+                  Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 1.0,
+                      child: AnimatedTapScale(
+                        onTap: () => MainNavigationShell.of(context).setTab(1),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.asset(
+                            'assets/delivery_widget.png',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -955,6 +969,47 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
             borderRadius: BorderRadius.circular(20),
             child: Column(
               children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          'assets/faq_widget.jpg',
+                          height: 50,
+                          width: 50,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'App Guide & FAQs',
+                              style: TextStyle(
+                                color: isDark ? Colors.white : const Color(0xff0f172a),
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            const Text(
+                              'Quick help, robot guides, and clearance information',
+                              style: TextStyle(
+                                color: Color(0xff64748b),
+                                fontSize: 10.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1, color: Color(0xff1e293b)),
                 _buildFAQTile(
                   'How do I view the Live Telemetry Map?',
                   'Navigate to the Delivery or Patrol tabs to view real-time telemetry feeds, speed/battery meters, active path lines, and interactive robot tracking on the map.',
